@@ -21,6 +21,8 @@ import com.thedesitadka.provider.ProviderEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.thedesitadka.core.config.ConfigValidator
+import com.thedesitadka.core.security.StreamHubLogger
 import java.io.File
 
 class AppContainer(val context: Context) {
@@ -59,20 +61,54 @@ class AppContainer(val context: Context) {
     }
 
     init {
-        // Initialize default known-good manifest (v110 with 16 sources) if empty or outdated
-        val defaultManifest = getDefaultManifest()
-        val current = configCache.loadCurrent()
-        if (current == null || current.configVersion < defaultManifest.configVersion || current.providers.size < defaultManifest.providers.size) {
-            configCache.saveValidatedConfig(defaultManifest, markAsLastKnownGood = true)
-            configRepository.updateManifest(defaultManifest)
-            providerEngine.updateFromManifest(defaultManifest)
-        } else {
-            configRepository.updateManifest(current)
-            providerEngine.updateFromManifest(current)
-        }
+        activateConfigurationIfValid()
 
         CoroutineScope(Dispatchers.IO).launch {
             monetizationManager.initialize()
+        }
+    }
+
+    /**
+     * Layered security & compatibility check:
+     * 1. Verifies APK signing identity and environment integrity
+     * 2. Verifies installedAppVersion >= minimumSupportedVersion
+     * 3. Validates configuration schema and security rules
+     *
+     * If validation fails: DO NOT ACTIVATE PROVIDERS, DO NOT LOAD CONTENT.
+     * Returns true if activated, false if rejected.
+     */
+    fun activateConfigurationIfValid(): Boolean {
+        // 1. Layered Validation: Verify app signing identity & integrity
+        val integrity = AndroidApkIntegrityChecker.checkAppIntegrity(context)
+        if (!integrity.isTrusted) {
+            StreamHubLogger.e("AppContainer", "Integrity check rejected: ${integrity.details}. Safe restricted mode.")
+            return false
+        }
+
+        // 2. Validate configuration against installed app version
+        val defaultManifest = getDefaultManifest()
+        val current = configCache.loadCurrent()
+        val candidate = if (current == null || current.configVersion < defaultManifest.configVersion || current.providers.size < defaultManifest.providers.size) {
+            defaultManifest
+        } else {
+            current
+        }
+
+        return try {
+            ConfigValidator.validate(
+                manifest = candidate,
+                currentVersion = 0,
+                currentAppVersion = BuildConfig.VERSION_CODE
+            )
+            configCache.saveValidatedConfig(candidate, markAsLastKnownGood = true)
+            configRepository.updateManifest(candidate)
+            providerEngine.updateFromManifest(candidate)
+            StreamHubLogger.i("AppContainer", "Configuration v${candidate.configVersion} activated for app version ${BuildConfig.VERSION_CODE}")
+            true
+        } catch (e: Exception) {
+            StreamHubLogger.w("AppContainer", "Configuration rejected for app version ${BuildConfig.VERSION_CODE}: ${e.message}")
+            // DO NOT ACTIVATE PROVIDERS - leave providerEngine empty
+            false
         }
     }
 
@@ -82,7 +118,7 @@ class AppContainer(val context: Context) {
         return ProviderManifest(
             schemaVersion = 1,
             configVersion = 131,
-            minimumAppVersion = 3,
+            minimumAppVersion = 4,
             forceUpdate = true,
             generatedAt = System.currentTimeMillis(),
             providers = listOf(

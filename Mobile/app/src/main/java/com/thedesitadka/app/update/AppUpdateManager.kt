@@ -281,7 +281,7 @@ object AppUpdateManager {
         return md.digest().joinToString("") { "%02x".format(it) }
     }
 
-    private fun isVersionNewer(latest: String, current: String): Boolean {
+    internal fun isVersionNewer(latest: String, current: String): Boolean {
         val latestParts = latest.split(".").mapNotNull { it.toIntOrNull() }
         val currentParts = current.split(".").mapNotNull { it.toIntOrNull() }
 

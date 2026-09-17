@@ -69,6 +69,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.thedesitadka.app.navigation.Screen
+import com.thedesitadka.app.security.AndroidApkIntegrityChecker
 import com.thedesitadka.app.ui.screens.DetailsScreen
 import com.thedesitadka.app.ui.screens.DiagnosticsScreen
 import com.thedesitadka.app.ui.screens.DownloadsScreen
@@ -155,7 +156,15 @@ private fun UpdateGateScreen(container: AppContainer) {
             return@LaunchedEffect
         }
 
-        // 2. Check for updates from official GitHub release
+        // 2. Layered Validation: Verify application identity and signing integrity
+        val integrity = AndroidApkIntegrityChecker.checkAppIntegrity(context)
+        if (!integrity.isTrusted) {
+            blockReason = "Application integrity check failed: ${integrity.details}.\n\nOfficial verified release required. Tampered or repackaged installations are not supported."
+            gateState = GateState.BLOCKED
+            return@LaunchedEffect
+        }
+
+        // 3. Check for updates from official GitHub release
         val result = AppUpdateManager.checkForUpdates()
         result.onSuccess { info ->
             if (info.isUpdateAvailable) {
@@ -164,8 +173,15 @@ private fun UpdateGateScreen(container: AppContainer) {
                 blockReason = "A mandatory update (v${info.latestVersionName}) must be installed to continue using TheDesiTadka.\n\nYour current version (v${info.currentVersionName}) is no longer supported."
                 gateState = GateState.BLOCKED
             } else {
-                // Up to date — allow normal app usage
-                gateState = GateState.PASSED
+                // 4. Validate configuration compatibility with this installed app version
+                val configActivated = container.activateConfigurationIfValid()
+                if (!configActivated) {
+                    blockReason = "Configuration incompatible with application version ${BuildConfig.VERSION_NAME} (code ${BuildConfig.VERSION_CODE}).\n\nPlease update to the latest official release."
+                    gateState = GateState.BLOCKED
+                } else {
+                    // Up to date & verified — allow normal app usage
+                    gateState = GateState.PASSED
+                }
             }
         }.onFailure { err ->
             blockReason = "Unable to reach the official release service.\n\n${err.message ?: "Connection refused"}\n\nOffline and unverified use is prohibited."
