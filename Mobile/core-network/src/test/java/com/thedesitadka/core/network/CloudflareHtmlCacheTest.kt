@@ -13,24 +13,40 @@ class CloudflareHtmlCacheTest {
 
     @Test
     fun testPutAndConsumeNormalizedUrls() {
-        val sampleHtml = "<html><body><h1>PornX11</h1></body></html>"
-        CloudflareHtmlCache.put("https://pornx11.com", sampleHtml)
+        val sampleHtml = "<html><body><h1>TestSite</h1></body></html>"
+        CloudflareHtmlCache.put("https://example-cached.com", sampleHtml)
 
         // Consume with trailing slash should match
-        val consumed = CloudflareHtmlCache.consume("https://pornx11.com/")
+        val consumed = CloudflareHtmlCache.consume("https://example-cached.com/")
         assertEquals(sampleHtml, consumed)
 
         // Second consume should return null (already consumed)
-        assertNull(CloudflareHtmlCache.consume("https://pornx11.com/"))
+        assertNull(CloudflareHtmlCache.consume("https://example-cached.com/"))
     }
 
     @Test
     fun testExpiration() {
-        val sampleHtml = "<html><body><h1>PornX11 Expired</h1></body></html>"
-        CloudflareHtmlCache.put("https://pornx11.com/videos", sampleHtml)
+        val sampleHtml = "<html><body><h1>TestSite Expired</h1></body></html>"
+        CloudflareHtmlCache.put("https://example-cached.com/videos", sampleHtml)
 
         // maxAgeMs = -1 forces immediate expiration
-        val consumed = CloudflareHtmlCache.consume("https://pornx11.com/videos", maxAgeMs = -1L)
+        val consumed = CloudflareHtmlCache.consume("https://example-cached.com/videos", maxAgeMs = -1L)
         assertNull(consumed)
+    }
+
+    @Test
+    fun testPutAndGetMultipleTimesWithWww() {
+        val sampleHtml = "<html><body><h1>TestSite Multi</h1></body></html>"
+        CloudflareHtmlCache.put("https://example-cached.com/video-slug/", sampleHtml)
+
+        // Multiple get calls must all succeed (e.g. for getDetails, getPlayableMedia, getRelatedContent)
+        val firstRead = CloudflareHtmlCache.get("https://example-cached.com/video-slug")
+        assertEquals(sampleHtml, firstRead)
+
+        val secondRead = CloudflareHtmlCache.get("https://www.example-cached.com/video-slug/")
+        assertEquals(sampleHtml, secondRead)
+
+        val thirdRead = CloudflareHtmlCache.get("https://example-cached.com/video-slug/")
+        assertEquals(sampleHtml, thirdRead)
     }
 }

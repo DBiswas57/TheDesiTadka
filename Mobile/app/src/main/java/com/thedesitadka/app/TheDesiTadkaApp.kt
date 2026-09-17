@@ -80,6 +80,7 @@ class TheDesiTadkaApp : Application(), ImageLoaderFactory {
                     host.contains("aagmaal") || host.contains("aagimg") -> "https://aagmaal.date/"
                     host.contains("fsiblog") -> "https://www.fsiblogxx.com/"
                     host.contains("webxseries") -> "https://webxseries.hot/"
+                    host.contains("xnxx") || host.contains("xvideos") -> "https://www.xnxx.com/"
                     else -> "https://${orig.url.host}/"
                 }
 

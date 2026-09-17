@@ -135,7 +135,7 @@ fun PlayerScreen(
 
     var hasStartedPlaying by remember { mutableStateOf(false) }
 
-    LaunchedEffect(videoItem.id) {
+    LaunchedEffect(videoItem.id, mediaSource.url) {
         val existing = watchHistoryDao.getHistoryItem(videoItem.id)
         val resumePos = existing?.lastPositionMs ?: 0L
         playerManager.prepareAndPlay(mediaSource, resumePositionMs = resumePos)

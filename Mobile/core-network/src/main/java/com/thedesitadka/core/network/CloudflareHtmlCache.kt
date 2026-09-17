@@ -40,6 +40,11 @@ object CloudflareHtmlCache {
     }
 
     /**
+     * Retrieve cached HTML if within [maxAgeMs] validity window without removing it.
+     */
+    fun get(url: String, maxAgeMs: Long = 120_000): String? = peek(url, maxAgeMs)
+
+    /**
      * Peek at cached HTML without removing it.
      */
     fun peek(url: String, maxAgeMs: Long = 120_000): String? {
@@ -63,11 +68,11 @@ object CloudflareHtmlCache {
     private fun normalizeKey(url: String): String {
         return try {
             val uri = URI(url.trim())
-            val host = uri.host?.lowercase() ?: ""
+            val host = (uri.host?.lowercase() ?: "").removePrefix("www.")
             val path = (uri.path ?: "").trimEnd('/')
             "$host$path"
         } catch (e: Exception) {
-            url.trim().lowercase().removeSuffix("/")
+            url.trim().lowercase().removePrefix("https://").removePrefix("http://").removePrefix("www.").removeSuffix("/")
         }
     }
 }

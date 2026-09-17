@@ -117,7 +117,7 @@ class AppContainer(val context: Context) {
     private fun createDefaultManifest(): ProviderManifest {
         return ProviderManifest(
             schemaVersion = 1,
-            configVersion = 131,
+            configVersion = 133,
             minimumAppVersion = 4,
             forceUpdate = true,
             generatedAt = System.currentTimeMillis(),
@@ -720,50 +720,7 @@ class AppContainer(val context: Context) {
                         disclaimer = "Aggregated public media feed."
                     )
                 ),
-                // 15. WowMasti
-                ProviderConfig(
-                    id = "wowmasti",
-                    familyId = "stream_embed_family",
-                    domains = listOf("https://wowmasti.com"),
-                    validationMarker = "wowmasti",
-                    name = "WowMasti",
-                    enabled = true,
-                    baseUrl = "https://wowmasti.com",
-                    adapter = "html_selector",
-                    capabilities = listOf(
-                        ProviderCapability.HOME,
-                        ProviderCapability.CATEGORY,
-                        ProviderCapability.SEARCH,
-                        ProviderCapability.DETAILS,
-                        ProviderCapability.STREAM,
-                        ProviderCapability.DOWNLOAD
-                    ),
-                    navigation = NavigationConfig(
-                        home = "/",
-                        search = "/?s={query}",
-                        page = "/page/{page}/"
-                    ),
-                    selectors = SelectorConfig(
-                        item = "article, div.item, div.post",
-                        title = "h2.entry-title a, h2 a, a[title]",
-                        thumbnail = "img",
-                        thumbnailAttr = "src",
-                        detailUrl = "h2.entry-title a, h2 a, a",
-                        duration = ".duration",
-                        detailTitle = "h1",
-                        detailDescription = ".entry-content p, .video-details",
-                        detailThumbnail = "meta[property='og:image'], img",
-                        player = "iframe, video",
-                        videoSource = "iframe[src*='luluvid'], iframe[src*='luluvdo'], iframe[src*='lulustream'], iframe[src*='/e/'], video source[src], video[src], iframe[src]",
-                        videoSourceAttr = "src",
-                        relatedItems = "article"
-                    ),
-                    contentPolicy = ContentPolicy(
-                        rightsStatus = "Public Web Index",
-                        disclaimer = "Aggregated public media feed."
-                    )
-                ),
-                // 16. WowUncut
+                // 15. WowUncut
                 ProviderConfig(
                     id = "wowuncut",
                     familyId = "clean_tube_family",
@@ -979,49 +936,7 @@ class AppContainer(val context: Context) {
                         disclaimer = "Aggregated public media feed."
                     )
                 ),
-                // 21. PornX11
-                ProviderConfig(
-                    id = "pornx11",
-                    name = "PornX11",
-                    enabled = true,
-                    baseUrl = "https://pornx11.com",
-                    adapter = "html_selector",
-                    familyId = "direct_cdn_family",
-                    domains = listOf("https://pornx11.com", "https://www.pornx11.com"),
-                    validationMarker = "pornx11",
-                    capabilities = listOf(
-                        ProviderCapability.HOME,
-                        ProviderCapability.CATEGORY,
-                        ProviderCapability.SEARCH,
-                        ProviderCapability.DETAILS,
-                        ProviderCapability.STREAM,
-                        ProviderCapability.DOWNLOAD
-                    ),
-                    navigation = NavigationConfig(
-                        home = "/",
-                        search = "/?s={query}",
-                        page = "/page/{page}/"
-                    ),
-                    selectors = SelectorConfig(
-                        item = "article, div.item, div.post",
-                        title = "a[title], h2.entry-title a, h2 a",
-                        thumbnail = "img",
-                        thumbnailAttr = "src",
-                        detailUrl = "h2.entry-title a, h2 a, a",
-                        duration = ".duration, span.duration",
-                        detailTitle = "h1",
-                        detailDescription = ".entry-content p",
-                        detailThumbnail = "meta[property='og:image'], img",
-                        player = "video, iframe",
-                        videoSource = "iframe[src*='/e/'], iframe[src*='lulu'], iframe[src*='tube279'], iframe[src*='stream'], video source[src], video[src]",
-                        videoSourceAttr = "src"
-                    ),
-                    contentPolicy = ContentPolicy(
-                        rightsStatus = "Public Web Index",
-                        disclaimer = "Aggregated public media feed."
-                    )
-                ),
-                // 23. XMaza
+                // 20. XMaza
                 ProviderConfig(
                     id = "xmaza",
                     name = "XMaza",
@@ -1146,48 +1061,7 @@ class AppContainer(val context: Context) {
                         disclaimer = "Aggregated public media feed."
                     )
                 ),
-                // 25. XHamster
-                ProviderConfig(
-                    id = "xhamster",
-                    name = "XHamster",
-                    enabled = true,
-                    baseUrl = "https://xhamster.desi",
-                    adapter = "html_selector",
-                    familyId = "xhamster_family",
-                    domains = listOf("https://xhamster.desi", "https://xhamster.com"),
-                    validationMarker = "xhamster",
-                    capabilities = listOf(
-                        ProviderCapability.HOME,
-                        ProviderCapability.CATEGORY,
-                        ProviderCapability.SEARCH,
-                        ProviderCapability.DETAILS,
-                        ProviderCapability.STREAM,
-                        ProviderCapability.DOWNLOAD
-                    ),
-                    navigation = NavigationConfig(
-                        home = "/",
-                        search = "/search/{query}",
-                        page = "/new/{page}"
-                    ),
-                    selectors = SelectorConfig(
-                        item = "div.video-thumb--type-video, div[data-video-id], div.thumb-list__item:has(a[href*='/videos/'])",
-                        title = "a.video-thumb-info__name, a[class*='video-thumb-info__name'], a[data-role='video-title'], a[title]",
-                        thumbnail = "img[src*='xhpingcdn'], img[src*='xhcdn'], img[class*='thumb-image'], img",
-                        thumbnailAttr = "src",
-                        detailUrl = "a[href*='/videos/']",
-                        duration = "span.badge__text, span[class*='duration'], span[data-role='video-duration']",
-                        detailTitle = "h1",
-                        detailThumbnail = "meta[property='og:image']",
-                        player = "video",
-                        videoSource = "video[src], video source[src], link[rel='preload'][href*='.m3u8'], link[rel='preload'][href*='.mp4']",
-                        videoSourceAttr = "src"
-                    ),
-                    contentPolicy = ContentPolicy(
-                        rightsStatus = "Public Web Index",
-                        disclaimer = "Aggregated public media feed."
-                    )
-                ),
-                // 26. AagMaal.com (Domain variant of AagMaal family)
+                // 24. AagMaal.com (Domain variant of AagMaal family)
                 ProviderConfig(
                     id = "aagmaal_com",
                     familyId = "aagmaal_family",

@@ -72,11 +72,14 @@ class HtmlSelectorAdapter(
             val html = NetworkClient.fetchString(targetUrl)
             val doc = Jsoup.parse(html, activeBaseUrl)
 
-            val categoryElements = doc.select("a[href*='/category/'], .category-list a, .categories a")
+            val categoryElements = doc.select("a[href*='/category/'], a[href*='/categories/'], .category-list a, .categories a, div.thumb-cat p.title a, .thumb-block.thumb-cat p.title a")
             val categories = categoryElements.mapNotNull { el ->
                 val name = el.text().trim()
                 val href = el.attr("href").trim()
                 if (name.isNotBlank() && href.isNotBlank()) {
+                    if (href.contains("/photos/", ignoreCase = true) || href.contains("/creators/", ignoreCase = true) || href.contains("/pornstars/", ignoreCase = true)) {
+                        return@mapNotNull null
+                    }
                     val id = href.trimEnd('/').substringAfterLast('/')
                     Category(id = id, name = name, url = resolveUrl(href))
                 } else null
@@ -240,7 +243,7 @@ class HtmlSelectorAdapter(
             )
 
             // 1. Try direct video source selectors
-            val videoSourceSelector = selectors?.videoSource ?: "meta[itemprop*='contentUrl' i], meta[itemprop*='contentURL'], video source[src], video[src], source[type='video/mp4']"
+            val videoSourceSelector = selectors?.videoSource ?: "meta[itemprop*='contentUrl'], meta[itemprop*='contentURL'], meta[itemprop*='contenturl'], video source[src], video[src], source[type='video/mp4']"
             val videoElements = doc.select(videoSourceSelector)
             for (el in videoElements) {
                 // Skip hover preview trailers / teasers in recommendation cards
@@ -297,6 +300,13 @@ class HtmlSelectorAdapter(
                     if (src.isNotBlank()) candidateUrls.add(src)
                 }
 
+                // Also check meta embed tags (e.g. PornX11 meta itemprop="embedURL")
+                val metaEmbeds = doc.select("meta[itemprop*='embedURL'], meta[itemprop*='embedUrl'], meta[itemprop*='embedurl'], meta[property='og:video'], meta[name='twitter:player']")
+                for (m in metaEmbeds) {
+                    val content = resolveUrl(m.attr("content"))
+                    if (content.isNotBlank()) candidateUrls.add(content)
+                }
+
                 // Also check host links with download/embed patterns
                 val hostLinks = doc.select("a[href*='tube279'], a[href*='luluvdo'], a[href*='lulustream'], a[href*='cdn1.site'], a[href*='streamtape']")
                 for (a in hostLinks) {
@@ -330,20 +340,27 @@ class HtmlSelectorAdapter(
                 }
 
                 for (urlCandidate in filteredCandidates) {
-                    // Build list of URLs to try for this candidate (e.g. cdn1.site -> luluvdo.com / lulustream.com)
+                    // Build list of URLs to try for this candidate (e.g. cdn1.site / luluvdo -> lulustream / luluvid mirrors)
                     val urlsToTry = mutableListOf(urlCandidate)
-                    if (urlCandidate.contains("cdn1.site/e/") || urlCandidate.contains("luluvid.com/e/")) {
-                        val fileCode = urlCandidate.substringAfter("/e/").substringBefore("?").substringBefore("/")
-                        urlsToTry.add("https://luluvdo.com/e/$fileCode")
-                        urlsToTry.add("https://lulustream.com/e/$fileCode")
-                    } else if (urlCandidate.contains("luluvdo.com/d/")) {
-                        urlsToTry.add(0, urlCandidate.replace("/d/", "/e/"))
-                    } else if (urlCandidate.contains("lulustream.com/d/")) {
-                        urlsToTry.add(0, urlCandidate.replace("/d/", "/e/"))
-                    } else if (urlCandidate.contains("luluvid.com/d/")) {
-                        val fileCode = urlCandidate.substringAfter("/d/").substringBefore("?").substringBefore("/")
-                        urlsToTry.add("https://luluvdo.com/e/$fileCode")
-                        urlsToTry.add("https://lulustream.com/e/$fileCode")
+                    if (urlCandidate.contains("cdn1.site/e/") || urlCandidate.contains("luluvid.com/e/") || urlCandidate.contains("luluvdo.com/e/") || urlCandidate.contains("lulustream.com/e/")) {
+                        val fileCode = urlCandidate.substringAfter("/e/").substringBefore("?").substringBefore("/").substringBefore("&")
+                        if (fileCode.isNotBlank()) {
+                            val mirrors = listOf(
+                                "https://luluvdo.com/e/$fileCode",
+                                "https://lulustream.com/e/$fileCode",
+                                "https://luluvid.com/e/$fileCode"
+                            )
+                            for (mirror in mirrors) {
+                                if (!urlsToTry.contains(mirror)) urlsToTry.add(mirror)
+                            }
+                        }
+                    } else if (urlCandidate.contains("luluvdo.com/d/") || urlCandidate.contains("lulustream.com/d/") || urlCandidate.contains("luluvid.com/d/")) {
+                        val fileCode = urlCandidate.substringAfter("/d/").substringBefore("?").substringBefore("/").substringBefore("&")
+                        if (fileCode.isNotBlank()) {
+                            urlsToTry.add(0, "https://luluvdo.com/e/$fileCode")
+                            urlsToTry.add("https://lulustream.com/e/$fileCode")
+                            urlsToTry.add("https://luluvid.com/e/$fileCode")
+                        }
                     }
 
                     for (iframeSrc in urlsToTry) {
@@ -404,8 +421,14 @@ class HtmlSelectorAdapter(
                         // Case B: Fetch iframe page HTML and parse nested video elements or stream URLs
                         if (sources.isEmpty() && (iframeSrc.contains("player") || iframeSrc.contains("embed") || iframeSrc.contains("video") || iframeSrc.contains("/e/") || iframeSrc.contains("tube279") || iframeSrc.contains("lulu") || iframeSrc.contains("streamtape") || iframeSrc.contains("cdn1"))) {
                             try {
-                                val iframeHtml = NetworkClient.fetchString(iframeSrc, headers = mapOf("Referer" to fullUrl))
-                                if (iframeHtml.isNotBlank() && !iframeHtml.contains("Just a moment...") && !iframeHtml.contains("Cloudflare")) {
+                                val iframeHtml = try {
+                                    NetworkClient.fetchString(iframeSrc, headers = mapOf("Referer" to fullUrl))
+                                } catch (e: Exception) {
+                                    if (!iframeHost.isNullOrBlank()) {
+                                        NetworkClient.fetchString(iframeSrc, headers = mapOf("Referer" to "https://$iframeHost/"))
+                                    } else throw e
+                                }
+                                if (iframeHtml.isNotBlank() && !iframeHtml.contains("Just a moment...") && !iframeHtml.contains("Attention Required! | Cloudflare")) {
                                     val unpacked = if (iframeHtml.contains("eval(function(p,a,c,k,e")) unpackDeanEdwards(iframeHtml) else iframeHtml
                                     val iframeDoc = Jsoup.parse(unpacked, iframeSrc)
                                     val innerVideos = iframeDoc.select("video source[src], video[src], source[type='video/mp4']")
@@ -608,19 +631,31 @@ class HtmlSelectorAdapter(
             if (rawTitle.isBlank()) {
                 rawTitle = linkEl.text().trim()
             }
-            // Fallback for card titles embedded in thumbnail alt attribute or link title attribute
-            if (rawTitle.isBlank() || rawTitle.equals("HD", ignoreCase = true) || rawTitle.equals("FHD", ignoreCase = true)) {
-                val altText = el.select("img[alt]").attr("alt").trim().ifEmpty { linkEl.attr("title").trim() }
+            // Check if rawTitle is blank, or just a duration/resolution badge (e.g. "09:29", "11:01", "HD")
+            val isDurationOrBadge = rawTitle.isBlank() ||
+                    rawTitle.matches(Regex("""^(?:\d{1,2}:\d{2}(?::\d{2})?|HD|FHD|4K|3K|2K|SD|\d+%)$"""))
+            if (isDurationOrBadge) {
+                val altText = el.select("img[alt]").attr("alt").trim()
+                    .ifEmpty { el.select("a.video-thumb-info__name, [class*='thumb-info__name'], [data-role='video-title']").text().trim() }
+                    .ifEmpty { linkEl.attr("title").trim() }
                 if (altText.isNotBlank()) {
                     rawTitle = altText
                 }
             }
 
             // Clean duration, resolution badges, view counts from raw title if prefixed
-            val cleanedTitle = rawTitle
+            var cleanedTitle = rawTitle
                 .replace(Regex("""^(?:HD|FHD|4K|3K|2K|SD|\d+:\d+|\d+%\s*)+\s*"""), "")
                 .trim()
                 .ifEmpty { rawTitle }
+
+            if (cleanedTitle.matches(Regex("""^(?:\d{1,2}:\d{2}(?::\d{2})?|HD|FHD|4K|3K|2K|SD|\d+%)$"""))) {
+                val altText = el.select("img[alt]").attr("alt").trim()
+                    .ifEmpty { el.select("a.video-thumb-info__name, [class*='thumb-info__name'], [data-role='video-title']").text().trim() }
+                if (altText.isNotBlank()) {
+                    cleanedTitle = altText
+                }
+            }
 
             val imgEl = if (el.tagName().equals("img", ignoreCase = true)) el else el.select(selectors?.thumbnail ?: "img").firstOrNull()
             val thumbAttr = selectors?.thumbnailAttr
@@ -728,7 +763,7 @@ class HtmlSelectorAdapter(
     }
 
     internal fun unpackDeanEdwards(script: String): String {
-        val regex = Regex("""eval\(function\(p,a,c,k,e,[rd]\)\{.+?\}\('(.+?)',(\d+),(\d+),'([^']*)'\.split\('\|'\)""", RegexOption.DOT_MATCHES_ALL)
+        val regex = Regex("""eval\(function\(p,a,c,k,e,[rd]\)\{.*?\}\)?\s*\(\s*['"](.+?)['"]\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*['"]([^'"]*)['"]\s*\.\s*split\s*\(\s*['"]\|['"]\s*\)""", RegexOption.DOT_MATCHES_ALL)
         val match = regex.find(script) ?: return script
         return try {
             val payload = match.groupValues[1]
@@ -737,11 +772,7 @@ class HtmlSelectorAdapter(
             val wordRegex = Regex("""\b[0-9a-zA-Z]+\b""")
             wordRegex.replace(payload) { mr ->
                 val token = mr.value
-                val idx = try {
-                    java.lang.Integer.parseInt(token, radix)
-                } catch (e: Exception) {
-                    -1
-                }
+                val idx = decodeBaseNToken(token, radix)
                 if (idx in 0 until symTab.size && symTab[idx].isNotBlank()) {
                     symTab[idx]
                 } else {
@@ -751,6 +782,17 @@ class HtmlSelectorAdapter(
         } catch (e: Exception) {
             script
         }
+    }
+
+    private fun decodeBaseNToken(token: String, radix: Int): Int {
+        val digits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        var value = 0
+        for (ch in token) {
+            val idx = digits.indexOf(ch)
+            if (idx < 0 || idx >= radix) return -1
+            value = value * radix + idx
+        }
+        return value
     }
 
     private fun resolveHeadersForStream(streamUrl: String, baseHeaders: Map<String, String>): Map<String, String> {

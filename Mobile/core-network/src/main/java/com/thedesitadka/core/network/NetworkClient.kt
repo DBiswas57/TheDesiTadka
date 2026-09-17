@@ -96,7 +96,7 @@ object NetworkClient {
     @Throws(IOException::class)
     fun fetchString(url: String, headers: Map<String, String> = emptyMap()): String {
         // First check if freshly solved Cloudflare HTML is available for this URL
-        val cachedHtml = CloudflareHtmlCache.consume(url)
+        val cachedHtml = CloudflareHtmlCache.get(url)
         if (!cachedHtml.isNullOrBlank()) {
             return cachedHtml
         }
