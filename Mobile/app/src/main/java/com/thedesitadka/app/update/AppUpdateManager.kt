@@ -107,7 +107,8 @@ object AppUpdateManager {
             val expectedSha = shaRegex.find(releaseNotes)?.value
 
             val isNewer = isVersionNewer(cleanTag, currentVersion)
-            val isForce = isNewer || BuildConfig.VERSION_CODE < 3 || releaseNotes.contains("[FORCE_UPDATE]") || releaseTitle.contains("Mandatory")
+            // ALL available updates are mandatory — no optional updates in this system
+            val isForce = isNewer
 
             val info = UpdateInfo(
                 isUpdateAvailable = isNewer && apkUrl.isNotBlank(),
