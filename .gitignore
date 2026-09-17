@@ -4,8 +4,11 @@
 /local.properties
 /.idea
 .DS_Store
-/build
-*/build
+**/build/
+build/
+**/bin/
+bin/
+SiteReferrence/
 captures
 .externalNativeBuild
 .cxx

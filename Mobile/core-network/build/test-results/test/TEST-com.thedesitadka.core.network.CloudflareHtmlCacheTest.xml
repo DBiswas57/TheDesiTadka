@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.thedesitadka.core.network.CloudflareHtmlCacheTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-09-17T08:43:45" hostname="HTANVIP" time="0.025">
-  <properties/>
-  <testcase name="testExpiration" classname="com.thedesitadka.core.network.CloudflareHtmlCacheTest" time="0.024"/>
-  <testcase name="testPutAndConsumeNormalizedUrls" classname="com.thedesitadka.core.network.CloudflareHtmlCacheTest" time="0.0"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

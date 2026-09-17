@@ -82,6 +82,13 @@ import com.thedesitadka.app.monetization.AdPlacementType
 import com.thedesitadka.app.monetization.MonetizationManager
 import com.thedesitadka.app.monetization.ui.AdSlotView
 import com.thedesitadka.provider.ProviderEngine
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.text.style.TextAlign
+import com.thedesitadka.app.ui.challenge.CloudflareChallengeActivity
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,6 +107,15 @@ fun DetailsScreen(
     val coroutineScope = rememberCoroutineScope()
     val adapter = remember { providerEngine.getAdapter(videoItem.providerId) }
 
+    var reloadTrigger by remember { mutableIntStateOf(0) }
+    val challengeLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            reloadTrigger++
+        }
+    }
+
     var resolvedItem by remember { mutableStateOf(videoItem) }
     var mediaSources = remember { mutableStateListOf<MediaSource>() }
     var relatedItems = remember { mutableStateListOf<VideoItem>() }
@@ -107,8 +123,9 @@ fun DetailsScreen(
     var mediaError by remember { mutableStateOf<String?>(null) }
 
     val isFavorite by favoriteDao.isFavorite(videoItem.id).collectAsState(initial = false)
+    val isCollection = mediaSources.isEmpty() && relatedItems.isNotEmpty()
 
-    LaunchedEffect(videoItem.id) {
+    LaunchedEffect(videoItem.id, reloadTrigger) {
         isLoadingMedia = true
         mediaError = null
 
@@ -131,7 +148,7 @@ fun DetailsScreen(
             isLoadingMedia = false
         }
 
-        // Fetch related content
+        // Fetch related content / category collection videos
         adapter?.getRelatedContent(videoItem.detailUrl)?.onSuccess { rel ->
             relatedItems.clear()
             relatedItems.addAll(rel)
@@ -236,17 +253,27 @@ fun DetailsScreen(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    // Legal Compliance Badge
+                    // Legal Compliance / Collection Badge
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .clip(RoundedCornerShape(4.dp))
-                            .background(Color(0xFF10B981).copy(alpha = 0.2f))
+                            .background((if (isCollection) MaterialTheme.colorScheme.primary else Color(0xFF10B981)).copy(alpha = 0.2f))
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
-                        Icon(imageVector = Icons.Default.Verified, contentDescription = null, tint = Color(0xFF10B981), modifier = Modifier.size(12.dp))
+                        Icon(
+                            imageVector = Icons.Default.Verified,
+                            contentDescription = null,
+                            tint = if (isCollection) MaterialTheme.colorScheme.primary else Color(0xFF10B981),
+                            modifier = Modifier.size(12.dp)
+                        )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "Authorized Public Source", color = Color(0xFF10B981), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = if (isCollection) "Category Collection" else "Authorized Public Source",
+                            color = if (isCollection) MaterialTheme.colorScheme.primary else Color(0xFF10B981),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
 
@@ -281,7 +308,7 @@ fun DetailsScreen(
                     ) {
                         Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null, tint = Color.Black)
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "Play", color = Color.Black, fontWeight = FontWeight.Bold)
+                        Text(text = if (isCollection) "Select Video Below" else "Play", color = Color.Black, fontWeight = FontWeight.Bold)
                     }
 
                     // Download Button (Enabled strictly when authorized by provider or media capability and progressive file)
@@ -431,9 +458,68 @@ fun DetailsScreen(
                     }
                 }
 
-                if (mediaError != null) {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(text = mediaError!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+                if (mediaError != null && mediaSources.isEmpty() && relatedItems.isEmpty()) {
+                    val isCloudflare = mediaError?.contains("cloudflare", ignoreCase = true) == true ||
+                        mediaError?.contains("403") == true ||
+                        mediaError?.contains("challenge", ignoreCase = true) == true ||
+                        mediaError?.contains("security", ignoreCase = true) == true
+
+                    if (isCloudflare) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Security,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(36.dp)
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = "Security Verification Required",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "This media provider is protected by Cloudflare. Tap below to verify and unlock full playback.",
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Button(
+                                    onClick = {
+                                        val intent = CloudflareChallengeActivity.createIntent(
+                                            context,
+                                            videoItem.detailUrl,
+                                            resolvedItem.title
+                                        )
+                                        challengeLauncher.launch(intent)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Icon(imageVector = Icons.Default.Security, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("Verify Site Access", color = Color.Black, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(text = mediaError!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+                    }
                 }
 
                 // Description
@@ -463,8 +549,44 @@ fun DetailsScreen(
                     )
                 }
 
-                // Related Videos
-                if (relatedItems.isNotEmpty()) {
+                // Category Collection Video Grid (e.g. XNXX category pages)
+                if (mediaSources.isEmpty() && relatedItems.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Text(
+                        text = "CATEGORY COLLECTION (${relatedItems.size})",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            letterSpacing = 1.sp
+                        )
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Select any video below to watch or download:",
+                        style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    for (chunk in relatedItems.chunked(2)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            for (relItem in chunk) {
+                                Box(modifier = Modifier.weight(1f)) {
+                                    VideoCard(
+                                        videoItem = relItem,
+                                        onClick = { onRelatedClick(relItem) }
+                                    )
+                                }
+                            }
+                            if (chunk.size == 1) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+                } else if (relatedItems.isNotEmpty()) {
+                    // Standard related content row for single video pages
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
                         text = "RELATED CONTENT",

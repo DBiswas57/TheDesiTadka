@@ -22,6 +22,7 @@ import java.security.MessageDigest
 
 data class UpdateInfo(
     val isUpdateAvailable: Boolean,
+    val isForceUpdate: Boolean = false,
     val latestVersionName: String,
     val currentVersionName: String,
     val releaseTitle: String,
@@ -32,10 +33,9 @@ data class UpdateInfo(
 
 object AppUpdateManager {
 
-    private const val GITHUB_REPO = "TheDesiTadka"
+    private const val GITHUB_REPO = "DBiswas57/TheDesiTadka"
     private val REPO_CANDIDATE_URLS = listOf(
-        "https://api.github.com/repos/DBiswas57/TheDesiTadka/releases/latest",
-        "https://api.github.com/repos/LearnersYT/TheDesiTadka/releases/latest"
+        "https://api.github.com/repos/DBiswas57/TheDesiTadka/releases/latest"
     )
 
     /**
@@ -43,6 +43,7 @@ object AppUpdateManager {
      * Compares semver and tags against the current app build.
      */
     suspend fun checkForUpdates(): Result<UpdateInfo> = withContext(Dispatchers.IO) {
+        val currentVersion = BuildConfig.VERSION_NAME.trim()
         try {
             val headers = mapOf(
                 "Accept" to "application/vnd.github.v3+json",
@@ -57,6 +58,22 @@ object AppUpdateManager {
                     if (jsonString.isNotBlank()) break
                 } catch (e: Exception) {
                     lastError = e
+                    // If 404, releases/latest means no releases published yet on repository
+                    if (e.message?.contains("404") == true) {
+                        StreamHubLogger.i("AppUpdateManager", "No releases published yet on $apiUrl")
+                        return@withContext Result.success(
+                            UpdateInfo(
+                                isUpdateAvailable = false,
+                                isForceUpdate = false,
+                                latestVersionName = currentVersion,
+                                currentVersionName = currentVersion,
+                                releaseTitle = "Up to date",
+                                releaseNotes = "No new updates available.",
+                                downloadUrl = "",
+                                expectedSha256 = null
+                            )
+                        )
+                    }
                 }
             }
 
@@ -71,7 +88,6 @@ object AppUpdateManager {
             val releaseNotes = root["body"]?.jsonPrimitive?.content ?: ""
 
             val cleanTag = tagName.removePrefix("v").trim()
-            val currentVersion = BuildConfig.VERSION_NAME.trim()
 
             // Find APK in release assets
             val assets = root["assets"]?.jsonArray ?: emptyList()
@@ -91,9 +107,11 @@ object AppUpdateManager {
             val expectedSha = shaRegex.find(releaseNotes)?.value
 
             val isNewer = isVersionNewer(cleanTag, currentVersion)
+            val isForce = isNewer || BuildConfig.VERSION_CODE < 3 || releaseNotes.contains("[FORCE_UPDATE]") || releaseTitle.contains("Mandatory")
 
             val info = UpdateInfo(
                 isUpdateAvailable = isNewer && apkUrl.isNotBlank(),
+                isForceUpdate = isForce,
                 latestVersionName = cleanTag,
                 currentVersionName = currentVersion,
                 releaseTitle = releaseTitle,
@@ -102,7 +120,7 @@ object AppUpdateManager {
                 expectedSha256 = expectedSha
             )
 
-            StreamHubLogger.i("AppUpdateManager", "Checked update: current=$currentVersion, latest=$cleanTag, isAvailable=${info.isUpdateAvailable}")
+            StreamHubLogger.i("AppUpdateManager", "Checked update: current=$currentVersion, latest=$cleanTag, isAvailable=${info.isUpdateAvailable}, isForce=${info.isForceUpdate}")
             Result.success(info)
         } catch (e: Exception) {
             StreamHubLogger.w("AppUpdateManager", "Update check failed: ${e.message}")

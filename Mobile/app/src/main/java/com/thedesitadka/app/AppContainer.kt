@@ -35,7 +35,7 @@ class AppContainer(val context: Context) {
     }
 
     val configRepository: ConfigRepository by lazy {
-        ConfigRepository(configCache = configCache, appVersion = 2)
+        ConfigRepository(configCache = configCache, appVersion = BuildConfig.VERSION_CODE)
     }
 
     val downloadRepository: DownloadRepository by lazy {
@@ -81,7 +81,9 @@ class AppContainer(val context: Context) {
     private fun createDefaultManifest(): ProviderManifest {
         return ProviderManifest(
             schemaVersion = 1,
-            configVersion = 130,
+            configVersion = 131,
+            minimumAppVersion = 3,
+            forceUpdate = true,
             generatedAt = System.currentTimeMillis(),
             providers = listOf(
                 // 1. KamaBaba
@@ -716,7 +718,7 @@ class AppContainer(val context: Context) {
                         detailDescription = ".entry-content p, .video-details",
                         detailThumbnail = "meta[property='og:image'], img",
                         player = "iframe, video",
-                        videoSource = "video source[src], video[src], iframe[src]",
+                        videoSource = "iframe[src*='luluvid'], iframe[src*='luluvdo'], iframe[src*='lulustream'], iframe[src*='/e/'], video source[src], video[src], iframe[src]",
                         videoSourceAttr = "src",
                         relatedItems = "article"
                     ),
@@ -975,7 +977,7 @@ class AppContainer(val context: Context) {
                         detailDescription = ".entry-content p",
                         detailThumbnail = "meta[property='og:image'], img",
                         player = "video, iframe",
-                        videoSource = "video source[src], video[src], iframe[src]",
+                        videoSource = "iframe[src*='/e/'], iframe[src*='lulu'], iframe[src*='tube279'], iframe[src*='stream'], video source[src], video[src]",
                         videoSourceAttr = "src"
                     ),
                     contentPolicy = ContentPolicy(
@@ -1030,10 +1032,10 @@ class AppContainer(val context: Context) {
                     id = "xnxx",
                     name = "XNXX",
                     enabled = true,
-                    baseUrl = "https://www.xnxx.com",
+                    baseUrl = "https://xnxx.health",
                     adapter = "html_selector",
                     familyId = "xvideos_network_family",
-                    domains = listOf("https://www.xnxx.com", "https://xnxx.com"),
+                    domains = listOf("https://xnxx.health", "https://www.xnxx.com", "https://xnxx.com"),
                     validationMarker = "xnxx",
                     capabilities = listOf(
                         ProviderCapability.HOME,
@@ -1044,22 +1046,23 @@ class AppContainer(val context: Context) {
                         ProviderCapability.DOWNLOAD
                     ),
                     navigation = NavigationConfig(
-                        home = "/hot",
+                        home = "/",
                         search = "/search/{query}/",
-                        page = "/hot/{page}"
+                        page = "/{page}"
                     ),
                     selectors = SelectorConfig(
-                        item = "div.mozaique > div, div.thumb-block",
-                        title = "p.title a, a[title]",
+                        item = "div.thumb-block.thumb-cat, div.thumb-block, div.mozaique > div",
+                        title = "p.title a, a[title], .title a",
                         thumbnail = "img",
-                        thumbnailAttr = "data-src",
-                        detailUrl = "p.title a, .thumb-under a, a[href^='/video']",
+                        thumbnailAttr = "src",
+                        detailUrl = "p.title a, a[href*='/todays-selection'], a[href*='/search/'], a[href*='/your-suggestions/'], a[href^='/video'], a",
                         duration = "span.duration",
                         detailTitle = "h1",
                         detailThumbnail = "meta[property='og:image']",
                         player = "video",
                         videoSource = "video source[src]",
-                        videoSourceAttr = "src"
+                        videoSourceAttr = "src",
+                        relatedItems = "div.thumb-block:not(.thumb-cat), div.mozaique > div, div.thumb-block"
                     ),
                     contentPolicy = ContentPolicy(
                         rightsStatus = "Public Web Index",
@@ -1131,16 +1134,16 @@ class AppContainer(val context: Context) {
                         page = "/new/{page}"
                     ),
                     selectors = SelectorConfig(
-                        item = "div.video-thumb, div.thumb-list__item, div[data-video-id], div[data-role='video-thumb']",
-                        title = "a[data-role='video-title'], a[class*='video-thumb__name'], a[class*='video-thumb__title'], a[title]",
-                        thumbnail = "img[src*='xhpingcdn'], img[src*='xhcdn'], img",
+                        item = "div.video-thumb--type-video, div[data-video-id], div.thumb-list__item:has(a[href*='/videos/'])",
+                        title = "a.video-thumb-info__name, a[class*='video-thumb-info__name'], a[data-role='video-title'], a[title]",
+                        thumbnail = "img[src*='xhpingcdn'], img[src*='xhcdn'], img[class*='thumb-image'], img",
                         thumbnailAttr = "src",
                         detailUrl = "a[href*='/videos/']",
                         duration = "span.badge__text, span[class*='duration'], span[data-role='video-duration']",
                         detailTitle = "h1",
                         detailThumbnail = "meta[property='og:image']",
                         player = "video",
-                        videoSource = "video source[src]",
+                        videoSource = "video[src], video source[src], link[rel='preload'][href*='.m3u8'], link[rel='preload'][href*='.mp4']",
                         videoSourceAttr = "src"
                     ),
                     contentPolicy = ContentPolicy(

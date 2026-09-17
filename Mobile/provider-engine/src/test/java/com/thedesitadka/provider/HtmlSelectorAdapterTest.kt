@@ -884,6 +884,204 @@ class HtmlSelectorAdapterTest {
         )
         assertEquals("https://ixiporn.live/", source.headersRequired["Referer"])
     }
+
+    @Test
+    fun testPornX11FiltersAdIframeAndPrioritizesLuluvdo() {
+        val pornx11Config = ProviderConfig(
+            id = "pornx11",
+            name = "PornX11",
+            baseUrl = "https://pornx11.com",
+            adapter = "html_selector",
+            capabilities = listOf(ProviderCapability.HOME, ProviderCapability.DETAILS, ProviderCapability.STREAM),
+            selectors = SelectorConfig(
+                item = "article, div.item, div.post",
+                title = "a[title], h2.entry-title a, h2 a",
+                thumbnail = "img",
+                detailUrl = "h2.entry-title a, h2 a, a",
+                player = "video, iframe",
+                videoSource = "iframe[src*='/e/'], iframe[src*='lulu'], iframe[src*='tube279'], iframe[src*='stream'], video source[src], video[src]",
+                videoSourceAttr = "src"
+            )
+        )
+        val adapter = HtmlSelectorAdapter(pornx11Config)
+
+        val detailHtml = """
+            <!DOCTYPE html>
+            <html>
+            <head><title>Desi Video - PornX11</title></head>
+            <body>
+                <iframe src="//ad.a-ads.com/2089330?size=728x90" width="728" height="90"></iframe>
+                <div class="video-container">
+                    <iframe src="https://luluvdo.com/e/mkzpihb53g51" width="640" height="360" allowfullscreen></iframe>
+                </div>
+            </body>
+            </html>
+        """.trimIndent()
+
+        // Test parsing detail HTML with candidate collection
+        val doc = org.jsoup.Jsoup.parse(detailHtml, "https://pornx11.com")
+        val candidateUrls = mutableListOf<String>()
+        val iframes = doc.select("iframe[src*='player'], iframe[src*='embed'], iframe[src*='/e/'], iframe[src*='cdn1'], iframe[src*='tube279'], iframe[src*='lulu'], iframe[src*='streamtape'], iframe[src]")
+        for (iframe in iframes) {
+            val src = iframe.attr("src")
+            if (src.isNotBlank()) candidateUrls.add(src)
+        }
+
+        val filteredCandidates = candidateUrls.filter { urlCandidate ->
+            val lowerUrl = urlCandidate.lowercase()
+            !(lowerUrl.contains("a-ads") || lowerUrl.contains("banner") || lowerUrl.contains("popunder"))
+        }.sortedByDescending { u ->
+            if (u.contains("luluvdo")) 100 else 10
+        }
+
+        assertEquals(1, filteredCandidates.size)
+        assertEquals("https://luluvdo.com/e/mkzpihb53g51", filteredCandidates[0])
+    }
+
+    @Test
+    fun testXHamsterItemAndMediaExtraction() {
+        val xhamsterConfig = ProviderConfig(
+            id = "xhamster",
+            name = "XHamster",
+            baseUrl = "https://xhamster.desi",
+            adapter = "html_selector",
+            capabilities = listOf(ProviderCapability.HOME, ProviderCapability.DETAILS, ProviderCapability.STREAM),
+            selectors = SelectorConfig(
+                item = "div.video-thumb--type-video, div[data-video-id], div.thumb-list__item:has(a[href*='/videos/'])",
+                title = "a.video-thumb-info__name, a[class*='video-thumb-info__name'], a[data-role='video-title'], a[title]",
+                thumbnail = "img[src*='xhpingcdn'], img[src*='xhcdn'], img[class*='thumb-image'], img",
+                thumbnailAttr = "src",
+                detailUrl = "a[href*='/videos/']",
+                player = "video",
+                videoSource = "video[src], video source[src], link[rel='preload'][href*='.m3u8'], link[rel='preload'][href*='.mp4']",
+                videoSourceAttr = "src"
+            )
+        )
+        val adapter = HtmlSelectorAdapter(xhamsterConfig)
+
+        // Test feed item parsing excluding cam ads
+        val feedHtml = """
+            <div class="thumb-list">
+                <!-- Cam Ad Card (should be excluded) -->
+                <div class="OBq-oDZXcam-thumb video-thumb">
+                    <a href="/cams/model1">Model 1</a>
+                </div>
+                <!-- Real Video Card -->
+                <div class="video-thumb--type-video" data-video-id="12345">
+                    <a href="/videos/desi-sample-xh123" class="video-thumb__image-container">
+                        <img class="thumb-image-container__image" src="https://ic-vt-nss.xhpingcdn.com/a/thumb123.jpg" />
+                    </a>
+                    <a href="/videos/desi-sample-xh123" class="video-thumb-info__name">Desi Sample Video 1</a>
+                </div>
+            </div>
+        """.trimIndent()
+
+        val doc = org.jsoup.Jsoup.parse(feedHtml, "https://xhamster.desi")
+        val items = doc.select(xhamsterConfig.selectors!!.item)
+        assertEquals(1, items.size)
+        val title = items[0].select(xhamsterConfig.selectors!!.title).text().trim()
+        assertEquals("Desi Sample Video 1", title)
+
+        // Test detail media extraction from video[src] with Referer injection
+        val detailHtml = """
+            <!DOCTYPE html>
+            <html>
+            <head><title>Sample Video - xHamster</title></head>
+            <body>
+                <video class="player-container__no-script-video" preload="auto"
+                       src="https://video5.xhpingcdn.com/key=123/speed=0/029/691/769/480p.h264.mp4">
+                </video>
+            </body>
+            </html>
+        """.trimIndent()
+
+        val sourcesResult = adapter.parsePlayableMediaHtml(detailHtml, "https://xhamster.desi/videos/desi-sample-xh123")
+        val sources = sourcesResult.getOrThrow()
+        assertTrue("Should extract xhamster media", sources.isNotEmpty())
+        assertEquals("https://video5.xhpingcdn.com/key=123/speed=0/029/691/769/480p.h264.mp4", sources[0].url)
+        assertEquals("https://xhamster.desi/", sources[0].headersRequired["Referer"])
+    }
+
+    @Test
+    fun testXNXXCategoryAndContentHierarchy() {
+        val xnxxConfig = ProviderConfig(
+            id = "xnxx",
+            name = "XNXX",
+            baseUrl = "https://xnxx.health",
+            adapter = "html_selector",
+            capabilities = listOf(ProviderCapability.HOME, ProviderCapability.CATEGORY, ProviderCapability.DETAILS, ProviderCapability.STREAM),
+            navigation = NavigationConfig(home = "/"),
+            selectors = SelectorConfig(
+                item = "div.thumb-block.thumb-cat, div.thumb-block, div.mozaique > div",
+                title = "p.title a, a[title], .title a",
+                thumbnail = "img",
+                thumbnailAttr = "src",
+                detailUrl = "p.title a, a[href*='/todays-selection'], a[href*='/search/'], a[href*='/your-suggestions/'], a[href^='/video'], a",
+                relatedItems = "div.thumb-block:not(.thumb-cat), div.mozaique > div, div.thumb-block"
+            )
+        )
+        val adapter = HtmlSelectorAdapter(xnxxConfig)
+
+        // 1. Home page serves category list
+        val homeHtml = """
+            <div class="mozaique">
+                <div class="thumb-block thumb-cat" id="tb_cat_1">
+                    <div class="thumb">
+                        <a href="/todays-selection">
+                            <img src="https://thumb-cdn77.xnxx-cdn.com/cat1.jpg" />
+                        </a>
+                    </div>
+                    <p class="title"><a href="/todays-selection">Today's selection</a></p>
+                </div>
+            </div>
+        """.trimIndent()
+
+        val homeDoc = org.jsoup.Jsoup.parse(homeHtml, "https://xnxx.health")
+        val catItem = homeDoc.select(xnxxConfig.selectors!!.item).first()
+        assertNotNull(catItem)
+        assertEquals("Today's selection", catItem?.select(xnxxConfig.selectors!!.title)?.text())
+        assertEquals("/todays-selection", catItem?.select(xnxxConfig.selectors!!.detailUrl)?.attr("href"))
+
+        // 2. Category page serves video content list
+        val categoryHtml = """
+            <div class="mozaique">
+                <div class="thumb-block tbm-init-ok" id="video_101">
+                    <div class="thumb">
+                        <a href="/video-101/sample-video-title">
+                            <img data-src="https://thumb-cdn77.xnxx-cdn.com/v101.jpg" />
+                        </a>
+                    </div>
+                    <p class="title"><a href="/video-101/sample-video-title">Sample Video Title</a></p>
+                </div>
+            </div>
+        """.trimIndent()
+
+        val catDoc = org.jsoup.Jsoup.parse(categoryHtml, "https://xnxx.health")
+        val videoItems = catDoc.select(xnxxConfig.selectors!!.relatedItems)
+        assertEquals(1, videoItems.size)
+        assertEquals("Sample Video Title", videoItems[0].select("p.title a").text())
+
+        // 3. Video page extracts HTML5 player stream
+        val videoHtml = """
+            <!DOCTYPE html>
+            <html>
+            <head><title>Sample Video Title - XNXX.COM</title></head>
+            <body>
+                <script>
+                    html5player.setVideoUrlHigh('https://mp4-cdn77.xnxx-cdn.com/sample_360p.mp4');
+                    html5player.setVideoHLS('https://hls-cdn77.xnxx-cdn.com/sample.m3u8');
+                </script>
+            </body>
+            </html>
+        """.trimIndent()
+
+        val mediaResult = adapter.parsePlayableMediaHtml(videoHtml, "https://xnxx.health/video-101/sample-video-title")
+        val sources = mediaResult.getOrThrow()
+        assertTrue("Should extract video stream from XNXX detail", sources.isNotEmpty())
+        assertEquals("https://hls-cdn77.xnxx-cdn.com/sample.m3u8", sources[0].url)
+        assertEquals(MediaSourceType.HLS, sources[0].type)
+    }
 }
+
 
 

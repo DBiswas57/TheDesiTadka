@@ -189,4 +189,27 @@ class ConfigVerifierTest {
             tempDir.deleteRecursively()
         }
     }
+
+    @Test
+    fun testRejectObsoleteAppVersion() {
+        val manifest = ProviderManifest(
+            schemaVersion = 1,
+            configVersion = 10,
+            minimumAppVersion = 3,
+            forceUpdate = true
+        )
+        val manifestJson = json.encodeToString(ProviderManifest.serializer(), manifest)
+        val signedJson = signPayload(manifestJson)
+
+        // Simulating current app version 2 (below minimum required 3)
+        val result = ConfigVerifier.verifySignedPayload(
+            signedJson = signedJson,
+            currentVersion = 5,
+            currentAppVersion = 2,
+            publicKeyBase64 = pubKeyBase64
+        )
+
+        assertFalse("Obsolete app version must be rejected when forceUpdate is true", result.isSuccess)
+        assertTrue(result.error?.message?.contains("Application update required") == true)
+    }
 }

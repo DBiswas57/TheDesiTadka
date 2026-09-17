@@ -115,7 +115,11 @@ fun ProviderScreen(
         }
         errorMessage = null
         coroutineScope.launch {
-            val result = providerEngine.getHomeFeed(providerId, page)
+            val result = if (selectedCategory != null) {
+                adapter?.search(selectedCategory!!.name, page) ?: providerEngine.getHomeFeed(providerId, page)
+            } else {
+                providerEngine.getHomeFeed(providerId, page)
+            }
             result.onSuccess { feedPage ->
                 if (reset) feedItems.clear()
                 feedItems.addAll(feedPage.items)
@@ -139,6 +143,10 @@ fun ProviderScreen(
                 }
             }
         }
+    }
+
+    LaunchedEffect(selectedCategory) {
+        loadContent(1, reset = true)
     }
 
     // Re-load after Cloudflare challenge is solved

@@ -55,6 +55,9 @@ object ConfigValidator {
 
         if (manifest.minimumAppVersion > currentAppVersion && manifest.forceUpdate) {
             StreamHubLogger.w("ConfigValidator", "Application update required: minVersion ${manifest.minimumAppVersion} > current $currentAppVersion")
+            throw StreamHubError.ConfigurationError(
+                "Application update required: installed version ($currentAppVersion) is below minimum required version (${manifest.minimumAppVersion}). Please update to continue."
+            )
         }
 
         for (provider in manifest.providers) {

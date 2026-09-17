@@ -181,6 +181,7 @@ class DownloadWorker(
                 urlLower.contains("desisex") || providerId == "desisex" -> "https://desisex.site/"
                 urlLower.contains("pornx11") || providerId == "pornx11" -> "https://pornx11.com/"
                 urlLower.contains("aagmaal") || providerId == "aagmaal" || providerId == "aagmaal_com" -> "https://aagmaal.com/"
+                urlLower.contains("xhpingcdn") || urlLower.contains("xhcdn") || urlLower.contains("xhamster") || providerId == "xhamster" -> "https://xhamster.desi/"
                 else -> "https://${android.net.Uri.parse(mediaUrl).host ?: "example.com"}/"
             }
             requestBuilder.header("Referer", referer)

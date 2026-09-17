@@ -263,7 +263,7 @@ class HtmlSelectorAdapter(
                 val src = el.attr("src")
                     .ifEmpty { el.attr("data-src") }
                     .ifEmpty { el.attr("content") }
-                    .ifEmpty { if (el.tagName().equals("a", ignoreCase = true)) el.attr("href") else "" }
+                    .ifEmpty { if (el.tagName().equals("a", ignoreCase = true) || el.tagName().equals("link", ignoreCase = true)) el.attr("href") else "" }
                 if (src.isNotBlank()) {
                     val resolved = resolveUrl(src)
                     val lower = resolved.lowercase()
@@ -271,7 +271,8 @@ class HtmlSelectorAdapter(
                         continue
                     }
                     if (lower.contains("/smartpop/") || lower.contains("whitetrafsa") || lower.contains("hipodi")
-                        || lower.contains("mavrtracktor") || lower.endsWith(".html") || lower.endsWith(".php")) {
+                        || lower.contains("mavrtracktor") || lower.endsWith(".html") || lower.endsWith(".php")
+                        || lower.contains("a-ads") || lower.contains("banner") || lower.contains("popunder")) {
                         continue
                     }
                     val mime = el.attr("type").ifEmpty { if (resolved.contains(".m3u8")) "application/x-mpegURL" else "video/mp4" }
@@ -280,7 +281,8 @@ class HtmlSelectorAdapter(
                         resolved.contains(".mpd") -> MediaSourceType.DASH
                         else -> MediaSourceType.PROGRESSIVE_MP4
                     }
-                    sources.add(MediaSource(url = resolved, type = type, mimeType = mime, headersRequired = defaultHeaders))
+                    val headers = resolveHeadersForStream(resolved, defaultHeaders)
+                    sources.add(MediaSource(url = resolved, type = type, mimeType = mime, headersRequired = headers))
                 }
             }
 
@@ -307,16 +309,27 @@ class HtmlSelectorAdapter(
                     }
                 }
 
-                for (urlCandidate in candidateUrls) {
+                // Filter out ads and sort candidate URLs so dedicated video players run first
+                val filteredCandidates = candidateUrls.filter { urlCandidate ->
                     val lowerUrl = urlCandidate.lowercase()
-                    // Skip ad networks, popups and trackers
-                    if (lowerUrl.contains("whitetrafsa") || lowerUrl.contains("mavrtracktor") || lowerUrl.contains("hipodi")
+                    !(lowerUrl.contains("whitetrafsa") || lowerUrl.contains("mavrtracktor") || lowerUrl.contains("hipodi")
                         || lowerUrl.contains("google") || lowerUrl.contains("doubleclick") || lowerUrl.contains("recaptcha")
                         || lowerUrl.contains("adservice") || lowerUrl.contains("smartpop") || lowerUrl.contains("videobaba")
-                        || lowerUrl.contains("revive") || lowerUrl.contains("javascript:")) {
-                        continue
+                        || lowerUrl.contains("revive") || lowerUrl.contains("javascript:")
+                        || lowerUrl.contains("a-ads") || lowerUrl.contains("ad.a-ads") || lowerUrl.contains("banner")
+                        || lowerUrl.contains("popunder") || lowerUrl.contains("syndication") || lowerUrl.contains("adsterra")
+                        || lowerUrl.contains("exoclick") || lowerUrl.contains("juicyads"))
+                }.sortedByDescending { u ->
+                    val lu = u.lowercase()
+                    when {
+                        lu.contains("luluvdo") || lu.contains("lulustream") || lu.contains("luluvid") -> 100
+                        lu.contains("/e/") || lu.contains("tube279") || lu.contains("streamtape") || lu.contains("cdn1") -> 90
+                        lu.contains("player") || lu.contains("embed") -> 50
+                        else -> 10
                     }
+                }
 
+                for (urlCandidate in filteredCandidates) {
                     // Build list of URLs to try for this candidate (e.g. cdn1.site -> luluvdo.com / lulustream.com)
                     val urlsToTry = mutableListOf(urlCandidate)
                     if (urlCandidate.contains("cdn1.site/e/") || urlCandidate.contains("luluvid.com/e/")) {
@@ -746,6 +759,7 @@ class HtmlSelectorAdapter(
             lower.contains("tube279.com") || lower.contains("siesta583") -> "https://tube279.com/"
             lower.contains("tnmr.org") || lower.contains("lulucdn") || lower.contains("lulustream") || lower.contains("luluvdo") -> "https://luluvdo.com/"
             lower.contains("tpead.net") || lower.contains("streamtape.com") || lower.contains("tapecontent.net") -> "https://streamtape.com/"
+            lower.contains("xhpingcdn") || lower.contains("xhcdn") || lower.contains("xhamster") -> "https://xhamster.desi/"
             else -> null
         }
         return if (targetReferer != null) {

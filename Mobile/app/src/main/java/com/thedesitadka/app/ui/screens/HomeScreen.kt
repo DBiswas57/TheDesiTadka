@@ -1,6 +1,9 @@
 package com.thedesitadka.app.ui.screens
 
 import android.app.Activity
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -34,6 +37,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -135,20 +139,36 @@ fun HomeScreen(
     val watchHistory by watchHistoryFlow.collectAsState(initial = emptyList())
     val categories = ContentCategoryDefinition.DEFAULT_CATEGORIES
 
-    // Automatic update detection on launch
+    // Mandatory startup update verification state
     var showUpdateDialog by remember { mutableStateOf(false) }
     var updateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
     var isDownloadingUpdate by remember { mutableStateOf(false) }
     var downloadProgress by remember { mutableFloatStateOf(0f) }
     var updateErrorMessage by remember { mutableStateOf<String?>(null) }
+    var startupBlockReason by remember { mutableStateOf<String?>(null) }
+    var startupCheckTrigger by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(startupCheckTrigger) {
+        startupBlockReason = null
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        val network = cm?.activeNetwork
+        val caps = if (network != null) cm.getNetworkCapabilities(network) else null
+        val isOnline = caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        if (!isOnline) {
+            startupBlockReason = "Offline Access Prohibited\n\nTheDesiTadka requires an active internet connection to securely verify application integrity and official release status. Please connect to the internet and retry."
+            return@LaunchedEffect
+        }
+
         val result = AppUpdateManager.checkForUpdates()
         result.onSuccess { info ->
             if (info.isUpdateAvailable) {
                 updateInfo = info
                 showUpdateDialog = true
+            } else {
+                showUpdateDialog = false
             }
+        }.onFailure { err ->
+            startupBlockReason = "Security & Update Check Blocked\n\nUnable to reach the official release service (${err.message ?: "Connection Refused"}).\n\nThe update service may be blocked or unreachable. Offline and unverified use is prohibited to protect application security."
         }
     }
 
@@ -219,8 +239,69 @@ fun HomeScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 168.dp),
+        if (startupBlockReason != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.WifiOff,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(56.dp)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Security Verification Required",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            color = Color.White,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = startupBlockReason ?: "",
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 18.sp
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Button(
+                            onClick = { startupCheckTrigger++ },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = null,
+                                tint = Color.Black,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Retry Verification", color = Color.Black, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 168.dp),
             state = gridState,
             contentPadding = PaddingValues(bottom = 32.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -548,18 +629,29 @@ fun HomeScreen(
                 }
             }
         }
+        }
     }
 
     if (showUpdateDialog && updateInfo != null) {
         val info = updateInfo!!
+        val isMandatory = info.isForceUpdate || com.thedesitadka.app.BuildConfig.VERSION_CODE < 3
         AlertDialog(
             onDismissRequest = {
-                if (!isDownloadingUpdate) showUpdateDialog = false
+                if (!isMandatory && !isDownloadingUpdate) showUpdateDialog = false
             },
-            title = { Text("App Update Available: v${info.latestVersionName}") },
+            title = {
+                Text(
+                    if (isMandatory) "Mandatory Update Required: v${info.latestVersionName}"
+                    else "App Update Available: v${info.latestVersionName}"
+                )
+            },
             text = {
                 Column {
-                    Text("A new official release of TheDesiTadka is ready to install.", fontWeight = FontWeight.SemiBold)
+                    Text(
+                        if (isMandatory) "A required security & content update must be installed to continue using TheDesiTadka."
+                        else "A new official release of TheDesiTadka is ready to install.",
+                        fontWeight = FontWeight.SemiBold
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("Release: ${info.releaseTitle}", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
                     if (info.releaseNotes.isNotBlank()) {
@@ -611,7 +703,7 @@ fun HomeScreen(
                 }
             },
             dismissButton = {
-                if (!isDownloadingUpdate) {
+                if (!isMandatory && !isDownloadingUpdate) {
                     TextButton(onClick = { showUpdateDialog = false }) {
                         Text("Later")
                     }

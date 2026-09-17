@@ -211,6 +211,7 @@ class MediaPlayerManager(
                     urlLower.contains("fsiblog") -> requestProperties["Referer"] = "https://fsiblogxx.com/"
                     urlLower.contains("webxseries") -> requestProperties["Referer"] = "https://webxseries.hot/"
                     urlLower.contains("aagmaal") -> requestProperties["Referer"] = "https://aagmaal.com/"
+                    urlLower.contains("xhpingcdn") || urlLower.contains("xhcdn") || urlLower.contains("xhamster") -> requestProperties["Referer"] = "https://xhamster.desi/"
                 }
             }
 

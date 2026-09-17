@@ -1,7 +1,0 @@
-Y[DEBUG][TheDesiTadka][AdEventTracker] AdEvent: REQUESTED for ExoClick on player_preroll
-g[DEBUG][TheDesiTadka][AdEventTracker] AdEvent: LOADED for ExoClick on player_preroll (VAST URL ready)
-T[DEBUG][TheDesiTadka][AdEventTracker] AdEvent: REQUESTED for ExoClick on home_feed
-f[DEBUG][TheDesiTadka][AdEventTracker] AdEvent: LOADED for ExoClick on home_feed (Zone 5671234 ready)
-T[DEBUG][TheDesiTadka][AdEventTracker] AdEvent: REQUESTED for ExoClick on home_feed
-d[WARN][TheDesiTadka][AdEventTracker] AdEvent: FAILED for ExoClick on home_feed [Error: NO_ZONE_ID]
-e[DEBUG][TheDesiTadka][ExoClickAdapter] ExoClick API token not set; skipping bearer token generation
