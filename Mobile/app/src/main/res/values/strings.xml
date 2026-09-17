@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">TheDesiTadka</string>
+    <string name="app_description">TheDesiTadka - Authorized Video &amp; Streaming Aggregator</string>
+    <string name="privacy_policy_title">Privacy Policy</string>
+    <string name="privacy_policy_text">TheDesiTadka operates strictly as an aggregator of public authorized content. No personal tracking, credentials, or private viewing telemetry is collected.</string>
+    <string name="terms_title">Terms of Service</string>
+    <string name="terms_text">TheDesiTadka presents publicly available video media as indexed from remote provider manifests. Third-party content rights remain with respective owners.</string>
+</resources>

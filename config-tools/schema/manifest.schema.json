@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StreamHub Provider Manifest",
+  "description": "Cryptographically signed remote configuration schema for StreamHub authorized video aggregations",
+  "type": "object",
+  "required": ["schemaVersion", "configVersion", "generatedAt", "expiresAt", "providers"],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Schema format version"
+    },
+    "configVersion": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Monotonically increasing configuration sequence number"
+    },
+    "generatedAt": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Epoch timestamp in milliseconds when config was generated"
+    },
+    "expiresAt": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Epoch timestamp in milliseconds after which config must be refreshed"
+    },
+    "minimumAppVersion": {
+      "type": "integer",
+      "default": 1,
+      "description": "Minimum required Android versionCode to parse this manifest"
+    },
+    "recommendedAppVersion": {
+      "type": "integer",
+      "default": 1
+    },
+    "forceUpdate": {
+      "type": "boolean",
+      "default": false
+    },
+    "maintenanceMode": {
+      "type": "boolean",
+      "default": false
+    },
+    "providers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ProviderConfig"
+      }
+    }
+  },
+  "$defs": {
+    "ProviderConfig": {
+      "type": "object",
+      "required": ["id", "name", "baseUrl", "adapter", "capabilities"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "baseUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "adapter": {
+          "type": "string",
+          "enum": ["html_selector", "wordpress_rest", "rss", "json_api", "embedded_player"]
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["HOME", "CATEGORY", "SEARCH", "DETAILS", "STREAM", "DOWNLOAD", "RELATED"]
+          }
+        },
+        "icon": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "navigation": {
+          "type": "object",
+          "properties": {
+            "home": { "type": "string" },
+            "search": { "type": "string" },
+            "page": { "type": "string" },
+            "categories": { "type": "string" },
+            "categoryPage": { "type": "string" }
+          }
+        },
+        "selectors": {
+          "type": "object",
+          "properties": {
+            "item": { "type": "string" },
+            "title": { "type": "string" },
+            "thumbnail": { "type": "string" },
+            "thumbnailAttr": { "type": "string" },
+            "detailUrl": { "type": "string" },
+            "duration": { "type": "string" },
+            "detailTitle": { "type": "string" },
+            "detailDescription": { "type": "string" },
+            "detailThumbnail": { "type": "string" },
+            "player": { "type": "string" },
+            "videoSource": { "type": "string" },
+            "videoSourceAttr": { "type": "string" },
+            "relatedItems": { "type": "string" }
+          }
+        },
+        "apiConfig": {
+          "type": "object",
+          "properties": {
+            "postsEndpoint": { "type": "string" },
+            "searchEndpoint": { "type": "string" },
+            "categoriesEndpoint": { "type": "string" },
+            "customHeaders": {
+              "type": "object",
+              "additionalProperties": { "type": "string" }
+            }
+          }
+        },
+        "contentPolicy": {
+          "type": "object",
+          "properties": {
+            "isAuthorizedPublicSource": { "type": "boolean" },
+            "rightsStatus": { "type": "string" },
+            "termsUrl": { "type": "string" },
+            "privacyPolicyUrl": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

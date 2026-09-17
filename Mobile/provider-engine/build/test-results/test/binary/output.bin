@@ -1,0 +1,13 @@
+K[DEBUG][TheDesiTadka][Network] --> GET https://luluvdo.com/e/mkzpihb53g51
+_[DEBUG][TheDesiTadka][Network] <-- 200  (1271.9552 ms) for https://luluvdo.com/e/mkzpihb53g51
+W[WARN][TheDesiTadka][HealthMonitor] Provider 'prov_1' error count: 1, status: ENABLED
+X[WARN][TheDesiTadka][HealthMonitor] Provider 'prov_1' error count: 2, status: DEGRADED
+X[WARN][TheDesiTadka][HealthMonitor] Provider 'prov_1' error count: 3, status: DEGRADED
+X[WARN][TheDesiTadka][HealthMonitor] Provider 'prov_1' error count: 4, status: DEGRADED
+[[WARN][TheDesiTadka][HealthMonitor] Provider 'prov_1' error count: 5, status: UNAVAILABLE
+L[INFO][TheDesiTadka][HealthMonitor] Provider 'prov_1' recovered to ENABLED
+a[INFO][TheDesiTadka][ProviderEngine] Loaded provider 'provider_a' with strategy 'html_selector'
+a[INFO][TheDesiTadka][ProviderEngine] Loaded provider 'provider_a' with strategy 'html_selector'
+W[INFO][TheDesiTadka][ProviderEngine] Loaded provider 'provider_b' with strategy 'rss'
+M[INFO][TheDesiTadka][ProviderEngine] Unloading retired provider: provider_a
+W[INFO][TheDesiTadka][ProviderEngine] Loaded provider 'provider_b' with strategy 'rss'

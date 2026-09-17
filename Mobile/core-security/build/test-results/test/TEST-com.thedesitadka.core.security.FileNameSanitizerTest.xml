@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.thedesitadka.core.security.FileNameSanitizerTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-09-16T12:35:02" hostname="HTANVIP" time="0.009">
+  <properties/>
+  <testcase name="testSanitizeEnforcesLengthLimit" classname="com.thedesitadka.core.security.FileNameSanitizerTest" time="0.003"/>
+  <testcase name="testSanitizeHandlesEmptyAndBlank" classname="com.thedesitadka.core.security.FileNameSanitizerTest" time="0.0"/>
+  <testcase name="testSanitizeHandlesUnicodeAndAccents" classname="com.thedesitadka.core.security.FileNameSanitizerTest" time="0.001"/>
+  <testcase name="testSanitizeHandlesWindowsReservedNames" classname="com.thedesitadka.core.security.FileNameSanitizerTest" time="0.001"/>
+  <testcase name="testSanitizeRemovesIllegalCharacters" classname="com.thedesitadka.core.security.FileNameSanitizerTest" time="0.001"/>
+  <testcase name="testBuildSafeFileName" classname="com.thedesitadka.core.security.FileNameSanitizerTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

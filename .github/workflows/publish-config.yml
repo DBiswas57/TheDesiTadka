@@ -1,0 +1,98 @@
+name: Publish Remote Configuration
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'config-tools/sample-manifest.json'
+      - 'config/**'
+      - '.github/workflows/publish-config.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  validate-and-sign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Signing Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install cryptography jsonschema
+
+      - name: Validate Manifest Schema & Security Guardrails
+        run: |
+          python config-tools/validate_config.py --input config-tools/sample-manifest.json
+
+      - name: Prepare Signing Environment
+        run: |
+          mkdir -p config-tools/keys public
+          if [ -n "${{ secrets.ED25519_SIGNING_KEY }}" ]; then
+            echo "${{ secrets.ED25519_SIGNING_KEY }}" > config-tools/keys/ed25519_private.pem
+          else
+            echo "[*] Notice: ED25519_SIGNING_KEY secret not set, checking for repository key or generating."
+          fi
+
+      - name: Canonicalize & Sign Manifest
+        run: |
+          if [ -f config-tools/keys/ed25519_private.pem ]; then
+            python config-tools/sign_config.py \
+              --input config-tools/sample-manifest.json \
+              --output public/signed-manifest.json \
+              --key config-tools/keys/ed25519_private.pem \
+              --key-id "streamhub-prod-v1"
+          else
+            python config-tools/sign_config.py \
+              --input config-tools/sample-manifest.json \
+              --output public/signed-manifest.json \
+              --gen-key \
+              --key-id "streamhub-dev-v1"
+          fi
+
+      - name: Copy Schema and Raw Config to Public Artifacts
+        run: |
+          cp config-tools/sample-manifest.json public/manifest.json
+          cp config-tools/schema/manifest.schema.json public/manifest.schema.json
+
+      - name: Update signed-manifest.json in Repository
+        run: |
+          cp public/signed-manifest.json config-tools/signed-manifest.json
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add config-tools/signed-manifest.json
+          git diff --staged --quiet || git commit -m "Auto-sign remote configuration manifest [skip ci]"
+          git push origin HEAD:${{ github.ref_name }} || echo "Push skipped or already up to date"
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'public'
+
+  deploy-pages:
+    needs: validate-and-sign
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,320 @@
+{
+  "schemaVersion": 1,
+  "configVersion": 104,
+  "generatedAt": 1773532800000,
+  "expiresAt": 1893456000000,
+  "minimumAppVersion": 1,
+  "recommendedAppVersion": 1,
+  "forceUpdate": false,
+  "maintenanceMode": false,
+  "providers": [
+    {
+      "id": "kamababa1",
+      "name": "KamaBaba Media Portal",
+      "enabled": true,
+      "baseUrl": "https://www.kamababa1.com",
+      "adapter": "html_selector",
+      "capabilities": [
+        "HOME",
+        "SEARCH",
+        "DETAILS",
+        "STREAM",
+        "DOWNLOAD"
+      ],
+      "icon": "https://www.kamababa1.com/wp-content/uploads/2020/07/kamababa_logo_50px.png",
+      "description": "Public Indian streaming video index and community media clips",
+      "navigation": {
+        "home": "/",
+        "search": "/?s={query}",
+        "page": "/page/{page}/"
+      },
+      "selectors": {
+        "item": "article.thumb-block, article.video-preview-item, article",
+        "title": "a[title], h2.entry-title a, h2 a",
+        "thumbnail": "img.video-main-thumb, img",
+        "thumbnailAttr": "src",
+        "detailUrl": "a[href*='kamababa1.com/']",
+        "duration": ".duration",
+        "detailTitle": "h1",
+        "detailDescription": ".entry-content p, .video-details, p",
+        "detailThumbnail": "meta[property='og:image'], img.video-main-thumb",
+        "player": "iframe[src*='player']",
+        "videoSource": "meta[itemprop='contentURL'], video source[src], video[src], source[type='video/mp4']",
+        "videoSourceAttr": "src"
+      },
+      "contentPolicy": {
+        "isAuthorizedPublicSource": true,
+        "rightsStatus": "Authorized Public Aggregation",
+        "termsUrl": "https://www.kamababa1.com/terms/",
+        "privacyPolicyUrl": "https://www.kamababa1.com/privacy/"
+      }
+    },
+    {
+      "id": "masa49",
+      "name": "Masa49 Media Archive",
+      "enabled": true,
+      "baseUrl": "https://www.masa49.nl",
+      "adapter": "html_selector",
+      "capabilities": [
+        "HOME",
+        "SEARCH",
+        "DETAILS",
+        "STREAM"
+      ],
+      "icon": "https://www.masa49.nl/favicon.ico",
+      "description": "Public Dutch media library and community video streams",
+      "navigation": {
+        "home": "/",
+        "search": "/?s={query}",
+        "page": "/page/{page}/"
+      },
+      "selectors": {
+        "item": "article, div.item, div.post",
+        "title": "h2.entry-title a, h2 a",
+        "thumbnail": "img.video-img, img",
+        "thumbnailAttr": "data-src",
+        "detailUrl": "h2.entry-title a, a",
+        "duration": ".badge-duration",
+        "detailTitle": "h1",
+        "detailDescription": ".video-description, .desc, .entry-content p",
+        "detailThumbnail": "video[poster], meta[property='og:image'], img.video-img, img",
+        "player": "video, iframe",
+        "videoSource": "video source[src], source[type='video/mp4'], video[src]",
+        "videoSourceAttr": "src",
+        "relatedItems": ".related article"
+      },
+      "contentPolicy": {
+        "isAuthorizedPublicSource": true,
+        "rightsStatus": "Public Web Feeds",
+        "termsUrl": "https://www.masa49.nl/disclaimer",
+        "privacyPolicyUrl": "https://www.masa49.nl/privacy/"
+      }
+    },
+    {
+      "id": "fsiblogxx",
+      "name": "FSIBlog Media",
+      "enabled": true,
+      "baseUrl": "https://www.fsiblogxx.com",
+      "adapter": "html_selector",
+      "capabilities": [
+        "HOME",
+        "SEARCH",
+        "DETAILS",
+        "STREAM"
+      ],
+      "icon": "https://www.fsiblogxx.com/wp-content/uploads/2020/07/fsiblog-logo.png",
+      "description": "Public community video blog and streaming media",
+      "navigation": {
+        "home": "/",
+        "search": "/?s={query}",
+        "page": "/page/{page}/"
+      },
+      "selectors": {
+        "item": "article, div.post, div.item",
+        "title": "h2.entry-title a, h2 a, a.entry-title, a",
+        "thumbnail": "img.attachment-medium, img",
+        "thumbnailAttr": "src",
+        "detailUrl": "h2.entry-title a, h2 a, a",
+        "duration": ".duration, .time",
+        "detailTitle": "h1.entry-title, h1",
+        "detailDescription": ".entry-content p, .post-content",
+        "detailThumbnail": "meta[property='og:image'], img",
+        "player": "iframe[src*='player']",
+        "videoSource": "video source[src], video[src]",
+        "videoSourceAttr": "src"
+      },
+      "contentPolicy": {
+        "isAuthorizedPublicSource": true,
+        "rightsStatus": "Public Aggregation Index",
+        "termsUrl": "https://www.fsiblogxx.com/terms/",
+        "privacyPolicyUrl": "https://www.fsiblogxx.com/privacy/"
+      }
+    },
+    {
+      "id": "masahub2",
+      "name": "MasaHub2",
+      "enabled": true,
+      "baseUrl": "https://masahub2.com",
+      "adapter": "html_selector",
+      "capabilities": [
+        "HOME",
+        "SEARCH",
+        "DETAILS",
+        "STREAM"
+      ],
+      "icon": "https://masahub2.com/favicon.ico",
+      "description": "Public video directory and media streaming index",
+      "navigation": {
+        "home": "/",
+        "search": "/?s={query}",
+        "page": "/page/{page}/"
+      },
+      "selectors": {
+        "item": "article.vcard, article, div.item, div.post",
+        "title": "h3.vtitle, h2 a, .video-title, a",
+        "thumbnail": ".thumb, img",
+        "thumbnailAttr": "style",
+        "detailUrl": "a",
+        "duration": "span.dur, .badge-duration",
+        "detailTitle": "h1",
+        "detailDescription": ".entry-content p, .video-details",
+        "detailThumbnail": "video[poster], meta[property='og:image'], img",
+        "player": "video, iframe",
+        "videoSource": "video source[src], source[type='video/mp4'], video[src]",
+        "videoSourceAttr": "src"
+      },
+      "contentPolicy": {
+        "isAuthorizedPublicSource": true,
+        "rightsStatus": "Public Web Feeds",
+        "termsUrl": "https://masahub2.com/terms",
+        "privacyPolicyUrl": "https://masahub2.com/privacy"
+      }
+    },
+    {
+      "id": "aagmaal",
+      "name": "AagMaal",
+      "enabled": true,
+      "baseUrl": "https://aagmaal.com",
+      "adapter": "html_selector",
+      "capabilities": [
+        "HOME",
+        "SEARCH",
+        "DETAILS",
+        "STREAM"
+      ],
+      "icon": "https://aagmaal.com/favicon.ico",
+      "description": "Public Indian web series and short film index",
+      "navigation": {
+        "home": "/",
+        "search": "/?s={query}",
+        "page": "/page/{page}/"
+      },
+      "selectors": {
+        "item": "article.post, div.post, article",
+        "title": "h2.entry-title a, h2 a, a[title]",
+        "thumbnail": "img",
+        "thumbnailAttr": "src",
+        "detailUrl": "a[href*='aagmaal.com/']",
+        "duration": ".duration",
+        "detailTitle": "h1.entry-title, h1",
+        "detailDescription": ".entry-content p, .video-details",
+        "detailThumbnail": "meta[property='og:image'], img",
+        "player": "iframe, video",
+        "videoSource": "video source[src], a[href*='.mp4'], iframe[src]",
+        "videoSourceAttr": "src"
+      },
+      "contentPolicy": {
+        "isAuthorizedPublicSource": true,
+        "rightsStatus": "Public Index",
+        "termsUrl": "https://aagmaal.com/terms",
+        "privacyPolicyUrl": "https://aagmaal.com/privacy"
+      }
+    },
+    {
+      "id": "fry99",
+      "name": "Fry99",
+      "enabled": true,
+      "baseUrl": "https://fry99.cc",
+      "adapter": "html_selector",
+      "capabilities": [
+        "HOME",
+        "SEARCH",
+        "DETAILS",
+        "STREAM"
+      ],
+      "icon": "https://fry99.cc/favicon.ico",
+      "description": "Public streaming index (Protected by Cloudflare; solve challenge in-app to access)",
+      "navigation": {
+        "home": "/",
+        "search": "/?s={query}",
+        "page": "/page/{page}/"
+      },
+      "selectors": {
+        "item": "article.post, div.post, article",
+        "title": "h2.entry-title a, h2 a, a.entry-title",
+        "thumbnail": "img.attachment-post-thumbnail, img",
+        "thumbnailAttr": "src",
+        "detailUrl": "a.entry-featured-image-url, h2.entry-title a, a",
+        "duration": ".duration, .time",
+        "detailTitle": "h1.entry-title, h1",
+        "detailDescription": ".entry-content p, .entry-content",
+        "detailThumbnail": "img.attachment-post-thumbnail, meta[property='og:image']",
+        "player": "iframe, video",
+        "videoSource": "video source[src], iframe[src]",
+        "videoSourceAttr": "src",
+        "relatedItems": ".related-posts article, .related article"
+      },
+      "contentPolicy": {
+        "isAuthorizedPublicSource": true,
+        "rightsStatus": "Cloudflare Protected Public Index",
+        "termsUrl": "https://fry99.cc/terms",
+        "privacyPolicyUrl": "https://fry99.cc/privacy"
+      }
+    },
+    {
+      "id": "public_domain_archive",
+      "name": "Public Domain Film Archive",
+      "enabled": true,
+      "baseUrl": "https://commondatastorage.googleapis.com",
+      "adapter": "json_api",
+      "capabilities": [
+        "HOME",
+        "DETAILS",
+        "STREAM",
+        "DOWNLOAD"
+      ],
+      "icon": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+      "description": "Verified open-access public domain educational and open-source media",
+      "contentPolicy": {
+        "isAuthorizedPublicSource": true,
+        "rightsStatus": "Creative Commons Attribution / Public Domain",
+        "termsUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "privacyPolicyUrl": "https://creativecommons.org/privacy"
+      }
+    },
+    {
+      "id": "webxseries",
+      "name": "WebXSeries",
+      "enabled": true,
+      "baseUrl": "https://webxseries.hot",
+      "adapter": "html_selector",
+      "capabilities": [
+        "HOME",
+        "CATEGORY",
+        "SEARCH",
+        "DETAILS",
+        "STREAM",
+        "DOWNLOAD"
+      ],
+      "icon": "https://webxseries.hot/wp-content/uploads/2026/02/cropped-favicon-192x192.png",
+      "description": "Public adult web series index and media streams",
+      "navigation": {
+        "home": "/",
+        "search": "/?s={query}",
+        "page": "/page/{page}/",
+        "categories": "/hot-web-series/"
+      },
+      "selectors": {
+        "item": "a.video",
+        "title": "h2.vtitle, a[title]",
+        "thumbnail": "a.video",
+        "thumbnailAttr": "data-bg",
+        "detailUrl": "a.video",
+        "duration": "span.time",
+        "detailTitle": "h1",
+        "detailDescription": ".entry-content p, .video-details, p",
+        "detailThumbnail": "video[poster], meta[property='og:image']",
+        "player": "video",
+        "videoSource": "video source[src], video[src]",
+        "videoSourceAttr": "src",
+        "relatedItems": "a.video"
+      },
+      "contentPolicy": {
+        "isAuthorizedPublicSource": true,
+        "rightsStatus": "Public Web Index",
+        "termsUrl": "https://webxseries.hot/terms/",
+        "privacyPolicyUrl": "https://webxseries.hot/privacy/"
+      }
+    }
+  ]
+}

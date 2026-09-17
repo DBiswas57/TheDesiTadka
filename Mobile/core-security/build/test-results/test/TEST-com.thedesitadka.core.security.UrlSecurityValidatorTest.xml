@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.thedesitadka.core.security.UrlSecurityValidatorTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-09-16T12:35:02" hostname="HTANVIP" time="0.271">
+  <properties/>
+  <testcase name="testRejectInsecureHttp" classname="com.thedesitadka.core.security.UrlSecurityValidatorTest" time="0.001"/>
+  <testcase name="testRejectPrivateRfc1918AndLinkLocal" classname="com.thedesitadka.core.security.UrlSecurityValidatorTest" time="0.001"/>
+  <testcase name="testRejectLoopbackAndLocalhost" classname="com.thedesitadka.core.security.UrlSecurityValidatorTest" time="0.001"/>
+  <testcase name="testRejectLocalTlds" classname="com.thedesitadka.core.security.UrlSecurityValidatorTest" time="0.001"/>
+  <testcase name="testValidPublicHttpsUrls" classname="com.thedesitadka.core.security.UrlSecurityValidatorTest" time="0.266"/>
+  <system-out><![CDATA[[WARN][TheDesiTadka][UrlSecurityValidator] Rejected non-HTTPS scheme: http in http://example.com/manifest.json
+[WARN][TheDesiTadka][UrlSecurityValidator] Rejected non-HTTPS scheme: ftp in ftp://example.com/file
+[WARN][TheDesiTadka][UrlSecurityValidator] Rejected non-HTTPS scheme: file in file:///etc/passwd
+]]></system-out>
+  <system-err><![CDATA[[ERROR][TheDesiTadka][UrlSecurityValidator] SSRF attempt detected on private IP: 10.0.0.1
+[ERROR][TheDesiTadka][UrlSecurityValidator] SSRF attempt detected on private IP: 192.168.1.1
+[ERROR][TheDesiTadka][UrlSecurityValidator] SSRF attempt detected on private IP: 172.16.0.1
+[ERROR][TheDesiTadka][UrlSecurityValidator] SSRF attempt detected on blocked host: 169.254.169.254
+[ERROR][TheDesiTadka][UrlSecurityValidator] SSRF attempt detected on blocked host: localhost
+[ERROR][TheDesiTadka][UrlSecurityValidator] SSRF attempt detected on blocked host: 127.0.0.1
+[ERROR][TheDesiTadka][UrlSecurityValidator] SSRF attempt detected on blocked host: 0.0.0.0
+[ERROR][TheDesiTadka][UrlSecurityValidator] SSRF attempt detected on local domain: gateway.local
+[ERROR][TheDesiTadka][UrlSecurityValidator] SSRF attempt detected on local domain: server.lan
+[ERROR][TheDesiTadka][UrlSecurityValidator] SSRF attempt detected on local domain: metadata.internal
+]]></system-err>
+</testsuite>

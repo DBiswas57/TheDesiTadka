@@ -1,0 +1,22 @@
+[
+    {
+        "merged": "C:\\Users\\LearnersYT\\.gradle\\daemon\\8.9\\com.thedesitadka.app-debug-73:\\drawable_ic_launcher.png.flat",
+        "source": "C:\\Users\\LearnersYT\\.gradle\\daemon\\8.9\\com.thedesitadka.app-main-75:\\drawable\\ic_launcher.png"
+    },
+    {
+        "merged": "com.thedesitadka.app-debug-73:/xml_file_paths.xml.flat",
+        "source": "com.thedesitadka.app-main-75:/xml/file_paths.xml"
+    },
+    {
+        "merged": "C:\\Users\\LearnersYT\\.gradle\\daemon\\8.9\\com.thedesitadka.app-debug-73:\\drawable_app_logo.png.flat",
+        "source": "C:\\Users\\LearnersYT\\.gradle\\daemon\\8.9\\com.thedesitadka.app-main-75:\\drawable\\app_logo.png"
+    },
+    {
+        "merged": "C:\\Users\\LearnersYT\\.gradle\\daemon\\8.9\\com.thedesitadka.app-debug-73:\\drawable_ic_launcher_round.png.flat",
+        "source": "C:\\Users\\LearnersYT\\.gradle\\daemon\\8.9\\com.thedesitadka.app-main-75:\\drawable\\ic_launcher_round.png"
+    },
+    {
+        "merged": "C:\\Users\\LearnersYT\\.gradle\\daemon\\8.9\\com.thedesitadka.app-debug-73:\\xml_network_security_config.xml.flat",
+        "source": "C:\\Users\\LearnersYT\\.gradle\\daemon\\8.9\\com.thedesitadka.app-main-75:\\xml\\network_security_config.xml"
+    }
+]

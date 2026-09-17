@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.thedesitadka.provider.HtmlSelectorAdapterTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-09-17T09:19:36" hostname="HTANVIP" time="2.176">
+  <properties/>
+  <testcase name="testIxiPornSingleVideoContentDetection" classname="com.thedesitadka.provider.HtmlSelectorAdapterTest" time="0.248"/>
+  <testcase name="testParseListingHtmlDirectly" classname="com.thedesitadka.provider.HtmlSelectorAdapterTest" time="0.01"/>
+  <testcase name="testHitmaalSelectors" classname="com.thedesitadka.provider.HtmlSelectorAdapterTest" time="0.023"/>
+  <testcase name="testFsiblogThumbnailExtractionAndVideoOnlyFiltering" classname="com.thedesitadka.provider.HtmlSelectorAdapterTest" time="0.007"/>
+  <testcase name="testDesiSexSingleVideoAndSearchPagination" classname="com.thedesitadka.provider.HtmlSelectorAdapterTest" time="0.008"/>
+  <testcase name="testPornX11ListingAndLuluStreamSourceExtraction" classname="com.thedesitadka.provider.HtmlSelectorAdapterTest" time="1.851"/>
+  <testcase name="testIndianSexStories3ListingAndFlashvarsStreamExtraction" classname="com.thedesitadka.provider.HtmlSelectorAdapterTest" time="0.008"/>
+  <testcase name="testKamaBabaSingleVideoContentDetection" classname="com.thedesitadka.provider.HtmlSelectorAdapterTest" time="0.005"/>
+  <testcase name="testMasaHub2BackgroundThumbnailExtraction" classname="com.thedesitadka.provider.HtmlSelectorAdapterTest" time="0.001"/>
+  <testcase name="testUncutMazaCarouselExclusionAndCleanTubeExtraction" classname="com.thedesitadka.provider.HtmlSelectorAdapterTest" time="0.005"/>
+  <testcase name="testFry99ThumbnailExtractionAndLogoRejection" classname="com.thedesitadka.provider.HtmlSelectorAdapterTest" time="0.004"/>
+  <testcase name="testParseWebXSeriesSelectors" classname="com.thedesitadka.provider.HtmlSelectorAdapterTest" time="0.0"/>
+  <testcase name="testAagMaalSingleVideoContentDetection" classname="com.thedesitadka.provider.HtmlSelectorAdapterTest" time="0.003"/>
+  <system-out><![CDATA[[DEBUG][TheDesiTadka][Network] --> GET https://luluvdo.com/e/mkzpihb53g51
+[DEBUG][TheDesiTadka][Network] <-- 200  (1271.9552 ms) for https://luluvdo.com/e/mkzpihb53g51
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
