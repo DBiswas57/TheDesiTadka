@@ -45,7 +45,7 @@ class AppContainer(val context: Context) {
     }
 
     val dashboardRepository: DashboardRepository by lazy {
-        DashboardRepository(providerEngine)
+        DashboardRepository(providerEngine, preferenceStore)
     }
 
     val adConfigRepository: AdConfigRepository by lazy {

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -19,6 +20,8 @@ class PreferenceStore(private val context: Context) {
         val TELEMETRY_ENABLED = booleanPreferencesKey("telemetry_enabled")
         val DEFAULT_QUALITY = stringPreferencesKey("default_quality")
         val REMOTE_CONFIG_URL = stringPreferencesKey("remote_config_url")
+        val HOME_SELECTION_COMPLETED = booleanPreferencesKey("home_selection_completed")
+        val SELECTED_HOME_PROVIDERS = stringSetPreferencesKey("selected_home_providers")
 
         const val DEFAULT_CONFIG_URL = "https://raw.githubusercontent.com/DBiswas57/TheDesiTadka/main/config-tools/signed-manifest.json"
     }
@@ -28,6 +31,8 @@ class PreferenceStore(private val context: Context) {
     val telemetryFlow: Flow<Boolean> = context.dataStore.data.map { it[TELEMETRY_ENABLED] ?: false }
     val qualityFlow: Flow<String> = context.dataStore.data.map { it[DEFAULT_QUALITY] ?: "auto" }
     val remoteConfigUrlFlow: Flow<String> = context.dataStore.data.map { it[REMOTE_CONFIG_URL] ?: DEFAULT_CONFIG_URL }
+    val homeSelectionCompletedFlow: Flow<Boolean> = context.dataStore.data.map { it[HOME_SELECTION_COMPLETED] ?: false }
+    val selectedHomeProvidersFlow: Flow<Set<String>> = context.dataStore.data.map { it[SELECTED_HOME_PROVIDERS] ?: emptySet() }
 
     suspend fun setThemeMode(mode: String) {
         context.dataStore.edit { it[THEME_MODE] = mode }
@@ -49,5 +54,22 @@ class PreferenceStore(private val context: Context) {
 
     suspend fun setRemoteConfigUrl(url: String) {
         context.dataStore.edit { it[REMOTE_CONFIG_URL] = url }
+    }
+
+    suspend fun isHomeSelectionCompleted(): Boolean = homeSelectionCompletedFlow.first()
+
+    suspend fun getSelectedHomeProviders(): Set<String> = selectedHomeProvidersFlow.first()
+
+    suspend fun saveSelectedHomeProviders(providerIds: Set<String>) {
+        context.dataStore.edit {
+            it[SELECTED_HOME_PROVIDERS] = providerIds
+            it[HOME_SELECTION_COMPLETED] = true
+        }
+    }
+
+    suspend fun resetHomeSelection() {
+        context.dataStore.edit {
+            it[HOME_SELECTION_COMPLETED] = false
+        }
     }
 }

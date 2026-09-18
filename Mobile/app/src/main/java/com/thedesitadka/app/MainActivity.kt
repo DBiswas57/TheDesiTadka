@@ -50,6 +50,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -78,6 +79,7 @@ import com.thedesitadka.app.ui.screens.DetailsScreen
 import com.thedesitadka.app.ui.screens.DiagnosticsScreen
 import com.thedesitadka.app.ui.screens.DownloadsScreen
 import com.thedesitadka.app.ui.screens.HomeScreen
+import com.thedesitadka.app.ui.screens.HomeSourceSelectionScreen
 import com.thedesitadka.app.ui.screens.PlayerScreen
 import com.thedesitadka.app.ui.screens.ProviderScreen
 import com.thedesitadka.app.ui.screens.SearchScreen
@@ -412,6 +414,27 @@ private fun UpdateGateScreen(container: AppContainer) {
 
 @Composable
 private fun AppNavigationContent(container: AppContainer) {
+    val isHomeSelectionCompleted by container.preferenceStore.homeSelectionCompletedFlow.collectAsState(initial = true)
+    var showSelectionScreen by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isHomeSelectionCompleted) {
+        if (!isHomeSelectionCompleted) {
+            showSelectionScreen = true
+        }
+    }
+
+    if (showSelectionScreen) {
+        HomeSourceSelectionScreen(
+            providerEngine = container.providerEngine,
+            preferenceStore = container.preferenceStore,
+            onCompleted = {
+                showSelectionScreen = false
+                container.dashboardRepository.clearCacheAndReload()
+            }
+        )
+        return
+    }
+
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route

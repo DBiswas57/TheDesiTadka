@@ -1,8 +1,14 @@
 package com.thedesitadka.app.ui.screens
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -84,8 +90,6 @@ import com.thedesitadka.app.monetization.MonetizationManager
 import com.thedesitadka.app.monetization.ui.AdSlotView
 import com.thedesitadka.provider.ProviderEngine
 import android.app.Activity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.text.style.TextAlign
@@ -114,6 +118,47 @@ fun DetailsScreen(
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             reloadTrigger++
+        }
+    }
+
+    var pendingDownloadAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            pendingDownloadAction?.invoke()
+            pendingDownloadAction = null
+        } else {
+            Toast.makeText(context, "Permission is required to download media", Toast.LENGTH_SHORT).show()
+            pendingDownloadAction = null
+        }
+    }
+
+    val requestPermissionAndDownload: (() -> Unit) -> Unit = { action ->
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+            val granted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+            if (granted) {
+                action()
+            } else {
+                pendingDownloadAction = action
+                permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val granted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+            if (granted) {
+                action()
+            } else {
+                pendingDownloadAction = action
+                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        } else {
+            action()
         }
     }
 
@@ -336,30 +381,14 @@ fun DetailsScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 if (!isCollection) {
-                    val triggerDownload: () -> Unit = {
+                    val executeDownload: () -> Unit = {
                         coroutineScope.launch {
-                            // If media has already been resolved and is playable
-                            if (resolutionResult != null && resolutionResult!!.isPlayable) {
-                                val mediaSourceToDownload = resolutionResult!!.toMediaSource()
-                                try {
-                                    val result = downloadRepository.enqueueAuthorizedDownload(
-                                        resolvedItem,
-                                        mediaSourceToDownload
-                                    )
-                                    if (result.isSuccess) {
-                                        Toast.makeText(context, "Added to queue", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        val err = result.exceptionOrNull()?.message ?: "Download unavailable"
-                                        Toast.makeText(context, "Download failed: $err", Toast.LENGTH_SHORT).show()
-                                    }
-                                } catch (e: Exception) {
-                                    com.thedesitadka.core.security.StreamHubLogger.e("DetailsScreen", "Download action error: ${e.message}")
-                                    Toast.makeText(context, "Download failed: ${e.message ?: "Error"}", Toast.LENGTH_SHORT).show()
-                                }
-                            } else {
-                                // If media is not yet resolved, resolve link now using the same process as Play
-                                isDownloadResolving = true
-                                try {
+                            Toast.makeText(context, "Resolving download…", Toast.LENGTH_SHORT).show()
+                            isDownloadResolving = true
+                            try {
+                                val mediaSourceToDownload: MediaSource? = if (resolutionResult != null && resolutionResult!!.isPlayable) {
+                                    resolutionResult!!.toMediaSource()
+                                } else {
                                     val mediaResult = adapter?.getPlayableMedia(videoItem.detailUrl)
                                     if (mediaResult != null && mediaResult.isSuccess) {
                                         val sources = mediaResult.getOrThrow()
@@ -378,33 +407,37 @@ fun DetailsScreen(
                                             )
                                             resolutionResult = res
                                             mediaResolutionState = res.state
-
-                                            val mediaSourceToDownload = res.toMediaSource()
-                                            val enqueueResult = downloadRepository.enqueueAuthorizedDownload(
-                                                resolvedItem,
-                                                mediaSourceToDownload
-                                            )
-                                            if (enqueueResult.isSuccess) {
-                                                Toast.makeText(context, "Added to queue", Toast.LENGTH_SHORT).show()
-                                            } else {
-                                                val err = enqueueResult.exceptionOrNull()?.message ?: "Download unavailable"
-                                                Toast.makeText(context, "Download failed: $err", Toast.LENGTH_SHORT).show()
-                                            }
-                                        } else {
-                                            Toast.makeText(context, "Download failed: No media stream", Toast.LENGTH_SHORT).show()
-                                        }
-                                    } else {
-                                        val err = mediaResult?.exceptionOrNull()?.message ?: "Download unavailable"
-                                        Toast.makeText(context, "Download failed: $err", Toast.LENGTH_SHORT).show()
-                                    }
-                                } catch (e: Exception) {
-                                    com.thedesitadka.core.security.StreamHubLogger.e("DetailsScreen", "Download resolution error: ${e.message}")
-                                    Toast.makeText(context, "Download failed: ${e.message ?: "Error"}", Toast.LENGTH_SHORT).show()
-                                } finally {
-                                    isDownloadResolving = false
+                                            res.toMediaSource()
+                                        } else null
+                                    } else null
                                 }
+
+                                if (mediaSourceToDownload == null) {
+                                    Toast.makeText(context, "Download failed: No downloadable stream found", Toast.LENGTH_SHORT).show()
+                                    return@launch
+                                }
+
+                                val result = downloadRepository.enqueueAuthorizedDownload(
+                                    resolvedItem,
+                                    mediaSourceToDownload
+                                )
+                                if (result.isSuccess) {
+                                    Toast.makeText(context, "Download started", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    val err = result.exceptionOrNull()?.message ?: "Download unavailable"
+                                    Toast.makeText(context, "Download failed: $err", Toast.LENGTH_SHORT).show()
+                                }
+                            } catch (e: Exception) {
+                                com.thedesitadka.core.security.StreamHubLogger.e("DetailsScreen", "Download action error: ${e.message}")
+                                Toast.makeText(context, "Download failed: ${e.message ?: "Error"}", Toast.LENGTH_SHORT).show()
+                            } finally {
+                                isDownloadResolving = false
                             }
                         }
+                    }
+
+                    val triggerDownload: () -> Unit = {
+                        requestPermissionAndDownload(executeDownload)
                     }
 
                     // Action Buttons Row

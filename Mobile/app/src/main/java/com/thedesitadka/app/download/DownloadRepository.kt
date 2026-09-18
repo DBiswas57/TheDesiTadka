@@ -104,6 +104,7 @@ class DownloadRepository(
                 mimeType = mediaSource.mimeType,
                 status = DownloadStatus.QUEUED
             )
+            downloadDao.insertDownload(record)
             val effectiveWifiOnly = wifiOnly ?: preferenceStore?.isWifiOnly() ?: true
             startWorker(downloadId, rawDownloadUrl, videoItem.title, videoItem.providerId, effectiveWifiOnly)
             StreamHubLogger.log(

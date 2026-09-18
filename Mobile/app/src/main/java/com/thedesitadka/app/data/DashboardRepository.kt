@@ -1,5 +1,6 @@
 package com.thedesitadka.app.data
 
+import com.thedesitadka.app.storage.PreferenceStore
 import com.thedesitadka.core.model.ProviderInfo
 import com.thedesitadka.core.model.VideoItem
 import com.thedesitadka.core.security.StreamHubLogger
@@ -35,6 +36,7 @@ data class DashboardState(
 
 class DashboardRepository(
     private val providerEngine: ProviderEngine,
+    private val preferenceStore: PreferenceStore? = null,
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 ) {
 
@@ -85,6 +87,16 @@ class DashboardRepository(
         refreshInBackground(categoryId, forceRefresh = true)
     }
 
+    fun clearCacheAndReload() {
+        cache.clear()
+        val categories = stateFlows.keys().toList()
+        if (categories.isEmpty()) {
+            refresh("all")
+        } else {
+            categories.forEach { refresh(it) }
+        }
+    }
+
     private fun refreshInBackground(categoryId: String, forceRefresh: Boolean = false) {
         scope.launch {
             mutex.withLock {
@@ -119,11 +131,18 @@ class DashboardRepository(
         flow: MutableStateFlow<DashboardState>
     ) {
         val allActiveProviders = providerEngine.getActiveProviders()
+        val selectedHomeProviders = preferenceStore?.getSelectedHomeProviders() ?: emptySet()
+        val candidateProviders = if (selectedHomeProviders.isNotEmpty()) {
+            allActiveProviders.filter { it.id in selectedHomeProviders }
+        } else {
+            allActiveProviders
+        }
+
         val providersToQuery = when (categoryId) {
-            "free" -> allActiveProviders.filter { it.id != "premium_catalog" }
-            "premium" -> allActiveProviders.filter { it.id == "premium_catalog" || it.capabilities.any { c -> c.name == "PREVIEW" } }
-            else -> allActiveProviders
-        }.ifEmpty { allActiveProviders }
+            "free" -> candidateProviders.filter { it.id != "premium_catalog" }
+            "premium" -> candidateProviders.filter { it.id == "premium_catalog" || it.capabilities.any { c -> c.name == "PREVIEW" } }
+            else -> candidateProviders
+        }.ifEmpty { candidateProviders }
 
         val statuses = ConcurrentHashMap<String, ProviderFetchStatus>()
         providersToQuery.forEach { statuses[it.id] = ProviderFetchStatus.LOADING }
