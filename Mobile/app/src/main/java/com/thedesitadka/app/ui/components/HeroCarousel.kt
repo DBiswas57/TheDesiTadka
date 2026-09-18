@@ -2,6 +2,7 @@ package com.thedesitadka.app.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
@@ -40,110 +44,155 @@ import com.thedesitadka.core.model.VideoItem
 
 @Composable
 fun HeroCarousel(
-    featuredItem: VideoItem?,
+    items: List<VideoItem>,
     onWatchClick: (VideoItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (featuredItem == null) return
+    if (items.isEmpty()) return
 
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(230.dp)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable { onWatchClick(featuredItem) },
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (featuredItem.thumbnailUrl.isNotBlank()) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(featuredItem.thumbnailUrl)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
+    val pagerState = rememberPagerState(pageCount = { items.size })
 
-            // Cinematic gradient overlay
-            Box(
+    Column(modifier = modifier.fillMaxWidth()) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(230.dp)
+        ) { page ->
+            val featuredItem = items[page]
+            Card(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Black.copy(alpha = 0.2f),
-                                Color.Black.copy(alpha = 0.6f),
-                                Color.Black.copy(alpha = 0.95f)
-                            )
-                        )
-                    )
-            )
-
-            // Content overlay
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(16.dp)
+                    .padding(horizontal = 8.dp)
+                    .clickable { onWatchClick(featuredItem) },
+                shape = RoundedCornerShape(8.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (featuredItem.thumbnailUrl.isNotBlank()) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(featuredItem.thumbnailUrl)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+
+                    // Cinematic gradient overlay
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(MaterialTheme.colorScheme.primary)
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = featuredItem.providerId.uppercase(),
-                            color = Color.Black,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.Black.copy(alpha = 0.15f),
+                                        Color.Black.copy(alpha = 0.6f),
+                                        Color.Black.copy(alpha = 0.95f)
+                                    )
+                                )
+                            )
+                    )
 
-                    featuredItem.category?.let { cat ->
-                        Spacer(modifier = Modifier.width(8.dp))
+                    // Content overlay
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(14.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(MaterialTheme.colorScheme.primary)
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = featuredItem.providerId.uppercase(),
+                                    color = Color.Black,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+
+                            featuredItem.category?.let { cat ->
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = cat,
+                                    color = Color.White.copy(alpha = 0.85f),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
                         Text(
-                            text = cat,
-                            color = Color.White.copy(alpha = 0.8f),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
+                            text = featuredItem.title,
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
                         )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Button(
+                            onClick = { onWatchClick(featuredItem) },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                            shape = RoundedCornerShape(6.dp),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = null,
+                                tint = Color.Black,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(text = "Watch Now", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        }
                     }
                 }
+            }
+        }
 
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = featuredItem.title,
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Button(
-                    onClick = { onWatchClick(featuredItem) },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    shape = RoundedCornerShape(8.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 6.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = null,
-                        tint = Color.Black,
-                        modifier = Modifier.size(18.dp)
+        // Indicator dots if multiple items
+        if (items.size > 1) {
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                repeat(items.size) { index ->
+                    val isSelected = pagerState.currentPage == index
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 3.dp)
+                            .clip(CircleShape)
+                            .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.3f))
+                            .size(if (isSelected) 6.dp else 4.dp)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = "Watch Now", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 }
             }
         }
     }
+}
+
+@Composable
+fun HeroCarousel(
+    featuredItem: VideoItem?,
+    onWatchClick: (VideoItem) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    HeroCarousel(
+        items = if (featuredItem != null) listOf(featuredItem) else emptyList(),
+        onWatchClick = onWatchClick,
+        modifier = modifier
+    )
 }

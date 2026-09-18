@@ -17,6 +17,7 @@ import com.thedesitadka.core.model.MediaSourceType
 import com.thedesitadka.core.model.ProviderCapability
 import com.thedesitadka.core.model.StreamHubError
 import com.thedesitadka.core.model.VideoItem
+import com.thedesitadka.app.storage.PreferenceStore
 import com.thedesitadka.core.security.StreamHubLogger
 import com.thedesitadka.provider.ProviderEngine
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +27,8 @@ import java.io.File
 
 class DownloadRepository(
     private val context: Context,
-    private val providerEngine: ProviderEngine
+    private val providerEngine: ProviderEngine,
+    private val preferenceStore: PreferenceStore? = null
 ) {
 
     private val downloadDao = AppDatabase.getInstance(context).downloadDao()
@@ -43,7 +45,7 @@ class DownloadRepository(
     suspend fun enqueueAuthorizedDownload(
         videoItem: VideoItem,
         mediaSource: MediaSource,
-        wifiOnly: Boolean = false
+        wifiOnly: Boolean? = null
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
             val adapter = providerEngine.getAdapter(videoItem.providerId)
@@ -102,9 +104,8 @@ class DownloadRepository(
                 mimeType = mediaSource.mimeType,
                 status = DownloadStatus.QUEUED
             )
-            downloadDao.insertDownload(record)
-
-            startWorker(downloadId, rawDownloadUrl, videoItem.title, videoItem.providerId, wifiOnly)
+            val effectiveWifiOnly = wifiOnly ?: preferenceStore?.isWifiOnly() ?: true
+            startWorker(downloadId, rawDownloadUrl, videoItem.title, videoItem.providerId, effectiveWifiOnly)
             StreamHubLogger.log(
                 StreamHubLogger.Category.DOWNLOAD,
                 "INFO",
@@ -138,6 +139,7 @@ class DownloadRepository(
                         DownloadWorker.KEY_MEDIA_URL to mediaUrl,
                         DownloadWorker.KEY_TITLE to title,
                         DownloadWorker.KEY_PROVIDER_ID to providerId,
+                        DownloadWorker.KEY_WIFI_ONLY to wifiOnly,
                         DownloadWorker.KEY_IS_PAUSED to isPaused
                     )
                 )
@@ -170,7 +172,8 @@ class DownloadRepository(
         try {
             val existing = downloadDao.getDownload(downloadId) ?: return@withContext
             downloadDao.updateDownload(existing.copy(status = DownloadStatus.QUEUED, error = null))
-            startWorker(existing.id, existing.mediaUrl, existing.title, existing.providerId)
+            val effectiveWifiOnly = preferenceStore?.isWifiOnly() ?: true
+            startWorker(existing.id, existing.mediaUrl, existing.title, existing.providerId, effectiveWifiOnly)
         } catch (e: Exception) {
             StreamHubLogger.e("DownloadRepository", "Could not resume download $downloadId: ${e.message}")
         }
@@ -186,7 +189,8 @@ class DownloadRepository(
                     retryCount = existing.retryCount + 1
                 )
             )
-            startWorker(existing.id, existing.mediaUrl, existing.title, existing.providerId)
+            val effectiveWifiOnly = preferenceStore?.isWifiOnly() ?: true
+            startWorker(existing.id, existing.mediaUrl, existing.title, existing.providerId, effectiveWifiOnly)
         } catch (e: Exception) {
             StreamHubLogger.e("DownloadRepository", "Could not retry download $downloadId: ${e.message}")
         }

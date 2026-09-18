@@ -145,11 +145,14 @@ fun DetailsScreen(
 
         detailResult?.onSuccess { detail ->
             if (currentRequestId != reqId) return@onSuccess
-            resolvedItem = if (detail.thumbnailUrl.isBlank() || isPlaceholderOrLogo(detail.thumbnailUrl)) {
-                detail.copy(thumbnailUrl = videoItem.thumbnailUrl.ifEmpty { detail.thumbnailUrl })
+            val reliableThumb = if (videoItem.thumbnailUrl.isNotBlank() && !isPlaceholderOrLogo(videoItem.thumbnailUrl)) {
+                videoItem.thumbnailUrl
+            } else if (detail.thumbnailUrl.isNotBlank() && !isPlaceholderOrLogo(detail.thumbnailUrl)) {
+                detail.thumbnailUrl
             } else {
-                detail
+                videoItem.thumbnailUrl
             }
+            resolvedItem = detail.copy(thumbnailUrl = reliableThumb)
         }
 
         // Fetch playable media sources using unified resolver
@@ -196,10 +199,7 @@ fun DetailsScreen(
         }
     }
 
-    var showStoragePermissionDialog by remember { mutableStateOf(false) }
-    var showDownloadUnavailableDialog by remember { mutableStateOf(false) }
     var isDownloadResolving by remember { mutableStateOf(false) }
-    var downloadErrorMessage by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
@@ -337,78 +337,71 @@ fun DetailsScreen(
 
                 if (!isCollection) {
                     val triggerDownload: () -> Unit = {
-                        if (!StoragePermissionHelper.hasFullStorageAccess(context)) {
-                            showStoragePermissionDialog = true
-                        } else {
-                            coroutineScope.launch {
-                                // If media has already been resolved and is playable
-                                if (resolutionResult != null && resolutionResult!!.isPlayable) {
-                                    val mediaSourceToDownload = resolutionResult!!.toMediaSource()
-                                    try {
-                                        val result = downloadRepository.enqueueAuthorizedDownload(
-                                            resolvedItem,
-                                            mediaSourceToDownload
-                                        )
-                                        if (result.isSuccess) {
-                                            Toast.makeText(context, "Download started to /Movies/TheDesiTadka", Toast.LENGTH_SHORT).show()
-                                        } else {
-                                            downloadErrorMessage = result.exceptionOrNull()?.message ?: "Download is not available for this video."
-                                            showDownloadUnavailableDialog = true
-                                        }
-                                    } catch (e: Exception) {
-                                        com.thedesitadka.core.security.StreamHubLogger.e("DetailsScreen", "Download action error: ${e.message}")
-                                        downloadErrorMessage = e.message ?: "Download is not available for this video."
-                                        showDownloadUnavailableDialog = true
+                        coroutineScope.launch {
+                            // If media has already been resolved and is playable
+                            if (resolutionResult != null && resolutionResult!!.isPlayable) {
+                                val mediaSourceToDownload = resolutionResult!!.toMediaSource()
+                                try {
+                                    val result = downloadRepository.enqueueAuthorizedDownload(
+                                        resolvedItem,
+                                        mediaSourceToDownload
+                                    )
+                                    if (result.isSuccess) {
+                                        Toast.makeText(context, "Added to queue", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        val err = result.exceptionOrNull()?.message ?: "Download unavailable"
+                                        Toast.makeText(context, "Download failed: $err", Toast.LENGTH_SHORT).show()
                                     }
-                                } else {
-                                    // If media is not yet resolved, resolve link now using the same process as Play
-                                    isDownloadResolving = true
-                                    try {
-                                        val mediaResult = adapter?.getPlayableMedia(videoItem.detailUrl)
-                                        if (mediaResult != null && mediaResult.isSuccess) {
-                                            val sources = mediaResult.getOrThrow()
-                                            if (sources.isNotEmpty()) {
-                                                mediaSources.clear()
-                                                mediaSources.addAll(sources)
-                                                isLoadingMedia = false
-                                                val primary = sources.first()
-                                                val isProviderDownloadAuthorized = adapter?.hasCapability(ProviderCapability.DOWNLOAD) == true
-                                                val res = MediaResolutionResult.fromMediaSource(
-                                                    videoId = videoItem.id,
-                                                    providerId = videoItem.providerId,
-                                                    source = primary,
-                                                    isProviderDownloadAuthorized = isProviderDownloadAuthorized,
-                                                    title = resolvedItem.title
-                                                )
-                                                resolutionResult = res
-                                                mediaResolutionState = res.state
+                                } catch (e: Exception) {
+                                    com.thedesitadka.core.security.StreamHubLogger.e("DetailsScreen", "Download action error: ${e.message}")
+                                    Toast.makeText(context, "Download failed: ${e.message ?: "Error"}", Toast.LENGTH_SHORT).show()
+                                }
+                            } else {
+                                // If media is not yet resolved, resolve link now using the same process as Play
+                                isDownloadResolving = true
+                                try {
+                                    val mediaResult = adapter?.getPlayableMedia(videoItem.detailUrl)
+                                    if (mediaResult != null && mediaResult.isSuccess) {
+                                        val sources = mediaResult.getOrThrow()
+                                        if (sources.isNotEmpty()) {
+                                            mediaSources.clear()
+                                            mediaSources.addAll(sources)
+                                            isLoadingMedia = false
+                                            val primary = sources.first()
+                                            val isProviderDownloadAuthorized = adapter?.hasCapability(ProviderCapability.DOWNLOAD) == true
+                                            val res = MediaResolutionResult.fromMediaSource(
+                                                videoId = videoItem.id,
+                                                providerId = videoItem.providerId,
+                                                source = primary,
+                                                isProviderDownloadAuthorized = isProviderDownloadAuthorized,
+                                                title = resolvedItem.title
+                                            )
+                                            resolutionResult = res
+                                            mediaResolutionState = res.state
 
-                                                val mediaSourceToDownload = res.toMediaSource()
-                                                val enqueueResult = downloadRepository.enqueueAuthorizedDownload(
-                                                    resolvedItem,
-                                                    mediaSourceToDownload
-                                                )
-                                                if (enqueueResult.isSuccess) {
-                                                    Toast.makeText(context, "Download started to /Movies/TheDesiTadka", Toast.LENGTH_SHORT).show()
-                                                } else {
-                                                    downloadErrorMessage = enqueueResult.exceptionOrNull()?.message ?: "Download is not available for this video."
-                                                    showDownloadUnavailableDialog = true
-                                                }
+                                            val mediaSourceToDownload = res.toMediaSource()
+                                            val enqueueResult = downloadRepository.enqueueAuthorizedDownload(
+                                                resolvedItem,
+                                                mediaSourceToDownload
+                                            )
+                                            if (enqueueResult.isSuccess) {
+                                                Toast.makeText(context, "Added to queue", Toast.LENGTH_SHORT).show()
                                             } else {
-                                                downloadErrorMessage = "Download is not available for this video."
-                                                showDownloadUnavailableDialog = true
+                                                val err = enqueueResult.exceptionOrNull()?.message ?: "Download unavailable"
+                                                Toast.makeText(context, "Download failed: $err", Toast.LENGTH_SHORT).show()
                                             }
                                         } else {
-                                            downloadErrorMessage = mediaResult?.exceptionOrNull()?.message ?: "Download is not available for this video."
-                                            showDownloadUnavailableDialog = true
+                                            Toast.makeText(context, "Download failed: No media stream", Toast.LENGTH_SHORT).show()
                                         }
-                                    } catch (e: Exception) {
-                                        com.thedesitadka.core.security.StreamHubLogger.e("DetailsScreen", "Download resolution error: ${e.message}")
-                                        downloadErrorMessage = e.message ?: "Download is not available for this video."
-                                        showDownloadUnavailableDialog = true
-                                    } finally {
-                                        isDownloadResolving = false
+                                    } else {
+                                        val err = mediaResult?.exceptionOrNull()?.message ?: "Download unavailable"
+                                        Toast.makeText(context, "Download failed: $err", Toast.LENGTH_SHORT).show()
                                     }
+                                } catch (e: Exception) {
+                                    com.thedesitadka.core.security.StreamHubLogger.e("DetailsScreen", "Download resolution error: ${e.message}")
+                                    Toast.makeText(context, "Download failed: ${e.message ?: "Error"}", Toast.LENGTH_SHORT).show()
+                                } finally {
+                                    isDownloadResolving = false
                                 }
                             }
                         }
@@ -498,89 +491,6 @@ fun DetailsScreen(
                                 tint = if (isFavorite) Color.Red else Color.White
                             )
                         }
-                    }
-
-                    if (showDownloadUnavailableDialog) {
-                        AlertDialog(
-                            onDismissRequest = { showDownloadUnavailableDialog = false },
-                            title = { Text("Download Unavailable", fontWeight = FontWeight.Bold, color = Color.White) },
-                            text = {
-                                Text(
-                                    downloadErrorMessage ?: "Download is not available for this video.",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            },
-                            confirmButton = {
-                                Button(
-                                    onClick = { showDownloadUnavailableDialog = false },
-                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                                ) {
-                                    Text("OK", color = Color.Black, fontWeight = FontWeight.Bold)
-                                }
-                            }
-                        )
-                    }
-
-                    if (showStoragePermissionDialog) {
-                        AlertDialog(
-                            onDismissRequest = { showStoragePermissionDialog = false },
-                            title = { Text("Storage Access Permission", fontWeight = FontWeight.Bold, color = Color.White) },
-                            text = {
-                                Text(
-                                    "TheDesiTadka saves videos directly to your device storage (/Movies/TheDesiTadka/) like 1DM so they appear in your Gallery and file manager.\n\nGrant Storage Permission for 1DM-style direct downloads, or proceed with standard download.",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            },
-                            confirmButton = {
-                                Button(
-                                    onClick = {
-                                        showStoragePermissionDialog = false
-                                        StoragePermissionHelper.requestFullStorageAccess(context)
-                                    },
-                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                                ) {
-                                    Text("Grant Access", color = Color.Black, fontWeight = FontWeight.Bold)
-                                }
-                            },
-                            dismissButton = {
-                                TextButton(
-                                    onClick = {
-                                        showStoragePermissionDialog = false
-                                        triggerDownload()
-                                    }
-                                ) {
-                                    Text("Download Now", color = MaterialTheme.colorScheme.primary)
-                                }
-                            }
-                        )
-                    }
-
-                    // Favorite Button
-                    OutlinedButton(
-                        onClick = {
-                            coroutineScope.launch {
-                                if (isFavorite) {
-                                    favoriteDao.removeFavorite(resolvedItem.id)
-                                } else {
-                                    favoriteDao.addFavorite(
-                                        FavoriteEntity(
-                                            id = resolvedItem.id,
-                                            providerId = resolvedItem.providerId,
-                                            title = resolvedItem.title,
-                                            thumbnailUrl = resolvedItem.thumbnailUrl,
-                                            detailUrl = resolvedItem.detailUrl
-                                        )
-                                    )
-                                }
-                            }
-                        },
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Icon(
-                            imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = "Favorite",
-                            tint = if (isFavorite) Color.Red else Color.White
-                        )
                     }
                 }
 
@@ -695,7 +605,7 @@ fun DetailsScreen(
                     for (chunk in relatedItems.chunked(2)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             for (relItem in chunk) {
                                 Box(modifier = Modifier.weight(1f)) {
@@ -709,7 +619,7 @@ fun DetailsScreen(
                                 Spacer(modifier = Modifier.weight(1f))
                             }
                         }
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 } else if (relatedItems.isNotEmpty()) {
                     // Standard related content row for single video pages
@@ -722,10 +632,10 @@ fun DetailsScreen(
                             letterSpacing = 1.sp
                         )
                     )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(relatedItems) { relItem ->
-                            Box(modifier = Modifier.width(180.dp)) {
+                            Box(modifier = Modifier.width(170.dp)) {
                                 VideoCard(
                                     videoItem = relItem,
                                     onClick = { onRelatedClick(relItem) }

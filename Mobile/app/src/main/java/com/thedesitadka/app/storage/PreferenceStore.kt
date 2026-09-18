@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 val Context.dataStore by preferencesDataStore(name = "thedesitadka_settings")
@@ -35,6 +36,8 @@ class PreferenceStore(private val context: Context) {
     suspend fun setWifiOnly(enabled: Boolean) {
         context.dataStore.edit { it[WIFI_ONLY_DOWNLOADS] = enabled }
     }
+
+    suspend fun isWifiOnly(): Boolean = wifiOnlyFlow.first()
 
     suspend fun setTelemetry(enabled: Boolean) {
         context.dataStore.edit { it[TELEMETRY_ENABLED] = enabled }

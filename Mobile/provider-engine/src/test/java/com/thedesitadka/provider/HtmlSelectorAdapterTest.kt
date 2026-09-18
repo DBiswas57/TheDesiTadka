@@ -699,6 +699,7 @@ class HtmlSelectorAdapterTest {
             <html>
             <head>
                 <title>Aunty ki Hindi BF Chudai ki video - Desi Porn</title>
+                <meta property="og:image" content="https://www.desisex.site/wp-content/uploads/2022/04/Aunty-ki-Hindi-BF-Chudai-ki-video.jpg" />
                 <meta itemprop="contentURL" content="https://cdn2.desisex.site/2022/04/Aunty-ki-Hindi-BF-Chudai-ki-video.mp4" />
             </head>
             <body>
@@ -709,7 +710,7 @@ class HtmlSelectorAdapterTest {
                 <h2>Related Videos</h2>
                 <div class="videos-list">
                     <article class="thumb-block video-preview-item">
-                        <video class="wpst-trailer" poster="https://www.desisex.site/thumb.jpg">
+                        <video class="wpst-trailer" poster="https://www.desisex.site/related-thumb.jpg">
                             <source src="//cdn2.desisex.site/2026/09/Juli-bhabhi-ki-hairy-chut-ki-chudai.mp4" type="video/mp4" />
                         </video>
                     </article>
@@ -717,6 +718,10 @@ class HtmlSelectorAdapterTest {
             </body>
             </html>
         """.trimIndent()
+
+        // Detail parsing regression check: og:image must be selected over related trailer poster
+        val parsedDetail = adapter.parseDetailsHtml(detailHtml, "https://www.desisex.site/aunty-ki-hindi-bf-chudai-ki-video/").getOrThrow()
+        assertEquals("https://www.desisex.site/wp-content/uploads/2022/04/Aunty-ki-Hindi-BF-Chudai-ki-video.jpg", parsedDetail.thumbnailUrl)
 
         val sourcesResult = adapter.parsePlayableMediaHtml(detailHtml, "https://www.desisex.site/aunty-ki-hindi-bf-chudai-ki-video/")
         val sources = sourcesResult.getOrThrow()
@@ -1009,6 +1014,83 @@ class HtmlSelectorAdapterTest {
         assertTrue("Should extract video stream from BMaal xplayer", sources.isNotEmpty())
         assertEquals("https://cdn.azmaal.com/ULLU/Virgin%20Boys/Virgin%20Boys%20Episode%207.mp4?token=123", sources[0].url)
         assertEquals(MediaSourceType.PROGRESSIVE_MP4, sources[0].type)
+    }
+
+    @Test
+    fun testNonContentLinksFiltering() {
+        val config = ProviderConfig(
+            id = "testprovider",
+            name = "TestProvider",
+            baseUrl = "https://example.com",
+            adapter = "html_selector",
+            selectors = SelectorConfig(
+                item = "article, .item",
+                title = "h2 a, a",
+                thumbnail = "img",
+                detailUrl = "a"
+            )
+        )
+        val adapter = HtmlSelectorAdapter(config)
+
+        val listingHtml = """
+            <div class="content">
+                <article class="item">
+                    <h2><a href="https://example.com/video-1/">Awesome Desi Video 1</a></h2>
+                    <img src="https://example.com/thumb1.jpg" />
+                </article>
+                <article class="item">
+                    <h2><a href="https://example.com/about-us/">About Us</a></h2>
+                    <img src="https://example.com/about.jpg" />
+                </article>
+                <article class="item">
+                    <h2><a href="https://example.com/privacy-policy/">Privacy Policy</a></h2>
+                    <img src="https://example.com/privacy.jpg" />
+                </article>
+                <article class="item">
+                    <h2><a href="https://example.com/video-2/">Awesome Desi Video 2</a></h2>
+                    <img src="https://example.com/thumb2.jpg" />
+                </article>
+            </div>
+        """.trimIndent()
+
+        val feed = adapter.parseListingHtml(listingHtml, 1).getOrThrow()
+        val titles = feed.items.map { it.title }
+        assertTrue(titles.contains("Awesome Desi Video 1"))
+        assertTrue(titles.contains("Awesome Desi Video 2"))
+        assertTrue("Should filter out About Us", titles.none { it.contains("About Us", ignoreCase = true) })
+        assertTrue("Should filter out Privacy Policy", titles.none { it.contains("Privacy Policy", ignoreCase = true) })
+    }
+
+    @Test
+    fun testChiggyWiggyScriptPlayerExtraction() {
+        val config = ProviderConfig(
+            id = "chiggywiggy",
+            name = "ChiggyWiggy",
+            baseUrl = "https://chiggywiggy.com",
+            adapter = "html_selector"
+        )
+        val adapter = HtmlSelectorAdapter(config)
+
+        val detailHtml = """
+            <!DOCTYPE html>
+            <html>
+            <head><title>Test Video - ChiggyWiggy</title></head>
+            <body>
+                <video id="player"></video>
+                <script>
+                    var player = videojs('player');
+                    player.src([
+                        {'src':'https://chiggywiggy.com/vfile/11002/13074/1/61f01f87855f330c0334/1789714212/mp4/11002_480p.mp4', 'type':'video/mp4', 'label':'480p', 'res':'480'}
+                    ]);
+                </script>
+            </body>
+            </html>
+        """.trimIndent()
+
+        val media = adapter.parsePlayableMediaHtml(detailHtml, "https://chiggywiggy.com/11002/video/").getOrThrow()
+        assertTrue("Should extract MP4 from player script", media.isNotEmpty())
+        assertEquals("https://chiggywiggy.com/vfile/11002/13074/1/61f01f87855f330c0334/1789714212/mp4/11002_480p.mp4", media[0].url)
+        assertEquals(MediaSourceType.PROGRESSIVE_MP4, media[0].type)
     }
 }
 

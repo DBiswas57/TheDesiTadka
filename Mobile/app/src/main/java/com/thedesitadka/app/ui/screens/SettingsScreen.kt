@@ -170,75 +170,29 @@ fun SettingsScreen(
                             Text(text = "Providers: ${manifest.providers.size} total | Schema: v${manifest.schemaVersion}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
 
-                        // Live Catalog sync button
-                        Button(
-                            onClick = {
-                                coroutineScope.launch {
-                                    Toast.makeText(context, "Checking for catalog updates...", Toast.LENGTH_SHORT).show()
-                                    val success = configRepository.syncRemoteConfig(PreferenceStore.DEFAULT_CONFIG_URL)
-                                    if (success) {
-                                        val newVer = configRepository.manifestFlow.value.configVersion
-                                        providerEngine.updateFromManifest(configRepository.manifestFlow.value)
-                                        Toast.makeText(context, "Sync success! Catalog v$newVer loaded.", Toast.LENGTH_LONG).show()
-                                    } else {
-                                        val err = configRepository.lastSyncError.value ?: "Connection note"
-                                        Toast.makeText(context, "Status: $err. Keeping active catalog.", Toast.LENGTH_LONG).show()
-                                    }
-                                }
-                            },
-                            enabled = !isSyncing,
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                            shape = RoundedCornerShape(8.dp)
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color(0xFF10B981).copy(alpha = 0.2f))
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
-                            if (isSyncing) {
-                                CircularProgressIndicator(color = Color.Black, modifier = Modifier.size(16.dp))
-                            } else {
-                                Icon(imageVector = Icons.Default.Refresh, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(text = "Sync Now", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                            }
+                            Text(
+                                text = "Auto-Sync Active",
+                                color = Color(0xFF10B981),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
 
-                    if (lastSyncError != null) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = "Status: $lastSyncError", color = MaterialTheme.colorScheme.error, fontSize = 11.sp)
-                    }
-
-                    Spacer(modifier = Modifier.height(10.dp))
-                    OutlinedButton(
-                        onClick = {
-                            val success = configRepository.rollbackToPrevious()
-                            if (success) {
-                                providerEngine.updateFromManifest(configRepository.manifestFlow.value)
-                                Toast.makeText(context, "Rolled back configuration", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(context, "No previous rollback target available", Toast.LENGTH_SHORT).show()
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Icon(imageVector = Icons.Default.Restore, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "Rollback to Previous Config", fontSize = 12.sp)
-                    }
-
-                    if (onResetToDefault != null) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedButton(
-                            onClick = {
-                                onResetToDefault()
-                                Toast.makeText(context, "Catalog updated to latest built-in sources (${manifest.providers.size} providers)!", Toast.LENGTH_SHORT).show()
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Icon(imageVector = Icons.Default.Refresh, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(text = "Reload Built-in Sources (${manifest.providers.size} Providers)", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                        }
-                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Source updates and network catalogs synchronize automatically in the background on launch.",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 11.sp
+                        )
+                    )
                 }
             }
 

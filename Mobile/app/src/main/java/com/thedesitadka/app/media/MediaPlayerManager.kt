@@ -77,6 +77,10 @@ class MediaPlayerManager(
                         }
                     }
 
+                    override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                        syncState()
+                    }
+
                     override fun onIsPlayingChanged(playing: Boolean) {
                         syncState()
                         if (playing) {
@@ -143,6 +147,7 @@ class MediaPlayerManager(
             durationMs = dur,
             bufferedPositionMs = bufPos,
             isPlaying = playing,
+            playWhenReady = player.playWhenReady,
             exoPlaybackState = state,
             isBuffering = isBuffering,
             isSeeking = isSeeking,
@@ -212,6 +217,11 @@ class MediaPlayerManager(
                     urlLower.contains("webxseries") -> requestProperties["Referer"] = "https://webxseries.hot/"
                     urlLower.contains("aagmaal") -> requestProperties["Referer"] = "https://aagmaal.com/"
                     urlLower.contains("xhpingcdn") || urlLower.contains("xhcdn") || urlLower.contains("xhamster") -> requestProperties["Referer"] = "https://xhamster.desi/"
+                    urlLower.contains("chiggywiggy") -> requestProperties["Referer"] = "https://chiggywiggy.com/"
+                    urlLower.contains("desibabe") || urlLower.contains("downloaddirect") -> requestProperties["Referer"] = "https://desibabe.to/"
+                    urlLower.contains("desigirlxx") || urlLower.contains("playmate.to") -> requestProperties["Referer"] = "https://desigirlxx.beer/"
+                    urlLower.contains("desimaals") -> requestProperties["Referer"] = "https://www.desimaals.fun/"
+                    urlLower.contains("desivideo") -> requestProperties["Referer"] = "https://desivideo.net/"
                 }
             }
 

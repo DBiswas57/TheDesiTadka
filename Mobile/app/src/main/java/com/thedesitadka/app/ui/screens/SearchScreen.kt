@@ -49,6 +49,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.thedesitadka.app.ui.components.EmptyStateView
 import com.thedesitadka.app.ui.components.ErrorStateView
 import com.thedesitadka.app.ui.components.VideoCard
@@ -59,24 +62,29 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SearchScreen(
-    providerEngine: ProviderEngine,
-    onVideoClick: (VideoItem) -> Unit,
-    onBackClick: () -> Unit
-) {
-    val coroutineScope = rememberCoroutineScope()
-    val activeProviders = remember { providerEngine.getActiveProviders() }
-    var searchQuery by remember { mutableStateOf("") }
-    var selectedProviderId by remember { mutableStateOf<String?>(null) }
+class SearchViewModel : ViewModel() {
+    var searchQuery by mutableStateOf("")
+    var selectedProviderId by mutableStateOf<String?>(null)
+    val searchResults = mutableStateListOf<VideoItem>()
+    var isLoading by mutableStateOf(false)
+    var errorMessage by mutableStateOf<String?>(null)
+    private var searchJob: Job? = null
 
-    var searchResults = remember { mutableStateListOf<VideoItem>() }
-    var isLoading by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    var searchJob by remember { mutableStateOf<Job?>(null) }
+    fun onQueryChanged(query: String, providerEngine: ProviderEngine) {
+        searchQuery = query
+        triggerSearch(query, selectedProviderId, providerEngine)
+    }
 
-    fun executeSearch(query: String) {
+    fun onProviderSelected(providerId: String?, providerEngine: ProviderEngine) {
+        selectedProviderId = providerId
+        triggerSearch(searchQuery, providerId, providerEngine)
+    }
+
+    fun retrySearch(providerEngine: ProviderEngine) {
+        triggerSearch(searchQuery, selectedProviderId, providerEngine, debounceMs = 0L)
+    }
+
+    private fun triggerSearch(query: String, providerId: String?, providerEngine: ProviderEngine, debounceMs: Long = 300L) {
         searchJob?.cancel()
         if (query.trim().length < 2) {
             searchResults.clear()
@@ -84,11 +92,13 @@ fun SearchScreen(
             return
         }
 
-        searchJob = coroutineScope.launch {
-            delay(300) // 300ms debounce
+        searchJob = viewModelScope.launch {
+            if (debounceMs > 0L) {
+                delay(debounceMs)
+            }
             isLoading = true
             errorMessage = null
-            val result = providerEngine.search(query.trim(), selectedProviderId, 1)
+            val result = providerEngine.search(query.trim(), providerId, 1)
             result.onSuccess { feedPage ->
                 searchResults.clear()
                 searchResults.addAll(feedPage.items)
@@ -99,10 +109,22 @@ fun SearchScreen(
             }
         }
     }
+}
 
-    LaunchedEffect(searchQuery, selectedProviderId) {
-        executeSearch(searchQuery)
-    }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchScreen(
+    providerEngine: ProviderEngine,
+    onVideoClick: (VideoItem) -> Unit,
+    onBackClick: () -> Unit,
+    viewModel: SearchViewModel = viewModel()
+) {
+    val activeProviders = remember { providerEngine.getActiveProviders() }
+    val searchQuery = viewModel.searchQuery
+    val selectedProviderId = viewModel.selectedProviderId
+    val searchResults = viewModel.searchResults
+    val isLoading = viewModel.isLoading
+    val errorMessage = viewModel.errorMessage
 
     Scaffold(
         topBar = {
@@ -127,7 +149,7 @@ fun SearchScreen(
             // Search Input Field
             OutlinedTextField(
                 value = searchQuery,
-                onValueChange = { searchQuery = it },
+                onValueChange = { viewModel.onQueryChanged(it, providerEngine) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -137,7 +159,7 @@ fun SearchScreen(
                 },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { searchQuery = "" }) {
+                        IconButton(onClick = { viewModel.onQueryChanged("", providerEngine) }) {
                             Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear", tint = Color.White)
                         }
                     }
@@ -148,7 +170,9 @@ fun SearchScreen(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
                     focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
                 )
             )
 
@@ -157,24 +181,28 @@ fun SearchScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                        .horizontalScroll(rememberScrollState()),
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     FilterChip(
                         selected = selectedProviderId == null,
-                        onClick = { selectedProviderId = null },
-                        label = { Text("All Providers", fontWeight = FontWeight.SemiBold) },
+                        onClick = { viewModel.onProviderSelected(null, providerEngine) },
+                        label = { Text("All Sources") },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = MaterialTheme.colorScheme.primary,
                             selectedLabelColor = Color.Black
                         )
                     )
                     activeProviders.forEach { provider ->
+                        val isSelected = selectedProviderId == provider.id
                         FilterChip(
-                            selected = selectedProviderId == provider.id,
-                            onClick = { selectedProviderId = provider.id },
-                            label = { Text(provider.name, fontWeight = FontWeight.SemiBold) },
+                            selected = isSelected,
+                            onClick = {
+                                val next = if (isSelected) null else provider.id
+                                viewModel.onProviderSelected(next, providerEngine)
+                            },
+                            label = { Text(provider.name) },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = MaterialTheme.colorScheme.primary,
                                 selectedLabelColor = Color.Black
@@ -188,10 +216,10 @@ fun SearchScreen(
 
             // Results Grid
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 170.dp),
+                columns = GridCells.Adaptive(minSize = 168.dp),
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
                 if (isLoading) {
@@ -202,7 +230,7 @@ fun SearchScreen(
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         ErrorStateView(
                             message = errorMessage!!,
-                            onRetry = { executeSearch(searchQuery) }
+                            onRetry = { viewModel.retrySearch(providerEngine) }
                         )
                     }
                 } else if (searchQuery.length >= 2 && searchResults.isEmpty()) {

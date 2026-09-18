@@ -50,9 +50,9 @@ fun VideoCard(
             .fillMaxWidth()
             .clickable { onClick() }
             .semantics { contentDescription = "Video: ${videoItem.title}" },
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(6.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column {
             Box(
@@ -89,15 +89,15 @@ fun VideoCard(
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopStart)
-                        .padding(8.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(Color.Black.copy(alpha = 0.65f))
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                        .padding(6.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(Color.Black.copy(alpha = 0.75f))
+                        .padding(horizontal = 5.dp, vertical = 2.dp)
                 ) {
                     Text(
                         text = videoItem.providerId.uppercase(),
                         color = MaterialTheme.colorScheme.primary,
-                        fontSize = 10.sp,
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -107,41 +107,43 @@ fun VideoCard(
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(8.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(Color.Black.copy(alpha = 0.75f))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                            .padding(6.dp)
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(Color.Black.copy(alpha = 0.8f))
+                            .padding(horizontal = 5.dp, vertical = 2.dp)
                     ) {
                         val mins = dur / 60
                         val secs = dur % 60
                         Text(
                             text = String.format("%02d:%02d", mins, secs),
                             color = Color.White,
-                            fontSize = 11.sp,
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.Medium
                         )
                     }
                 }
             }
 
-            Column(modifier = Modifier.padding(10.dp)) {
+            Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)) {
                 Text(
                     text = videoItem.title,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 13.sp,
+                        lineHeight = 17.sp
                     ),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
 
                 videoItem.category?.let { cat ->
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = cat,
                         style = MaterialTheme.typography.bodySmall.copy(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 11.sp
+                            fontSize = 10.sp
                         ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis

@@ -53,11 +53,17 @@ if (Test-Path $ReleaseApkDir) {
         New-Item -ItemType Directory -Path $DestReleaseDir -Force | Out-Null
     }
 
+    $BuildGradle = Get-Content (Join-Path $MobileDir "app\build.gradle.kts") -Raw
+    $VersionName = "1.0.6"
+    if ($BuildGradle -match 'versionName\s*=\s*"([^"]+)"') {
+        $VersionName = $matches[1]
+    }
+
     $SourceApk = Join-Path $ReleaseApkDir "app-release.apk"
     if (Test-Path $SourceApk) {
         Copy-Item -Path $SourceApk -Destination (Join-Path $DestReleaseDir "TheDesiTadka-release.apk") -Force
-        Copy-Item -Path $SourceApk -Destination (Join-Path $DestReleaseDir "TheDesiTadka-v1.0.5-release.apk") -Force
-        Write-Host "[+] Copied release APKs to: $DestReleaseDir" -ForegroundColor Cyan
+        Copy-Item -Path $SourceApk -Destination (Join-Path $DestReleaseDir "TheDesiTadka-v$VersionName-release.apk") -Force
+        Write-Host "[+] Copied release APKs to: $DestReleaseDir (v$VersionName)" -ForegroundColor Cyan
     }
 
     Get-ChildItem -Path $ReleaseApkDir -Filter "*.apk" | ForEach-Object {

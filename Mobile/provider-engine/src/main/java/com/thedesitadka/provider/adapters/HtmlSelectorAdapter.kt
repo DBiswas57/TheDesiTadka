@@ -81,7 +81,7 @@ class HtmlSelectorAdapter(
                 val href = el.attr("href").trim()
                 if (name.isNotBlank() && href.isNotBlank()) {
                     if (href.contains("/photos/", ignoreCase = true) || href.contains("/creators/", ignoreCase = true) || href.contains("/pornstars/", ignoreCase = true)
-                        || href.endsWith("/ott/") || href.endsWith("/series/")) {
+                        || href.endsWith("/ott/") || href.endsWith("/series/") || isNonContentLink(name, href)) {
                         return@mapNotNull null
                     }
                     val id = href.trimEnd('/').substringAfterLast('/')
@@ -167,27 +167,33 @@ class HtmlSelectorAdapter(
                 doc.select(sel).firstOrNull()?.text()?.trim()
             } ?: ""
 
-            // Extract thumbnail with poster, content (og:image), data-src, src fallbacks
+            // Extract thumbnail with meta (og:image), poster, data-src, src fallbacks
             var thumb = ""
             val thumbEl = selectors?.detailThumbnail?.let { doc.select(it).firstOrNull() }
             val candidateThumb = extractValidThumbnail(
                 el = doc.body() ?: doc,
-                imgEl = thumbEl ?: doc.select("img.video-main-thumb, img.video-img").firstOrNull(),
+                imgEl = thumbEl ?: doc.select("img.video-main-thumb, img.video-img, meta[property='og:image']").firstOrNull(),
                 specifiedAttr = null
             )
             if (!isPlaceholderOrLogo(candidateThumb)) {
                 thumb = candidateThumb
             }
             if (thumb.isEmpty()) {
-                val poster = doc.select("video[poster]").attr("poster")
-                if (!isPlaceholderOrLogo(poster)) {
-                    thumb = poster
+                val ogImg = doc.select("meta[property='og:image'], meta[name='twitter:image']").attr("content")
+                if (!isPlaceholderOrLogo(ogImg)) {
+                    thumb = ogImg
                 }
             }
             if (thumb.isEmpty()) {
-                val ogImg = doc.select("meta[property='og:image']").attr("content")
-                if (!isPlaceholderOrLogo(ogImg)) {
-                    thumb = ogImg
+                // Select poster from main video player, avoiding recommendation or related trailers (.wpst-trailer, .trailer, .loop-video)
+                val poster = doc.select("video:not(.wpst-trailer):not(.trailer)[poster]").attr("poster")
+                    .ifEmpty {
+                        doc.select("video[poster]").firstOrNull { v ->
+                            v.closest(".wpst-trailer, .trailer, .video-preview-item, .related, .recommendations") == null
+                        }?.attr("poster") ?: ""
+                    }.ifEmpty { doc.select("video[poster]").attr("poster") }
+                if (!isPlaceholderOrLogo(poster)) {
+                    thumb = poster
                 }
             }
 
@@ -488,15 +494,16 @@ class HtmlSelectorAdapter(
                 }
             }
 
-            // 4. KVS (Kernel Video Sharing) media link and script extractor
+            // 4. KVS / Script player media link and script extractor
             if (sources.isEmpty()) {
-                // First check script flashvars (canonical player stream with auth token)
-                val kvsRegex = Regex("""(?:video_url|video_alt_url|video_url_text):\s*['"]([^'"]+\.(?:mp4|m3u8)[^'"]*)['"]""")
+                // First check script flashvars or player config (canonical player stream with auth token)
+                val kvsRegex = Regex("""(?:video_url|video_alt_url|video_url_text|['"]?src['"]?|['"]?file['"]?)\s*:\s*['"]([^'"]+\.(?:mp4|m3u8)[^'"]*)['"]""")
                 val match = kvsRegex.find(html)
                 if (match != null) {
                     val streamUrl = match.groupValues[1]
                     val type = if (streamUrl.contains(".m3u8")) MediaSourceType.HLS else MediaSourceType.PROGRESSIVE_MP4
-                    sources.add(MediaSource(url = resolveUrl(streamUrl), type = type, mimeType = if (type == MediaSourceType.HLS) "application/x-mpegURL" else "video/mp4", headersRequired = defaultHeaders))
+                    val headers = resolveHeadersForStream(streamUrl, defaultHeaders)
+                    sources.add(MediaSource(url = resolveUrl(streamUrl), type = type, mimeType = if (type == MediaSourceType.HLS) "application/x-mpegURL" else "video/mp4", headersRequired = headers))
                 }
 
                 // Fallback: direct download link if it's explicitly an mp4/m3u8 video (not a screenshot/image)
@@ -666,7 +673,7 @@ class HtmlSelectorAdapter(
 
             val thumb = extractValidThumbnail(el, imgEl, thumbAttr)
 
-            if (href.isNotBlank() && cleanedTitle.isNotBlank()) {
+            if (href.isNotBlank() && cleanedTitle.isNotBlank() && !isNonContentLink(cleanedTitle, href)) {
                 VideoItem(
                     id = href.hashCode().toString(),
                     providerId = config.id,
@@ -690,6 +697,18 @@ class HtmlSelectorAdapter(
 
     private fun extractValidThumbnail(el: Element, imgEl: Element?, specifiedAttr: String?): String {
         val candidates = mutableListOf<String>()
+
+        // 0. If imgEl or el is a meta tag (e.g. meta[property='og:image']), extract content attribute
+        imgEl?.let {
+            if (it.tagName().equals("meta", ignoreCase = true)) {
+                val content = it.attr("content")
+                if (content.isNotBlank()) candidates.add(content)
+            }
+        }
+        if (el.tagName().equals("meta", ignoreCase = true)) {
+            val content = el.attr("content")
+            if (content.isNotBlank()) candidates.add(content)
+        }
 
         // 1. Specified attribute(s) if present (supports comma-separated list like "data-bg, style")
         if (!specifiedAttr.isNullOrBlank() && specifiedAttr != "src") {
@@ -829,5 +848,27 @@ class HtmlSelectorAdapter(
         } catch (e: Exception) {
             path
         }
+    }
+
+    private fun isNonContentLink(title: String, href: String): Boolean {
+        val t = title.lowercase().trim()
+        val h = href.lowercase().trim()
+        val nonContentKeywords = listOf(
+            "about", "about us", "privacy", "privacy policy", "terms", "terms of service", "terms of use", "terms & conditions",
+            "contact", "contact us", "dmca", "2257", "18 u.s.c. 2257", "disclaimer", "faq", "f.a.q.", "login", "log in",
+            "register", "sign in", "sign up", "signup", "signin", "submit video", "submit", "upload", "advertise",
+            "advertising", "theporndude", "feedback", "report", "cookie policy", "legal", "notice"
+        )
+        if (nonContentKeywords.any { t == it || t.startsWith("$it ") || t.endsWith(" $it") }) {
+            return true
+        }
+        val nonContentPaths = listOf(
+            "/about", "/privacy", "/terms", "/contact", "/dmca", "/2257", "/disclaimer", "/faq",
+            "/login", "/register", "/signup", "/signin", "/theporndude", "/submit-video", "/advertise"
+        )
+        if (nonContentPaths.any { h.endsWith(it) || h.endsWith("$it/") || h.contains("$it?") || h.contains("$it#") || h.contains("/$it/") }) {
+            return true
+        }
+        return false
     }
 }

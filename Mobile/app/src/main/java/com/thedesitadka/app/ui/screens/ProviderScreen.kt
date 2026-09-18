@@ -55,9 +55,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.runtime.saveable.rememberSaveable
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -107,6 +115,10 @@ fun ProviderScreen(
     var currentPage by remember { mutableIntStateOf(1) }
     var hasNextPage by remember { mutableStateOf(true) }
 
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var isSearchExpanded by rememberSaveable { mutableStateOf(false) }
+    var searchJob by remember { mutableStateOf<Job?>(null) }
+
     fun loadContent(page: Int, reset: Boolean = false) {
         if (reset) {
             isLoading = true
@@ -115,7 +127,9 @@ fun ProviderScreen(
         }
         errorMessage = null
         coroutineScope.launch {
-            val result = if (selectedCategory != null) {
+            val result = if (searchQuery.isNotBlank()) {
+                adapter?.search(searchQuery.trim(), page) ?: providerEngine.search(searchQuery.trim(), providerId, page)
+            } else if (selectedCategory != null) {
                 adapter?.search(selectedCategory!!.name, page) ?: providerEngine.getHomeFeed(providerId, page)
             } else {
                 providerEngine.getHomeFeed(providerId, page)
@@ -146,7 +160,21 @@ fun ProviderScreen(
     }
 
     LaunchedEffect(selectedCategory) {
-        loadContent(1, reset = true)
+        if (searchQuery.isBlank()) {
+            loadContent(1, reset = true)
+        }
+    }
+
+    LaunchedEffect(searchQuery) {
+        if (searchQuery.isNotBlank()) {
+            searchJob?.cancel()
+            searchJob = coroutineScope.launch {
+                delay(300)
+                loadContent(1, reset = true)
+            }
+        } else if (isSearchExpanded) {
+            loadContent(1, reset = true)
+        }
     }
 
     // Re-load after Cloudflare challenge is solved
@@ -166,27 +194,84 @@ fun ProviderScreen(
             }
     }
 
+    BackHandler(enabled = isSearchExpanded || searchQuery.isNotBlank()) {
+        searchQuery = ""
+        isSearchExpanded = false
+        loadContent(1, reset = true)
+    }
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                windowInsets = WindowInsets(0.dp),
-                title = { Text(info?.name ?: "Provider", fontWeight = FontWeight.Bold, color = Color.White) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
-            )
+            if (isSearchExpanded) {
+                TopAppBar(
+                    windowInsets = WindowInsets(0.dp),
+                    title = {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp),
+                            placeholder = { Text("Search ${info?.name ?: providerId}...", fontSize = 14.sp) },
+                            singleLine = true,
+                            shape = RoundedCornerShape(8.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White
+                            )
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            searchQuery = ""
+                            isSearchExpanded = false
+                            loadContent(1, reset = true)
+                        }) {
+                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        }
+                    },
+                    actions = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = {
+                                searchQuery = ""
+                                loadContent(1, reset = true)
+                            }) {
+                                Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear", tint = Color.White)
+                            }
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                )
+            } else {
+                TopAppBar(
+                    windowInsets = WindowInsets(0.dp),
+                    title = { Text(info?.name ?: "Provider", fontWeight = FontWeight.Bold, color = Color.White) },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { isSearchExpanded = true }) {
+                            Icon(imageVector = Icons.Default.Search, contentDescription = "Search provider", tint = Color.White)
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                )
+            }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 170.dp),
+            columns = GridCells.Adaptive(minSize = 168.dp),
             state = gridState,
-            contentPadding = PaddingValues(bottom = 32.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(start = 8.dp, end = 8.dp, bottom = 32.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -371,12 +456,10 @@ fun ProviderScreen(
 
             // Feed Items Grid
             items(feedItems) { item ->
-                Box(modifier = Modifier.padding(horizontal = 8.dp)) {
-                    VideoCard(
-                        videoItem = item,
-                        onClick = { onVideoClick(item) }
-                    )
-                }
+                VideoCard(
+                    videoItem = item,
+                    onClick = { onVideoClick(item) }
+                )
             }
 
             // Bottom loading indicator

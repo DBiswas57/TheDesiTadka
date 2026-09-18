@@ -25,8 +25,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,12 +53,14 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -91,7 +95,7 @@ import com.thedesitadka.app.monetization.AdPlacementType
 import com.thedesitadka.app.monetization.MonetizationManager
 import com.thedesitadka.app.monetization.ui.AdSlotView
 
-@OptIn(UnstableApi::class)
+@kotlin.OptIn(UnstableApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun PlayerScreen(
     videoItem: VideoItem,
@@ -161,10 +165,10 @@ fun PlayerScreen(
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    LaunchedEffect(isLandscape) {
-        isFullscreen = isLandscape
+    LaunchedEffect(isLandscape, isFullscreen, showControls) {
+        val shouldBeImmersive = isLandscape || isFullscreen || !showControls
         activity?.let { act ->
-            setImmersiveMode(act, isLandscape)
+            setImmersiveMode(act, shouldBeImmersive)
         }
     }
 
@@ -174,11 +178,13 @@ fun PlayerScreen(
         isFullscreen = nextFullscreen
         activity?.let { act ->
             if (nextFullscreen) {
-                act.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                if (!isLandscape) {
+                    act.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                }
                 setImmersiveMode(act, true)
             } else {
                 act.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                setImmersiveMode(act, false)
+                setImmersiveMode(act, !showControls)
             }
         }
     }
@@ -251,8 +257,8 @@ fun PlayerScreen(
                     )
                 }
             }
-        } else if (hasStartedPlaying && (state.isBuffering || state.isSeeking) && state.errorMessage == null) {
-            // Non-disruptive Buffering Indicator during active playback or seeking
+        } else if (hasStartedPlaying && (state.isBuffering || state.isSeeking) && !showControls && state.errorMessage == null) {
+            // Non-disruptive Buffering Indicator during active playback or seeking when controls are hidden
             CircularProgressIndicator(
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
@@ -343,7 +349,8 @@ fun PlayerScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                        .statusBarsPadding()
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = {
@@ -448,6 +455,7 @@ fun PlayerScreen(
                     ) {
                         IconButton(
                             onClick = { playerManager.seekBackward(10000L) },
+                            enabled = !state.isBuffering && !state.isSeeking,
                             modifier = Modifier
                                 .size(52.dp)
                                 .clip(CircleShape)
@@ -461,26 +469,41 @@ fun PlayerScreen(
                             )
                         }
 
-                        Box(
-                            modifier = Modifier
-                                .size(68.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary)
-                                .clickable {
-                                    if (state.isPlaying) playerManager.pause() else playerManager.play()
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                contentDescription = if (state.isPlaying) "Pause" else "Play",
-                                tint = Color.Black,
-                                modifier = Modifier.size(38.dp)
-                            )
+                        val isBufferingOrSeeking = state.isBuffering || state.isSeeking
+                        if (isBufferingOrSeeking) {
+                            Box(
+                                modifier = Modifier.size(68.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(52.dp),
+                                    strokeWidth = 4.dp
+                                )
+                            }
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .size(68.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary)
+                                    .clickable {
+                                        if (state.isPlaying) playerManager.pause() else playerManager.play()
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = if (state.isPlaying || (state.playWhenReady && !state.isEnded)) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                    contentDescription = if (state.isPlaying || (state.playWhenReady && !state.isEnded)) "Pause" else "Play",
+                                    tint = Color.Black,
+                                    modifier = Modifier.size(38.dp)
+                                )
+                            }
                         }
 
                         IconButton(
                             onClick = { playerManager.seekForward(10000L) },
+                            enabled = !state.isBuffering && !state.isSeeking,
                             modifier = Modifier
                                 .size(52.dp)
                                 .clip(CircleShape)
@@ -501,7 +524,8 @@ fun PlayerScreen(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 16.dp)
+                        .navigationBarsPadding()
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
                     val currentSliderValue = if (isDragging) dragProgressRatio else state.progressRatio
 
@@ -517,6 +541,13 @@ fun PlayerScreen(
                                 val targetMs = (dragProgressRatio * state.durationMs).toLong()
                                 playerManager.seekTo(targetMs)
                             }
+                        },
+                        thumb = {
+                            SliderDefaults.Thumb(
+                                interactionSource = remember { MutableInteractionSource() },
+                                colors = SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary),
+                                thumbSize = DpSize(12.dp, 12.dp)
+                            )
                         },
                         colors = SliderDefaults.colors(
                             thumbColor = MaterialTheme.colorScheme.primary,

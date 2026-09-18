@@ -3,6 +3,8 @@ package com.thedesitadka.app.download
 import android.app.NotificationManager
 import android.content.ContentValues
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
@@ -40,6 +42,7 @@ class DownloadWorker(
         const val KEY_TITLE = "title"
         const val KEY_PROVIDER_ID = "provider_id"
         const val KEY_IS_PAUSED = "is_paused"
+        const val KEY_WIFI_ONLY = "wifi_only"
         const val BUFFER_SIZE = 65536 // 64 KB buffer for high-speed streaming I/O
         const val MAX_RETRIES = 3
     }
@@ -51,12 +54,29 @@ class DownloadWorker(
         val mediaUrl = inputData.getString(KEY_MEDIA_URL) ?: return Result.failure()
         val title = inputData.getString(KEY_TITLE) ?: "Media Download"
         val providerId = inputData.getString(KEY_PROVIDER_ID) ?: ""
+        val isWifiOnly = inputData.getBoolean(KEY_WIFI_ONLY, false)
 
         StreamHubLogger.log(
             StreamHubLogger.Category.DOWNLOAD,
             "INFO",
-            "DOWNLOAD_STARTED: id=$downloadId, provider=$providerId, title='$title'"
+            "DOWNLOAD_STARTED: id=$downloadId, provider=$providerId, title='$title', wifiOnly=$isWifiOnly"
         )
+
+        // Wi-Fi Only pre-check: verify network is Wi-Fi or unmetered
+        if (isWifiOnly && !isWifiOrUnmeteredNetwork(context)) {
+            StreamHubLogger.w("DownloadWorker", "DOWNLOAD_WAITING_WIFI: ID $downloadId waiting for Wi-Fi connection")
+            val existing = downloadDao.getDownload(downloadId)
+            if (existing != null) {
+                downloadDao.updateDownload(
+                    existing.copy(
+                        status = DownloadStatus.QUEUED,
+                        error = "Waiting for Wi-Fi network",
+                        speedBytesPerSec = 0L
+                    )
+                )
+            }
+            return Result.retry()
+        }
 
         // Validate URL Safety
         if (!UrlSecurityValidator.isUrlSafe(mediaUrl)) {
@@ -180,8 +200,12 @@ class DownloadWorker(
                 urlLower.contains("webxseries") || providerId == "webxseries" -> "https://webxseries.hot/"
                 urlLower.contains("desisex") || providerId == "desisex" -> "https://desisex.site/"
                 urlLower.contains("pornx11") || providerId == "pornx11" -> "https://pornx11.com/"
-                urlLower.contains("aagmaal") || providerId == "aagmaal" || providerId == "aagmaal_com" -> "https://aagmaal.com/"
                 urlLower.contains("xhpingcdn") || urlLower.contains("xhcdn") || urlLower.contains("xhamster") || providerId == "xhamster" -> "https://xhamster.desi/"
+                urlLower.contains("chiggywiggy") || providerId == "chiggywiggy" -> "https://chiggywiggy.com/"
+                urlLower.contains("desibabe") || providerId == "desibabe" || urlLower.contains("downloaddirect") -> "https://desibabe.to/"
+                urlLower.contains("desigirlxx") || providerId == "desigirlxx" || urlLower.contains("playmate.to") -> "https://desigirlxx.beer/"
+                urlLower.contains("desimaals") || providerId == "desimaals" -> "https://www.desimaals.fun/"
+                urlLower.contains("desivideo") || providerId == "desivideo" -> "https://desivideo.net/"
                 else -> "https://${android.net.Uri.parse(mediaUrl).host ?: "example.com"}/"
             }
             requestBuilder.header("Referer", referer)
@@ -327,6 +351,21 @@ class DownloadWorker(
                         // Update DB & Notification periodically (every 1 sec)
                         if (now - lastUiUpdateTime >= 1000L) {
                             lastUiUpdateTime = now
+
+                            // Verify Wi-Fi connectivity has not been lost mid-download
+                            if (isWifiOnly && !isWifiOrUnmeteredNetwork(context)) {
+                                StreamHubLogger.w("DownloadWorker", "DOWNLOAD_INTERRUPTED_WIFI: Wi-Fi lost for id=$downloadId")
+                                currentRecord = currentRecord.copy(
+                                    status = DownloadStatus.QUEUED,
+                                    downloadedBytes = currentDownloaded,
+                                    totalBytes = totalBytes,
+                                    error = "Waiting for Wi-Fi network",
+                                    speedBytesPerSec = 0L
+                                )
+                                downloadDao.updateDownload(currentRecord)
+                                return Result.retry()
+                            }
+
                             val progress = if (totalBytes > 0) ((currentDownloaded * 100) / totalBytes).toInt() else -1
                             setProgress(
                                 workDataOf(
@@ -505,6 +544,19 @@ class DownloadWorker(
             notificationManager?.notify(title.hashCode(), notification)
         } catch (e: Exception) {
             StreamHubLogger.w("DownloadWorker", "Could not post failure notification: ${e.message}")
+        }
+    }
+
+    private fun isWifiOrUnmeteredNetwork(context: Context): Boolean {
+        return try {
+            val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
+            val activeNetwork = cm.activeNetwork ?: return false
+            val caps = cm.getNetworkCapabilities(activeNetwork) ?: return false
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                    caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) ||
+                    caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+        } catch (e: Exception) {
+            false
         }
     }
 }

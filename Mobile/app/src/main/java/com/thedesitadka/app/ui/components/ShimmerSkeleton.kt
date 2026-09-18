@@ -57,7 +57,7 @@ fun VideoCardSkeleton(modifier: Modifier = Modifier) {
     val brush = ShimmerBrush()
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(6.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column {

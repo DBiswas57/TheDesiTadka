@@ -85,7 +85,8 @@ object AppUpdateManager {
 
             val tagName = root["tag_name"]?.jsonPrimitive?.content ?: ""
             val releaseTitle = root["name"]?.jsonPrimitive?.content ?: tagName
-            val releaseNotes = root["body"]?.jsonPrimitive?.content ?: ""
+            val rawNotes = root["body"]?.jsonPrimitive?.content ?: ""
+            val releaseNotes = rawNotes.replace("**", "").replace("##", "").trim()
 
             val cleanTag = tagName.removePrefix("v").trim()
 

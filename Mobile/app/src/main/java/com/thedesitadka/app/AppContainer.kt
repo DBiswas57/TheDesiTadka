@@ -41,7 +41,7 @@ class AppContainer(val context: Context) {
     }
 
     val downloadRepository: DownloadRepository by lazy {
-        DownloadRepository(context, providerEngine)
+        DownloadRepository(context, providerEngine, preferenceStore)
     }
 
     val dashboardRepository: DashboardRepository by lazy {
@@ -117,7 +117,7 @@ class AppContainer(val context: Context) {
     private fun createDefaultManifest(): ProviderManifest {
         return ProviderManifest(
             schemaVersion = 1,
-            configVersion = 134,
+            configVersion = 140,
             minimumAppVersion = 4,
             forceUpdate = true,
             generatedAt = System.currentTimeMillis(),
@@ -1141,6 +1141,216 @@ class AppContainer(val context: Context) {
                         videoSource = "div.xplayer-lazy-source, .xplayer-lazy-source, meta[itemprop*='embedUrl'], video source[src], video[src], source[type='video/mp4']",
                         videoSourceAttr = "data-src",
                         relatedItems = ".related-series article, .related-videos article, article.video-card"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Web Index",
+                        disclaimer = "Aggregated public reference media feed."
+                    )
+                ),
+                // 30. ChiggyWiggy
+                ProviderConfig(
+                    id = "chiggywiggy",
+                    familyId = "direct_cdn_family",
+                    domains = listOf("https://chiggywiggy.com", "https://www.chiggywiggy.com"),
+                    validationMarker = "chiggywiggy",
+                    name = "ChiggyWiggy",
+                    enabled = true,
+                    baseUrl = "https://chiggywiggy.com",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/search/video/?s={query}",
+                        page = "/?page={page}",
+                        categories = "/categories/"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "div.video-thumb, div.video-preview, .thumb-block",
+                        title = "a[title], img[alt]",
+                        thumbnail = "img.thumb, img",
+                        thumbnailAttr = "data-src, src",
+                        detailUrl = "a",
+                        duration = ".video-duration, .duration, span.time",
+                        detailTitle = "h1",
+                        detailDescription = ".video-details, .description, p",
+                        detailThumbnail = "meta[property='og:image'], img.thumb, img",
+                        player = "video, script",
+                        videoSource = "source[type='video/mp4'], video source, script"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Web Index",
+                        disclaimer = "Aggregated public reference media feed."
+                    )
+                ),
+                // 31. DesiBabe
+                ProviderConfig(
+                    id = "desibabe",
+                    familyId = "direct_cdn_family",
+                    domains = listOf("https://desibabe.to", "https://www.desibabe.to", "https://desibabe.net", "https://www.desibabe.net"),
+                    validationMarker = "desibabe",
+                    name = "DesiBabe",
+                    enabled = true,
+                    baseUrl = "https://desibabe.to",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/search?q={query}",
+                        page = "/?page={page}",
+                        categories = "/categories"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "a[href*='/post/']",
+                        title = "h3, img[alt]",
+                        thumbnail = "img",
+                        thumbnailAttr = "src",
+                        detailUrl = "this",
+                        duration = ".duration",
+                        detailTitle = "h1",
+                        detailDescription = ".post-description, p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "iframe[src*='downloaddirect.xyz'], iframe, video",
+                        videoSource = "iframe[src*='downloaddirect.xyz'], iframe, video source"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Web Index",
+                        disclaimer = "Aggregated public reference media feed."
+                    )
+                ),
+                // 32. DesiGirlXX
+                ProviderConfig(
+                    id = "desigirlxx",
+                    familyId = "direct_cdn_family",
+                    domains = listOf("https://desigirlxx.beer", "https://www.desigirlxx.beer"),
+                    validationMarker = "desigirlxx",
+                    name = "DesiGirlXX",
+                    enabled = true,
+                    baseUrl = "https://desigirlxx.beer",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/?s={query}",
+                        page = "/page/{page}/",
+                        categories = "/category/hot-web-series"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "article.loop-video, article.thumb-block, article.video-preview-item",
+                        title = "header h2 a, a[title]",
+                        thumbnail = "img.video-main-thumb, img",
+                        thumbnailAttr = "data-main-thumb, src, data-src",
+                        detailUrl = "header h2 a, a",
+                        duration = ".duration",
+                        detailTitle = "h1.entry-title, h1",
+                        detailDescription = ".entry-content p, .video-details, p",
+                        detailThumbnail = "meta[property='og:image'], img.wp-post-image, img",
+                        player = "iframe[src*='playmate.to'], iframe, video",
+                        videoSource = "iframe[src*='playmate.to'], iframe, video source, source[type='video/mp4']"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Web Index",
+                        disclaimer = "Aggregated public reference media feed."
+                    )
+                ),
+                // 33. DesiMaals
+                ProviderConfig(
+                    id = "desimaals",
+                    familyId = "direct_cdn_family",
+                    domains = listOf("https://www.desimaals.fun", "https://desimaals.fun", "https://desimaals.com", "https://www.desimaals.com"),
+                    validationMarker = "desimaals",
+                    name = "DesiMaals",
+                    enabled = true,
+                    baseUrl = "https://www.desimaals.fun",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/?filter=latest",
+                        search = "/?s={query}",
+                        page = "/page/{page}/?filter=latest",
+                        categories = "/categories/"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "article.loop-video, article.thumb-block, article.post",
+                        title = "header h2 a, a[title]",
+                        thumbnail = "img.video-main-thumb, img",
+                        thumbnailAttr = "src, data-src",
+                        detailUrl = "header h2 a, a",
+                        duration = ".duration",
+                        detailTitle = "h1.entry-title, h1",
+                        detailDescription = ".entry-content p, .video-details, p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "iframe[src*='clean-tube-player'], iframe, video",
+                        videoSource = "iframe[src*='clean-tube-player'], iframe, video source, source[type='video/mp4']"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Web Index",
+                        disclaimer = "Aggregated public reference media feed."
+                    )
+                ),
+                // 34. DesiVideo
+                ProviderConfig(
+                    id = "desivideo",
+                    familyId = "direct_cdn_family",
+                    domains = listOf("https://desivideo.net", "https://www.desivideo.net", "https://desivideo.us", "https://www.desivideo.us"),
+                    validationMarker = "desivideo",
+                    name = "DesiVideo",
+                    enabled = true,
+                    baseUrl = "https://desivideo.net",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/latest-video",
+                        search = "/search?s={query}",
+                        page = "?page={page}",
+                        categories = "/categories"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "article.thumb-block, article.post",
+                        title = "a[title]",
+                        thumbnail = "video[poster], img",
+                        thumbnailAttr = "poster, src",
+                        detailUrl = "a",
+                        duration = ".duration",
+                        detailTitle = "h1",
+                        detailDescription = ".video-details, .entry-content p, p",
+                        detailThumbnail = "meta[property='og:image'], video[poster], img",
+                        player = "video#main-video, video",
+                        videoSource = "video#main-video source, meta[property='og:video'], video source, source[type='video/mp4']"
                     ),
                     contentPolicy = ContentPolicy(
                         rightsStatus = "Public Web Index",

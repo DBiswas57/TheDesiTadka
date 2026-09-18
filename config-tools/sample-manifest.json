@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "configVersion": 105,
+  "configVersion": 106,
   "generatedAt": 1773532800000,
   "expiresAt": 1893456000000,
   "minimumAppVersion": 1,
@@ -358,6 +358,216 @@
         "rightsStatus": "Public Web Index",
         "termsUrl": "https://bmaal.io/disclaimer/",
         "privacyPolicyUrl": "https://bmaal.io/privacy-policy/"
+      }
+    },
+    {
+      "id": "chiggywiggy",
+      "name": "ChiggyWiggy",
+      "enabled": true,
+      "baseUrl": "https://chiggywiggy.com",
+      "adapter": "html_selector",
+      "capabilities": [
+        "HOME",
+        "CATEGORY",
+        "SEARCH",
+        "DETAILS",
+        "STREAM",
+        "DOWNLOAD"
+      ],
+      "icon": "https://chiggywiggy.com/media/videos/tmb/loading.jpg",
+      "description": "Viral Sex Videos, MMS, Desi, Indian Porn",
+      "navigation": {
+        "home": "/",
+        "search": "/search/video/?s={query}",
+        "page": "/?page={page}",
+        "categories": "/categories/"
+      },
+      "selectors": {
+        "item": "div.video-thumb, div.video-preview, .thumb-block",
+        "title": "a[title], img[alt]",
+        "thumbnail": "img.thumb, img",
+        "thumbnailAttr": "data-src, src",
+        "detailUrl": "a",
+        "duration": ".video-duration, .duration, span.time",
+        "detailTitle": "h1",
+        "detailDescription": ".video-details, .description, p",
+        "detailThumbnail": "meta[property='og:image'], img.thumb, img",
+        "player": "video, script",
+        "videoSource": "source[type='video/mp4'], video source, script"
+      },
+      "contentPolicy": {
+        "isAuthorizedPublicSource": true,
+        "rightsStatus": "Public Web Index",
+        "termsUrl": "https://chiggywiggy.com/terms/",
+        "privacyPolicyUrl": "https://chiggywiggy.com/privacy/"
+      }
+    },
+    {
+      "id": "desibabe",
+      "name": "DesiBabe",
+      "enabled": true,
+      "baseUrl": "https://desibabe.to",
+      "adapter": "html_selector",
+      "capabilities": [
+        "HOME",
+        "CATEGORY",
+        "SEARCH",
+        "DETAILS",
+        "STREAM",
+        "DOWNLOAD"
+      ],
+      "icon": "https://desibabe.to/favicon.ico",
+      "description": "Desi Babe Leaked XXX & MMS Videos",
+      "navigation": {
+        "home": "/",
+        "search": "/search?q={query}",
+        "page": "/?page={page}",
+        "categories": "/categories"
+      },
+      "selectors": {
+        "item": "a[href*='/post/']",
+        "title": "h3, img[alt]",
+        "thumbnail": "img",
+        "thumbnailAttr": "src",
+        "detailUrl": "this",
+        "duration": ".duration",
+        "detailTitle": "h1",
+        "detailDescription": ".post-description, p",
+        "detailThumbnail": "meta[property='og:image'], img",
+        "player": "iframe[src*='downloaddirect.xyz'], iframe, video",
+        "videoSource": "iframe[src*='downloaddirect.xyz'], iframe, video source"
+      },
+      "contentPolicy": {
+        "isAuthorizedPublicSource": true,
+        "rightsStatus": "Public Web Index",
+        "termsUrl": "https://desibabe.to/terms",
+        "privacyPolicyUrl": "https://desibabe.to/privacy"
+      }
+    },
+    {
+      "id": "desigirlxx",
+      "name": "DesiGirlXX",
+      "enabled": true,
+      "baseUrl": "https://desigirlxx.beer",
+      "adapter": "html_selector",
+      "capabilities": [
+        "HOME",
+        "CATEGORY",
+        "SEARCH",
+        "DETAILS",
+        "STREAM",
+        "DOWNLOAD"
+      ],
+      "icon": "https://desigirlxx.beer/wp-content/uploads/2024/11/cropped-Desigilrxx-1.png",
+      "description": "Desi Girl XX Porn Videos & MMS",
+      "navigation": {
+        "home": "/",
+        "search": "/?s={query}",
+        "page": "/page/{page}/",
+        "categories": "/category/hot-web-series"
+      },
+      "selectors": {
+        "item": "article.loop-video, article.thumb-block, article.video-preview-item",
+        "title": "header h2 a, a[title]",
+        "thumbnail": "img.video-main-thumb, img",
+        "thumbnailAttr": "data-main-thumb, src, data-src",
+        "detailUrl": "header h2 a, a",
+        "duration": ".duration",
+        "detailTitle": "h1.entry-title, h1",
+        "detailDescription": ".entry-content p, .video-details, p",
+        "detailThumbnail": "meta[property='og:image'], img.wp-post-image, img",
+        "player": "iframe[src*='playmate.to'], iframe, video",
+        "videoSource": "iframe[src*='playmate.to'], iframe, video source, source[type='video/mp4']"
+      },
+      "contentPolicy": {
+        "isAuthorizedPublicSource": true,
+        "rightsStatus": "Public Web Index",
+        "termsUrl": "https://desigirlxx.beer/terms",
+        "privacyPolicyUrl": "https://desigirlxx.beer/privacy"
+      }
+    },
+    {
+      "id": "desimaals",
+      "name": "DesiMaals",
+      "enabled": true,
+      "baseUrl": "https://www.desimaals.fun",
+      "adapter": "html_selector",
+      "capabilities": [
+        "HOME",
+        "CATEGORY",
+        "SEARCH",
+        "DETAILS",
+        "STREAM",
+        "DOWNLOAD"
+      ],
+      "icon": "https://www.desimaals.fun/favicon.ico",
+      "description": "DesiMaals Hot Web Series, Desi MMS Videos & Short Films",
+      "navigation": {
+        "home": "/?filter=latest",
+        "search": "/?s={query}",
+        "page": "/page/{page}/?filter=latest",
+        "categories": "/categories/"
+      },
+      "selectors": {
+        "item": "article.loop-video, article.thumb-block, article.post",
+        "title": "header h2 a, a[title]",
+        "thumbnail": "img.video-main-thumb, img",
+        "thumbnailAttr": "src, data-src",
+        "detailUrl": "header h2 a, a",
+        "duration": ".duration",
+        "detailTitle": "h1.entry-title, h1",
+        "detailDescription": ".entry-content p, .video-details, p",
+        "detailThumbnail": "meta[property='og:image'], img",
+        "player": "iframe[src*='clean-tube-player'], iframe, video",
+        "videoSource": "iframe[src*='clean-tube-player'], iframe, video source, source[type='video/mp4']"
+      },
+      "contentPolicy": {
+        "isAuthorizedPublicSource": true,
+        "rightsStatus": "Public Web Index",
+        "termsUrl": "https://www.desimaals.fun/terms",
+        "privacyPolicyUrl": "https://www.desimaals.fun/privacy"
+      }
+    },
+    {
+      "id": "desivideo",
+      "name": "DesiVideo",
+      "enabled": true,
+      "baseUrl": "https://desivideo.net",
+      "adapter": "html_selector",
+      "capabilities": [
+        "HOME",
+        "CATEGORY",
+        "SEARCH",
+        "DETAILS",
+        "STREAM",
+        "DOWNLOAD"
+      ],
+      "icon": "https://desivideo.net/favicon.ico",
+      "description": "Free Indian, Pakistani & Bangladeshi Sex Clips - DesiVideo.Net",
+      "navigation": {
+        "home": "/latest-video",
+        "search": "/search?s={query}",
+        "page": "?page={page}",
+        "categories": "/categories"
+      },
+      "selectors": {
+        "item": "article.thumb-block, article.post",
+        "title": "a[title]",
+        "thumbnail": "video[poster], img",
+        "thumbnailAttr": "poster, src",
+        "detailUrl": "a",
+        "duration": ".duration",
+        "detailTitle": "h1",
+        "detailDescription": ".video-details, .entry-content p, p",
+        "detailThumbnail": "meta[property='og:image'], video[poster], img",
+        "player": "video#main-video, video",
+        "videoSource": "video#main-video source, meta[property='og:video'], video source, source[type='video/mp4']"
+      },
+      "contentPolicy": {
+        "isAuthorizedPublicSource": true,
+        "rightsStatus": "Public Web Index",
+        "termsUrl": "https://desivideo.net/terms",
+        "privacyPolicyUrl": "https://desivideo.net/privacy"
       }
     }
   ]

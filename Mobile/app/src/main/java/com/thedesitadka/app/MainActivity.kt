@@ -8,6 +8,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.BackHandler
+import com.thedesitadka.app.storage.PreferenceStore
+import com.thedesitadka.core.security.StreamHubLogger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -181,6 +185,20 @@ private fun UpdateGateScreen(container: AppContainer) {
                 } else {
                     // Up to date & verified — allow normal app usage
                     gateState = GateState.PASSED
+
+                    // Background auto-sync of newer catalog configurations (safe and non-blocking)
+                    coroutineScope.launch(Dispatchers.IO) {
+                        try {
+                            val success = container.configRepository.syncRemoteConfig(PreferenceStore.DEFAULT_CONFIG_URL)
+                            if (success) {
+                                val updated = container.configRepository.manifestFlow.value
+                                container.providerEngine.updateFromManifest(updated)
+                                StreamHubLogger.i("MainActivity", "Catalog automatically synchronized to v${updated.configVersion} (${updated.providers.size} providers)")
+                            }
+                        } catch (e: Exception) {
+                            StreamHubLogger.w("MainActivity", "Background auto-sync note: ${e.message}")
+                        }
+                    }
                 }
             }
         }.onFailure { err ->
@@ -558,11 +576,6 @@ private fun AppNavigationContent(container: AppContainer) {
                     providerEngine = container.providerEngine,
                     preferenceStore = container.preferenceStore,
                     monetizationManager = container.monetizationManager,
-                    onResetToDefault = {
-                        val defaultManifest = container.getDefaultManifest()
-                        container.configRepository.updateManifest(defaultManifest)
-                        container.providerEngine.updateFromManifest(defaultManifest)
-                    },
                     onDiagnosticsClick = { navController.navigate(Screen.Diagnostics.route) },
                     onBackClick = { navController.popBackStack() }
                 )

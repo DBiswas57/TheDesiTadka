@@ -119,6 +119,14 @@ fun HomeScreen(
     val watchHistory by watchHistoryFlow.collectAsState(initial = emptyList())
     val categories = ContentCategoryDefinition.DEFAULT_CATEGORIES
 
+    val carouselItems = remember(aggregatedVideos) {
+        aggregatedVideos
+            .filter { it.thumbnailUrl.isNotBlank() }
+            .distinctBy { it.id }
+            .shuffled()
+            .take(10)
+    }
+
 
 
     LaunchedEffect(selectedCategoryId, reloadTrigger) {
@@ -188,12 +196,12 @@ fun HomeScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 168.dp),
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 168.dp),
             state = gridState,
-            contentPadding = PaddingValues(bottom = 32.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(start = 8.dp, end = 8.dp, bottom = 32.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -224,11 +232,11 @@ fun HomeScreen(
                 }
             }
 
-            // 2. Hero Featured Item
-            if (aggregatedVideos.isNotEmpty()) {
+            // 2. Hero Carousel (Up to 10 items)
+            if (carouselItems.isNotEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     HeroCarousel(
-                        featuredItem = aggregatedVideos.firstOrNull(),
+                        items = carouselItems,
                         onWatchClick = { onVideoClick(it) }
                     )
                 }
@@ -249,8 +257,8 @@ fun HomeScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            contentPadding = PaddingValues(horizontal = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(watchHistory) { history ->
                                 Box(
@@ -469,17 +477,16 @@ fun HomeScreen(
             }
 
             // Aggregated Media Grid Items
-            val remainingVideos = aggregatedVideos.drop(1)
+            val remainingVideos = aggregatedVideos.filterNot { it.id in carouselItems.map { c -> c.id } }
+                .ifEmpty { aggregatedVideos }
             val batch1 = remainingVideos.take(8)
             val batch2 = remainingVideos.drop(8)
 
             items(batch1, key = { it.id }) { item ->
-                Box(modifier = Modifier.padding(horizontal = 8.dp)) {
-                    VideoCard(
-                        videoItem = item,
-                        onClick = { onVideoClick(item) }
-                    )
-                }
+                VideoCard(
+                    videoItem = item,
+                    onClick = { onVideoClick(item) }
+                )
             }
 
             if (monetizationManager != null && batch1.isNotEmpty()) {
@@ -492,12 +499,10 @@ fun HomeScreen(
             }
 
             items(batch2, key = { it.id }) { item ->
-                Box(modifier = Modifier.padding(horizontal = 8.dp)) {
-                    VideoCard(
-                        videoItem = item,
-                        onClick = { onVideoClick(item) }
-                    )
-                }
+                VideoCard(
+                    videoItem = item,
+                    onClick = { onVideoClick(item) }
+                )
             }
 
             // Pagination loader

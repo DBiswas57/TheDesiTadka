@@ -7,6 +7,7 @@ data class PlayerPlaybackState(
     val durationMs: Long = 0L,
     val bufferedPositionMs: Long = 0L,
     val isPlaying: Boolean = false,
+    val playWhenReady: Boolean = false,
     val exoPlaybackState: Int = Player.STATE_IDLE,
     val playbackSpeed: Float = 1.0f,
     val isMuted: Boolean = false,
