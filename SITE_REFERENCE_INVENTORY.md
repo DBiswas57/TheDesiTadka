@@ -1,6 +1,6 @@
-# TheDesiTadka: Site Reference Inventory (27 References, 26 Active Retained)
+# TheDesiTadka: Site Reference Inventory (28 References, 27 Active Retained)
 
-This document provides the complete forensic inventory and classification of all **27 reference directories** audited directly in `c:\Users\LearnersYT\source\TheDesiTadka\SiteReferrence`.
+This document provides the complete forensic inventory and classification of all **28 reference directories** audited directly in `c:\Users\LearnersYT\source\TheDesiTadka\SiteReferrence`.
 
 ## Master Reference Inventory Table
 
@@ -33,6 +33,7 @@ This document provides the complete forensic inventory and classification of all
 | 25 | `xnxx.com` | `xnxx.com` | `.com` | `xvideos_network_family` | `xnxx` | **IMPLEMENTED** | Xvideos/XNXX Engine (`setVideoUrlLow/High/Hls`) |
 | 26 | `xvideos.com` | `xvideos.com` | `.com` | `xvideos_network_family` | `xvideos` | **IMPLEMENTED** | Xvideos/XNXX Engine (`setVideoUrlLow/High/Hls`) |
 | 27 | `xxxindianstories.com` | `xxxindianstories.com` | `.com` | `kvs_tube_family` | `xxxindianstories` | **IMPLEMENTED** | KVS (Kernel Video Sharing) + `/videos/get_file/` MP4 |
+| 28 | `bmaal.com` | `bmaal.io` | `.io` / `.com` | `web_series_family` | `bmaal` | **IMPLEMENTED** | Indian Adult OTT & Web Series (ULLU, PrimeShots, Jugnu) + Direct CDN MP4 (`cdn.azmaal.com`) |
 
 ---
 
@@ -72,3 +73,8 @@ This document provides the complete forensic inventory and classification of all
 ### 7. Global Tube & Stream Embed Families
 - **Members**: `wowmasti.com` (LuluStream), `xhamster.com` (XHamster), `webxseries.hot` (JSON API).
 - **Mechanism**: Custom stream extractors and embed resolution.
+
+### 8. Web Series & Adult OTT Family (`web_series_family`)
+- **Members**: `bmaal.io` / `bmaal.com`.
+- **Mechanism**: Dedicated Indian 18+ OTT platform aggregator indexing episodes across ULLU, PrimeShots, Jugnu, Atrangii, PrimePlay, Rabbit, VOOVI, Makhan, BulBul Play.
+- **Handling**: Handled natively in `HtmlSelectorAdapter` with `article.video-card` item selectors, `/ott/` category resolution, and direct authenticated CDN progressive MP4 streams via `xplayer-lazy-source` (`cdn.azmaal.com`).

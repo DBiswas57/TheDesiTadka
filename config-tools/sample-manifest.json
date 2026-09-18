@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "configVersion": 104,
+  "configVersion": 105,
   "generatedAt": 1773532800000,
   "expiresAt": 1893456000000,
   "minimumAppVersion": 1,
@@ -314,6 +314,50 @@
         "rightsStatus": "Public Web Index",
         "termsUrl": "https://webxseries.hot/terms/",
         "privacyPolicyUrl": "https://webxseries.hot/privacy/"
+      }
+    },
+    {
+      "id": "bmaal",
+      "name": "BMaal",
+      "enabled": true,
+      "baseUrl": "https://bmaal.io",
+      "adapter": "html_selector",
+      "capabilities": [
+        "HOME",
+        "CATEGORY",
+        "SEARCH",
+        "DETAILS",
+        "STREAM",
+        "DOWNLOAD"
+      ],
+      "icon": "https://bmaal.io/wp-content/uploads/2026/02/favicon.png",
+      "description": "Indian OTT 18+ Web Series (ULLU, PrimeShots, Jugnu, Makhan, BulBul Play)",
+      "navigation": {
+        "home": "/",
+        "search": "/?s={query}",
+        "page": "/page/{page}/",
+        "categories": "/ott/"
+      },
+      "selectors": {
+        "item": "article.video-card, article.post, article",
+        "title": "h2.loop-title a, h2.loop-title, h2 a, a[title]",
+        "thumbnail": "div.video-thumbnail img, img.wp-post-image, img",
+        "thumbnailAttr": "src",
+        "detailUrl": "div.video-thumbnail a, h2.loop-title a, a",
+        "duration": "span.video-duration-badge, .duration",
+        "detailTitle": "h1.entry-title, h1",
+        "detailDescription": ".series-description, .entry-content p, .video-details, p",
+        "detailThumbnail": "meta[property='og:image'], img.wp-post-image, img",
+        "player": "div.xplayer, video, iframe",
+        "videoSource": "div.xplayer-lazy-source, .xplayer-lazy-source, meta[itemprop*='embedUrl'], video source[src], video[src], source[type='video/mp4']",
+        "videoSourceAttr": "data-src",
+        "relatedItems": ".related-series article, .related-videos article, article.video-card"
+      },
+      "contentPolicy": {
+        "isAuthorizedPublicSource": true,
+        "rightsStatus": "Public Web Index",
+        "termsUrl": "https://bmaal.io/disclaimer/",
+        "privacyPolicyUrl": "https://bmaal.io/privacy-policy/"
       }
     }
   ]

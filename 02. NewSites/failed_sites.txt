@@ -1,0 +1,16 @@
+clipsage.com - https://www.clipsage.com/ - SSLError
+masalaseen.com - https://www.masalaseen.com/ - ConnectionError
+aagmaal.com - https://aagmaal.com/ - RetryError
+uncutmaza.com.co - https://uncutmaza.com.co/ - ConnectionError
+indianporngirl.com - https://www.indianporngirl.com/ - ConnectionError
+wowuncut.com - https://wowuncut.com/ - ConnectionError
+wowmasti.com - https://wowmasti.com/ - ConnectionError
+fry99.cc - https://fry99.cc/ - RetryError
+pornx11.com - https://pornx11.com/ - RetryError
+uncutmaza.com - https://uncutmaza.com/ - ConnectionError
+happy2hub.org - https://happy2hub.org/ - SSLError
+desibp.com.in - https://desibp.com.in/ - ConnectionError
+xbaaz.com - https://xbaaz.com/ - RetryError
+fsiblog4.blog - https://fsiblog4.blog/ - ConnectTimeout
+uncutmaal.com - https://uncutmaal.com/ - ConnectionError
+webmaal.cyou - https://webmaal.cyou/ - SSLError

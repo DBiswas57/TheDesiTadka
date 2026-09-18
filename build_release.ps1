@@ -56,7 +56,7 @@ if (Test-Path $ReleaseApkDir) {
     $SourceApk = Join-Path $ReleaseApkDir "app-release.apk"
     if (Test-Path $SourceApk) {
         Copy-Item -Path $SourceApk -Destination (Join-Path $DestReleaseDir "TheDesiTadka-release.apk") -Force
-        Copy-Item -Path $SourceApk -Destination (Join-Path $DestReleaseDir "TheDesiTadka-v1.0.1-release.apk") -Force
+        Copy-Item -Path $SourceApk -Destination (Join-Path $DestReleaseDir "TheDesiTadka-v1.0.5-release.apk") -Force
         Write-Host "[+] Copied release APKs to: $DestReleaseDir" -ForegroundColor Cyan
     }
 

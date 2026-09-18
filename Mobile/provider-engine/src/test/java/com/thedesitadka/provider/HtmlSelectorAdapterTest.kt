@@ -893,6 +893,123 @@ class HtmlSelectorAdapterTest {
         val unpacked = adapter.unpackDeanEdwards(packedScript)
         assertTrue("Should unpack string", unpacked.contains("var streamUrl=\"https://example.com/video.mp4\";"))
     }
+
+    @Test
+    fun testBMaalOttAndSeriesSelectors() {
+        val bmaalConfig = ProviderConfig(
+            id = "bmaal",
+            familyId = "web_series_family",
+            name = "BMaal",
+            baseUrl = "https://bmaal.io",
+            adapter = "html_selector",
+            capabilities = listOf(
+                ProviderCapability.HOME,
+                ProviderCapability.CATEGORY,
+                ProviderCapability.SEARCH,
+                ProviderCapability.DETAILS,
+                ProviderCapability.STREAM,
+                ProviderCapability.DOWNLOAD
+            ),
+            navigation = NavigationConfig(
+                home = "/",
+                search = "/?s={query}",
+                page = "/page/{page}/",
+                categories = "/ott/"
+            ),
+            selectors = SelectorConfig(
+                item = "article.video-card, article.post, article",
+                title = "h2.loop-title a, h2.loop-title, h2 a, a[title]",
+                thumbnail = "div.video-thumbnail img, img.wp-post-image, img",
+                thumbnailAttr = "src",
+                detailUrl = "div.video-thumbnail a, h2.loop-title a, a",
+                duration = "span.video-duration-badge, .duration",
+                detailTitle = "h1.entry-title, h1",
+                detailDescription = ".series-description, .entry-content p, .video-details, p",
+                detailThumbnail = "meta[property='og:image'], img.wp-post-image, img",
+                player = "div.xplayer, video, iframe",
+                videoSource = "div.xplayer-lazy-source, .xplayer-lazy-source, meta[itemprop*='embedUrl'], video source[src], video[src], source[type='video/mp4']",
+                videoSourceAttr = "data-src",
+                relatedItems = ".related-series article, .related-videos article, article.video-card"
+            )
+        )
+
+        val adapter = HtmlSelectorAdapter(bmaalConfig)
+
+        // 1. Verify listing extraction
+        val listingHtml = """
+            <div class="video-grid">
+                <article class="video-card post-6606 post type-post status-publish format-standard has-post-thumbnail hentry category-ullu series-zaroorat-s2">
+                    <div class="video-thumbnail">
+                        <a href="https://bmaal.io/zaroorat-s2-episode-1/" title="Zaroorat S2 Episode 1">
+                            <img width="400" height="225" src="https://bmaal.io/wp-content/uploads/2026/03/Zaroorat-S2-Episode-1-400x225.webp" class="attachment-medium size-medium wp-post-image" alt="Zaroorat S2 Episode 1" />
+                        </a>
+                        <span id="taxo1" class="taxo1 video-category ott-badge">ULLU</span>
+                        <span class="video-duration-badge">20 min</span>
+                    </div>
+                    <div class="video-content">
+                        <header class="entry-header">
+                            <h2 class="loop-title">
+                                <a href="https://bmaal.io/zaroorat-s2-episode-1/">Zaroorat S2 Episode 1</a>
+                            </h2>
+                        </header>
+                    </div>
+                </article>
+            </div>
+        """.trimIndent()
+
+        val feedPage = adapter.parseListingHtml(listingHtml, 1).getOrThrow()
+        assertEquals(1, feedPage.items.size)
+        val item = feedPage.items[0]
+        assertEquals("Zaroorat S2 Episode 1", item.title)
+        assertEquals("https://bmaal.io/zaroorat-s2-episode-1/", item.detailUrl)
+        val docListing = org.jsoup.Jsoup.parse(listingHtml, "https://bmaal.io")
+        assertEquals("20 min", docListing.select(bmaalConfig.selectors!!.duration).text())
+
+        // 2. Verify OTT platform categories extraction
+        val ottPageHtml = """
+            <div class="taxonomy-grid">
+                <a href="https://bmaal.io/ott/ullu/" data-name="ullu" class="taxonomy-item-card">
+                    <div class="taxonomy-card-content">
+                        <span class="taxonomy-name">ULLU</span>
+                        <span class="taxonomy-count">1,574</span>
+                    </div>
+                </a>
+                <a href="https://bmaal.io/ott/primeshots/" data-name="primeshots" class="taxonomy-item-card">
+                    <div class="taxonomy-card-content">
+                        <span class="taxonomy-name">PrimeShots</span>
+                        <span class="taxonomy-count">206</span>
+                    </div>
+                </a>
+            </div>
+        """.trimIndent()
+
+        val doc = org.jsoup.Jsoup.parse(ottPageHtml, "https://bmaal.io")
+        val catElements = doc.select("a[href*='/category/'], a[href*='/categories/'], a[href*='/ott/'], a[href*='/series/'], a.taxonomy-item-card")
+        assertEquals(2, catElements.size)
+        val ulluName = catElements[0].select(".taxonomy-name, .cat-name, span.title, p.title").first()?.text()?.trim()
+        assertEquals("ULLU", ulluName)
+
+        // 3. Verify media resolution from xplayer-lazy-source
+        val detailPageHtml = """
+            <div class="series-layout">
+                <div class="series-video-section">
+                    <div class="video-player">
+                        <div class="video-container">
+                            <div class="xplayer xplayer-lazy" data-xplayer="">
+                                <div class="xplayer-lazy-source" data-src="https://cdn.azmaal.com/ULLU/Virgin%20Boys/Virgin%20Boys%20Episode%207.mp4?token=123" data-type="video/mp4"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        """.trimIndent()
+
+        val mediaResult = adapter.parsePlayableMediaHtml(detailPageHtml, "https://bmaal.io/virgin-boys-episode-7/")
+        val sources = mediaResult.getOrThrow()
+        assertTrue("Should extract video stream from BMaal xplayer", sources.isNotEmpty())
+        assertEquals("https://cdn.azmaal.com/ULLU/Virgin%20Boys/Virgin%20Boys%20Episode%207.mp4?token=123", sources[0].url)
+        assertEquals(MediaSourceType.PROGRESSIVE_MP4, sources[0].type)
+    }
 }
 
 

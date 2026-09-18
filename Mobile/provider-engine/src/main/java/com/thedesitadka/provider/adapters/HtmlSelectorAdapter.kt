@@ -72,12 +72,16 @@ class HtmlSelectorAdapter(
             val html = NetworkClient.fetchString(targetUrl)
             val doc = Jsoup.parse(html, activeBaseUrl)
 
-            val categoryElements = doc.select("a[href*='/category/'], a[href*='/categories/'], .category-list a, .categories a, div.thumb-cat p.title a, .thumb-block.thumb-cat p.title a")
+            val categoryElements = doc.select("a[href*='/category/'], a[href*='/categories/'], a[href*='/ott/'], a[href*='/series/'], .category-list a, .categories a, div.thumb-cat p.title a, .thumb-block.thumb-cat p.title a, a.taxonomy-item-card")
             val categories = categoryElements.mapNotNull { el ->
-                val name = el.text().trim()
+                val rawName = el.select(".taxonomy-name, .cat-name, span.title, p.title").firstOrNull()?.text()?.trim()
+                    ?.ifEmpty { null }
+                    ?: el.text().substringBefore("\n").trim()
+                val name = rawName.replace(Regex("""\s+"""), " ")
                 val href = el.attr("href").trim()
                 if (name.isNotBlank() && href.isNotBlank()) {
-                    if (href.contains("/photos/", ignoreCase = true) || href.contains("/creators/", ignoreCase = true) || href.contains("/pornstars/", ignoreCase = true)) {
+                    if (href.contains("/photos/", ignoreCase = true) || href.contains("/creators/", ignoreCase = true) || href.contains("/pornstars/", ignoreCase = true)
+                        || href.endsWith("/ott/") || href.endsWith("/series/")) {
                         return@mapNotNull null
                     }
                     val id = href.trimEnd('/').substringAfterLast('/')

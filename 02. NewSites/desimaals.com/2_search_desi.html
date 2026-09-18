@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+
+
+<html lang="en-US" prefix="og: https://ogp.me/ns#">
+<head>
+<meta charset="UTF-8">
+<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+<link rel="profile" href="https://gmpg.org/xfn/11">
+<link rel="icon" href="
+https://www.desimaals.fun/wp-content/uploads/2023/12/favicon.ico">
+
+<!-- Meta social networks -->
+
+<!-- Temp Style -->
+<style>
+	.post-thumbnail {
+		aspect-ratio: 16/9;
+	}
+	.post-thumbnail video,
+	.post-thumbnail img {
+		object-fit: fill;
+	}
+
+	.video-debounce-bar {
+		background: #FF3565!important;
+	}
+	
+			button,
+		.button,
+		input[type="button"],
+		input[type="reset"],
+		input[type="submit"],
+		.label,
+		.label:visited,
+		.pagination ul li a,
+		.widget_categories ul li a,
+		.comment-reply-link,
+		a.tag-cloud-link,
+		.template-actors li a {
+			background: -moz-linear-gradient(top, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 70%); /* FF3.6-15 */
+			background: -webkit-linear-gradient(top, rgba(0,0,0,0.3) 0%,rgba(0,0,0,0) 70%); /* Chrome10-25,Safari5.1-6 */
+			background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%,rgba(0,0,0,0) 70%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a62b2b2b', endColorstr='#00000000',GradientType=0 ); /* IE6-9 */
+			-moz-box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+			-webkit-box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+			-o-box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+			box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+		}
+		input[type="text"],
+		input[type="email"],
+		input[type="url"],
+		input[type="password"],
+		input[type="search"],
+		input[type="number"],
+		input[type="tel"],
+		input[type="range"],
+		input[type="date"],
+		input[type="month"],
+		input[type="week"],
+		input[type="time"],
+		input[type="datetime"],
+		input[type="datetime-local"],
+		input[type="color"],
+		select,
+		textarea,
+		.wp-editor-container {
+			-moz-box-shadow: 0 0 1px rgba(255, 255, 255, 0.3), 0 0 5px black inset;
+			-webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.3), 0 0 5px black inset;
+			-o-box-shadow: 0 0 1px rgba(255, 255, 255, 0.3), 0 0 5px black inset;
+			box-shadow: 0 0 1px rgba(255, 255, 255, 0.3), 0 0 5px black inset;
+		}
+		#site-navigation {
+			background: #222222;
+			background: -moz-linear-gradient(top, #222222 0%, #333333 50%, #222222 51%, #151515 100%);
+			background: -webkit-linear-gradient(top, #222222 0%,#333333 50%,#222222 51%,#151515 100%);
+			background: linear-gradient(to bottom, #222222 0%,#333333 50%,#222222 51%,#151515 100%);
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#222222', endColorstr='#151515',GradientType=0 );
+			-moz-box-shadow: 0 6px 6px 0 rgba(0, 0, 0, 0.12);
+			-webkit-box-shadow: 0 6px 6px 0 rgba(0, 0, 0, 0.12);
+			-o-box-shadow: 0 6px 6px 0 rgba(0, 0, 0, 0.12);
+			box-shadow: 0 6px 6px 0 rgba(0, 0, 0, 0.12);
+		}
+		#site-navigation > ul > li:hover > a,
+		#site-navigation ul li.current-menu-item a {
+			background: -moz-linear-gradient(top, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 70%);
+			background: -webkit-linear-gradient(top, rgba(0,0,0,0.3) 0%,rgba(0,0,0,0) 70%);
+			background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%,rgba(0,0,0,0) 70%);
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a62b2b2b', endColorstr='#00000000',GradientType=0 );
+			-moz-box-shadow: inset 0px 0px 2px 0px #000000;
+			-webkit-box-shadow: inset 0px 0px 2px 0px #000000;
+			-o-box-shadow: inset 0px 0px 2px 0px #000000;
+			box-shadow: inset 0px 0px 2px 0px #000000;
+			filter:progid:DXImageTransform.Microsoft.Shadow(color=#000000, Direction=NaN, Strength=2);
+		}
+		.rating-bar,
+		.categories-list .thumb-block .entry-header,
+		.actors-list .thumb-block .entry-header,
+		#filters .filters-select,
+		#filters .filters-options {
+			background: -moz-linear-gradient(top, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 70%); /* FF3.6-15 */
+			background: -webkit-linear-gradient(top, rgba(0,0,0,0.3) 0%,rgba(0,0,0,0) 70%); /* Chrome10-25,Safari5.1-6 */
+			background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%,rgba(0,0,0,0) 70%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+			-moz-box-shadow: inset 0px 0px 2px 0px #000000;
+			-webkit-box-shadow: inset 0px 0px 2px 0px #000000;
+			-o-box-shadow: inset 0px 0px 2px 0px #000000;
+			box-shadow: inset 0px 0px 2px 0px #000000;
+			filter:progid:DXImageTransform.Microsoft.Shadow(color=#000000, Direction=NaN, Strength=2);
+		}
+		.breadcrumbs-area {
+			background: -moz-linear-gradient(top, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 70%); /* FF3.6-15 */
+			background: -webkit-linear-gradient(top, rgba(0,0,0,0.3) 0%,rgba(0,0,0,0) 70%); /* Chrome10-25,Safari5.1-6 */
+			background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%,rgba(0,0,0,0) 70%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+		}
+	
+	.site-title a {
+		font-family: Open Sans;
+		font-size: 36px;
+	}
+	.site-branding .logo img {
+		max-width: 300px;
+		max-height: 120px;
+		margin-top: 0px;
+		margin-left: 0px;
+	}
+	a,
+	.site-title a i,
+	.thumb-block:hover .rating-bar i,
+	.categories-list .thumb-block:hover .entry-header .cat-title:before,
+	.required,
+	.like #more:hover i,
+	.dislike #less:hover i,
+	.top-bar i:hover,
+	.main-navigation .menu-item-has-children > a:after,
+	.menu-toggle i,
+	.main-navigation.toggled li:hover > a,
+	.main-navigation.toggled li.focus > a,
+	.main-navigation.toggled li.current_page_item > a,
+	.main-navigation.toggled li.current-menu-item > a,
+	#filters .filters-select:after,
+	.morelink i,
+	.top-bar .membership a i,
+	.thumb-block:hover .photos-count i {
+		color: #FF3565;
+	}
+	button,
+	.button,
+	input[type="button"],
+	input[type="reset"],
+	input[type="submit"],
+	.label,
+	.pagination ul li a.current,
+	.pagination ul li a:hover,
+	body #filters .label.secondary.active,
+	.label.secondary:hover,
+	.main-navigation li:hover > a,
+	.main-navigation li.focus > a,
+	.main-navigation li.current_page_item > a,
+	.main-navigation li.current-menu-item > a,
+	.widget_categories ul li a:hover,
+	.comment-reply-link,
+	a.tag-cloud-link:hover,
+	.template-actors li a:hover {
+		border-color: #FF3565!important;
+		background-color: #FF3565!important;
+	}
+
+	body.single-post #video-about .tags .tags-list .label-tag,
+	body.single-post #video-about .tags .tags-list .label-tag:visited {
+		background: #FF3565!important;
+		border-color: #FF3565!important;
+		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+		border-radius: 7px;
+	}
+
+	body.single-post #video-about .tags .tags-list .label-tag:hover,
+	body.single-post #video-about .tags .tags-list .label-tag:focus,
+	body.single-post #video-about .tags .tags-list .label-tag:active {
+		background: #ff5a92 !important;
+		border-color: #ff7cab !important;
+		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 6px 16px rgba(255, 73, 132, 0.28) !important;
+		transform: translateY(-1px);
+	}
+
+	body.single-post #video-about .tags .tags-list .label-category,
+	body.single-post #video-about .tags .tags-list .label-category:visited {
+		background: linear-gradient(135deg, #ff9f43 0%, #ff6b35 100%) !important;
+		border-color: #ffc067 !important;
+		box-shadow: 0 0 0 1px rgba(255, 192, 103, 0.18), 0 6px 16px rgba(255, 120, 64, 0.24) !important;
+		border-radius: 7px;
+	}
+
+	body.single-post #video-about .tags .tags-list .label-category:hover,
+	body.single-post #video-about .tags .tags-list .label-category:focus,
+	body.single-post #video-about .tags .tags-list .label-category:active {
+		background: linear-gradient(135deg, #ffb15a 0%, #ff7b3d 100%) !important;
+		border-color: #ffd28e !important;
+		box-shadow: 0 0 0 1px rgba(255, 210, 142, 0.24), 0 8px 20px rgba(255, 120, 64, 0.3) !important;
+		transform: translateY(-1px) scale(1.01);
+	}
+
+	@supports selector(a:has(i)) {
+		body.single-post #video-about .tags .tags-list a.label:has(.fa-folder-open),
+		body.single-post #video-about .tags .tags-list a.label:has(.fa-folder-open):visited {
+			background: linear-gradient(135deg, #ff9f43 0%, #ff6b35 100%) !important;
+			border-color: #ffc067 !important;
+			box-shadow: 0 0 0 1px rgba(255, 192, 103, 0.18), 0 6px 16px rgba(255, 120, 64, 0.24) !important;
+			border-radius: 7px;
+		}
+
+		body.single-post #video-about .tags .tags-list a.label:has(.fa-folder-open):hover,
+		body.single-post #video-about .tags .tags-list a.label:has(.fa-folder-open):focus,
+		body.single-post #video-about .tags .tags-list a.label:has(.fa-folder-open):active {
+			background: linear-gradient(135deg, #ffb15a 0%, #ff7b3d 100%) !important;
+			border-color: #ffd28e !important;
+			box-shadow: 0 0 0 1px rgba(255, 210, 142, 0.24), 0 8px 20px rgba(255, 120, 64, 0.3) !important;
+			transform: translateY(-1px) scale(1.01);
+		}
+
+		body.single-post #video-about .tags .tags-list a.label:has(.fa-tag),
+		body.single-post #video-about .tags .tags-list a.label:has(.fa-tag):visited {
+			background: #FF3565!important;
+			border-color: #FF3565!important;
+			box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+			border-radius: 7px;
+		}
+
+		body.single-post #video-about .tags .tags-list a.label:has(.fa-tag):hover,
+		body.single-post #video-about .tags .tags-list a.label:has(.fa-tag):focus,
+		body.single-post #video-about .tags .tags-list a.label:has(.fa-tag):active {
+			background: #ff5a92 !important;
+			border-color: #ff7cab !important;
+			box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 6px 16px rgba(255, 73, 132, 0.28) !important;
+			transform: translateY(-1px);
+		}
+	}
+	.rating-bar-meter,
+	.vjs-play-progress,
+	#filters .filters-options span:hover,
+	.bx-wrapper .bx-controls-direction a,
+	.top-bar .social-share a:hover,
+	.thumb-block:hover span.hd-video,
+	.featured-carousel .slide a:hover span.hd-video,
+	.appContainer .ctaButton {
+		background-color: #FF3565!important;
+	}
+	#video-tabs button.tab-link.active,
+	.title-block,
+	.widget-title,
+	.page-title,
+	.page .entry-title,
+	.comments-title,
+	.comment-reply-title,
+	.morelink:hover {
+		border-color: #FF3565!important;
+	}
+
+	/* Small desktops ----------- */
+	@media only screen  and (min-width : 64.001em) and (max-width : 84em) {
+		#main .thumb-block {
+			width: 25%!important;
+		}
+	}
+
+	/* Desktops and laptops ----------- */
+	@media only screen  and (min-width : 84.001em) {
+		#main .thumb-block {
+			width: 25%!important;
+		}
+	}
+
+</style>
+
+<!-- Google Analytics -->
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0DT1FGTXSN"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-0DT1FGTXSN');
+</script>
+<!-- Meta Verification -->
+<meta name="google-site-verification" content="ywMX0fAjSFm6VxLhjcHGBOJ76-HZiq8CZOCraZre_dA" />
+
+<!-- Search Engine Optimization by Rank Math PRO - https://rankmath.com/ -->
+<title>desi - DesiMaals.com</title>
+<meta name="robots" content="follow, noindex"/>
+<meta property="og:locale" content="en_US" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="desi - DesiMaals.com" />
+<meta property="og:url" content="https://www.desimaals.fun/search/desi/" />
+<meta property="og:site_name" content="DesiMaals.com" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="desi - DesiMaals.com" />
+<script type="application/ld+json" class="rank-math-schema-pro">{"@context":"https://schema.org","@graph":[{"@type":"Person","@id":"https://www.desimaals.fun/#person","name":"DesiMaals.com"},{"@type":"WebSite","@id":"https://www.desimaals.fun/#website","url":"https://www.desimaals.fun","name":"DesiMaals.com","publisher":{"@id":"https://www.desimaals.fun/#person"},"inLanguage":"en-US"},{"@type":"SearchResultsPage","@id":"https://www.desimaals.fun/search/desi/#webpage","url":"https://www.desimaals.fun/search/desi/","name":"desi - DesiMaals.com","isPartOf":{"@id":"https://www.desimaals.fun/#website"},"inLanguage":"en-US"}]}</script>
+<!-- /Rank Math WordPress SEO plugin -->
+
+<link rel="alternate" type="application/rss+xml" title="DesiMaals.com &raquo; Feed" href="https://www.desimaals.fun/feed/" />
+<link rel="alternate" type="application/rss+xml" title="DesiMaals.com &raquo; Comments Feed" href="https://www.desimaals.fun/comments/feed/" />
+<link rel="alternate" type="application/rss+xml" title="DesiMaals.com &raquo; Search Results for &#8220;desi&#8221; Feed" href="https://www.desimaals.fun/search/desi/feed/rss2/" />
+<style id="wp-img-auto-sizes-contain-inline-css">
+img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
+/*# sourceURL=wp-img-auto-sizes-contain-inline-css */
+</style>
+
+<style id="wp-emoji-styles-inline-css">
+
+	img.wp-smiley, img.emoji {
+		display: inline !important;
+		border: none !important;
+		box-shadow: none !important;
+		height: 1em !important;
+		width: 1em !important;
+		margin: 0 0.07em !important;
+		vertical-align: -0.1em !important;
+		background: none !important;
+		padding: 0 !important;
+	}
+/*# sourceURL=wp-emoji-styles-inline-css */
+</style>
+<style id="wp-block-library-inline-css">
+:root{--wp-block-synced-color:#7a00df;--wp-block-synced-color--rgb:122,0,223;--wp-bound-block-color:var(--wp-block-synced-color);--wp-editor-canvas-background:#ddd;--wp-admin-theme-color:#007cba;--wp-admin-theme-color--rgb:0,124,186;--wp-admin-theme-color-darker-10:#006ba1;--wp-admin-theme-color-darker-10--rgb:0,107,160.5;--wp-admin-theme-color-darker-20:#005a87;--wp-admin-theme-color-darker-20--rgb:0,90,135;--wp-admin-border-width-focus:2px}@media (min-resolution:192dpi){:root{--wp-admin-border-width-focus:1.5px}}.wp-element-button{cursor:pointer}:root .has-very-light-gray-background-color{background-color:#eee}:root .has-very-dark-gray-background-color{background-color:#313131}:root .has-very-light-gray-color{color:#eee}:root .has-very-dark-gray-color{color:#313131}:root .has-vivid-green-cyan-to-vivid-cyan-blue-gradient-background{background:linear-gradient(135deg,#00d084,#0693e3)}:root .has-purple-crush-gradient-background{background:linear-gradient(135deg,#34e2e4,#4721fb 50%,#ab1dfe)}:root .has-hazy-dawn-gradient-background{background:linear-gradient(135deg,#faaca8,#dad0ec)}:root .has-subdued-olive-gradient-background{background:linear-gradient(135deg,#fafae1,#67a671)}:root .has-atomic-cream-gradient-background{background:linear-gradient(135deg,#fdd79a,#004a59)}:root .has-nightshade-gradient-background{background:linear-gradient(135deg,#330968,#31cdcf)}:root .has-midnight-gradient-background{background:linear-gradient(135deg,#020381,#2874fc)}:root{--wp--preset--font-size--normal:16px;--wp--preset--font-size--huge:42px}.has-regular-font-size{font-size:1em}.has-larger-font-size{font-size:2.625em}.has-normal-font-size{font-size:var(--wp--preset--font-size--normal)}.has-huge-font-size{font-size:var(--wp--preset--font-size--huge)}:root .has-text-align-center{text-align:center}:root .has-text-align-left{text-align:left}:root .has-text-align-right{text-align:right}.has-fit-text{white-space:nowrap!important}#end-resizable-editor-section{display:none}.aligncenter{clear:both}.items-justified-left{justify-content:flex-start}.items-justified-center{justify-content:center}.items-justified-right{justify-content:flex-end}.items-justified-space-between{justify-content:space-between}.screen-reader-text{word-wrap:normal!important;border:0;clip-path:inset(50%);height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;width:1px;word-break:normal!important}.screen-reader-text:focus{background-color:#ddd;clip-path:none;color:#444;display:block;font-size:1em;height:auto;left:5px;line-height:normal;padding:15px 23px 14px;text-decoration:none;top:5px;width:auto;z-index:100000}html :where(.has-border-color){border-style:solid}html :where([style^=border-color],[style*=";border-color"],[style*="; border-color"]){border-style:solid}html :where([style^=border-top-color],[style*=";border-top-color"],[style*="; border-top-color"]){border-top-style:solid}html :where([style^=border-right-color],[style*=";border-right-color"],[style*="; border-right-color"]){border-right-style:solid}html :where([style^=border-bottom-color],[style*=";border-bottom-color"],[style*="; border-bottom-color"]){border-bottom-style:solid}html :where([style^=border-left-color],[style*=";border-left-color"],[style*="; border-left-color"]){border-left-style:solid}html :where([style^=border-width],[style*=";border-width"],[style*="; border-width"]){border-style:solid}html :where([style^=border-top-width],[style*=";border-top-width"],[style*="; border-top-width"]){border-top-style:solid}html :where([style^=border-right-width],[style*=";border-right-width"],[style*="; border-right-width"]){border-right-style:solid}html :where([style^=border-bottom-width],[style*=";border-bottom-width"],[style*="; border-bottom-width"]){border-bottom-style:solid}html :where([style^=border-left-width],[style*=";border-left-width"],[style*="; border-left-width"]){border-left-style:solid}html :where(img[class*=wp-image-]){height:auto;max-width:100%}:where(figure){margin:0 0 1em}html :where(.is-position-sticky){--wp-admin--admin-bar--position-offset:var(--wp-admin--admin-bar--height,0px)}@media screen and (max-width:600px){html :where(.is-position-sticky){--wp-admin--admin-bar--position-offset:0px}}
+
+/*# sourceURL=/wp-includes/css/dist/block-library/common.min.css */
+</style>
+<style id="classic-theme-styles-inline-css">
+/*! This file is auto-generated */
+.wp-block-button__link{color:#fff;background-color:#32373c;border-radius:9999px;box-shadow:none;text-decoration:none;padding:calc(.667em + 2px) calc(1.333em + 2px);font-size:1.125em}.wp-block-file__button{background:#32373c;color:#fff;text-decoration:none}
+/*# sourceURL=/wp-includes/css/classic-themes.min.css */
+</style>
+
+<style id="global-styles-inline-css">
+:root{--wp--preset--aspect-ratio--square: 1;--wp--preset--aspect-ratio--4-3: 4/3;--wp--preset--aspect-ratio--3-4: 3/4;--wp--preset--aspect-ratio--3-2: 3/2;--wp--preset--aspect-ratio--2-3: 2/3;--wp--preset--aspect-ratio--16-9: 16/9;--wp--preset--aspect-ratio--9-16: 9/16;--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgb(6,147,227) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgb(252,185,0) 0%,rgb(255,105,0) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgb(255,105,0) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgb(255, 255, 255), 6px 6px rgb(0, 0, 0);--wp--preset--shadow--crisp: 6px 6px 0px rgb(0, 0, 0);}.wp-block-button{--wp--preset--dimension--25: 25%;--wp--preset--dimension--50: 50%;--wp--preset--dimension--75: 75%;--wp--preset--dimension--100: 100%;}:where(body) { margin: 0; }:where(.is-layout-flex){gap: 0.5em;}:where(.is-layout-grid){gap: 0.5em;}body .is-layout-flex{display: flex;}.is-layout-flex{flex-wrap: wrap;align-items: center;}.is-layout-flex > :is(*, div){margin: 0;}body .is-layout-grid{display: grid;}.is-layout-grid > :is(*, div){margin: 0;}body{padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;}:root :where(.wp-element-button, .wp-block-button__link){background-color: #32373c;border-width: 0;color: #fff;font-family: inherit;font-size: inherit;font-style: inherit;font-weight: inherit;letter-spacing: inherit;line-height: inherit;padding-top: calc(0.667em + 2px);padding-right: calc(1.333em + 2px);padding-bottom: calc(0.667em + 2px);padding-left: calc(1.333em + 2px);text-decoration: none;text-transform: inherit;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+/*# sourceURL=global-styles-inline-css */
+</style>
+
+<link rel='stylesheet' id='wpst-font-awesome-css' href='https://www.desimaals.fun/wp-content/themes/retrotube/assets/stylesheets/font-awesome/css/font-awesome.min.css?ver=4.7.0' media='all' />
+<link rel='stylesheet' id='wpst-style-css' href='https://www.desimaals.fun/wp-content/themes/retrotube/style.css?ver=1.14.0.1774544869' media='all' />
+<script id="jquery-core-js" src="https://www.desimaals.fun/wp-includes/js/jquery/jquery.min.js?ver=3.7.1"></script>
+<script id="jquery-migrate-js" src="https://www.desimaals.fun/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.4.1"></script>
+<link rel="https://api.w.org/" href="https://www.desimaals.fun/wp-json/" /><link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://www.desimaals.fun/xmlrpc.php?rsd" />
+<meta name="generator" content="WordPress 7.1.1" />
+<link rel="icon" href="https://www.desimaals.fun/wp-content/uploads/2023/12/favicon.ico" sizes="32x32" />
+<link rel="icon" href="https://www.desimaals.fun/wp-content/uploads/2023/12/favicon.ico" sizes="192x192" />
+<link rel="apple-touch-icon" href="https://www.desimaals.fun/wp-content/uploads/2023/12/favicon.ico" />
+<meta name="msapplication-TileImage" content="https://www.desimaals.fun/wp-content/uploads/2023/12/favicon.ico" />
+</head>
+
+<body
+class="search search-results wp-embed-responsive wp-theme-retrotube group-blog hfeed">
+<div id="page">
+	<a class="skip-link screen-reader-text" href="#content">Skip to content</a>
+
+	<header id="masthead" class="site-header" role="banner">
+
+		
+		<div class="site-branding row">
+			<div class="logo">
+									<a href="https://www.desimaals.fun/" rel="home" title="DesiMaals.com"><img src="
+										https://www.desimaals.fun/wp-content/uploads/2026/03/Desimaals-logo.webp					" alt="DesiMaals.com"></a>
+				
+							</div>
+							<div class="header-search ">
+	<form method="get" id="searchform" action="https://www.desimaals.fun/">        
+					<input class="input-group-field" type="text" value="desi" name="s" id="s" />
+				
+		<input class="button fa-input" type="submit" id="searchsubmit" value="&#xf002;" />        
+	</form>
+</div>								</div><!-- .site-branding -->
+
+		<nav id="site-navigation" class="main-navigation
+		" role="navigation">
+			<div id="head-mobile"></div>
+			<div class="button-nav"></div>
+			<ul id="menu-main-menu" class="row"><li id="menu-item-15" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-15"><a href="https://www.desimaals.fun">Home</a></li>
+<li id="menu-item-16" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-16"><a href="https://www.desimaals.fun/categories/">Categories</a></li>
+<li id="menu-item-17" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-17"><a href="https://www.desimaals.fun/tags/">Tags</a></li>
+<li id="menu-item-18" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-18"><a href="https://www.desimaals.fun/actors/">Actors</a></li>
+<li id="menu-item-5645" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5645"><a href="https://www.google.com/url?sa=t&#038;source=web&#038;rct=j&#038;opi=89978449&#038;url=https://www.tadkax.com/&#038;ved=2ahUKEwiW6fHIiOiTAxUnslYBHf41HeMQFnoECCMQAQ&#038;usg=AOvVaw1-rN-8r_MJK_QtMIpaq0C1" title="ixiporn">Desi Porn APP Free</a></li>
+<li id="menu-item-5666" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5666"><a href="https://www.google.com/url?sa=t&#038;source=web&#038;rct=j&#038;opi=89978449&#038;url=https://www.justindianporn.mobi/&#038;ved=2ahUKEwij3t7_2aaTAxUmT2cHHeuzC1UQFnoECA8QAQ&#038;sqi=2&#038;usg=AOvVaw3k_pDzZ-uch_icX2SLd2F9">Hindi XXX Videos</a></li>
+<li id="menu-item-5887" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5887"><a target="_blank" href="https://theporndude.com/">ThePornDude</a></li>
+</ul>		</nav><!-- #site-navigation -->
+
+		<div class="clear"></div>
+
+					<div class="happy-header-mobile">
+				<a href="https://www.tadkax.com/" target="_blank" rel="noopener noreferrer">
+    <img src="https://i.ibb.co/S7G3v3s3/Tadka-X-03.webp" alt="TadkaX" />
+</a>			</div>
+			</header><!-- #masthead -->
+
+	<div class="breadcrumbs-area"><div class="row"><div id="breadcrumbs"><a href="https://www.desimaals.fun">Home</a><span class="separator"><i class="fa fa-caret-right"></i></span><span class="current">Search results for "desi"</span></div></div></div>
+	
+	<div id="content" class="site-content row">
+	<section id="primary" class="content-area ">
+		<main id="main" class="site-main " role="main">
+					<header class="page-header">
+				<h1 class="widget-title">Search results for: <span>desi</span></h1>
+						<div id="filters">        
+		<div class="filters-select">
+					Latest videos						<div class="filters-options">
+					
+					<span><a class="" href="/?s=desi&filter=latest">Latest videos</a></span>
+											<span><a class="" href="/?s=desi&filter=most-viewed">Most viewed videos</a></span>											<span><a class="" href="/?s=desi&filter=longest">Longest videos</a></span>			
+											<span><a class="" href="/?s=desi&filter=popular">Popular videos</a></span>			
+					<span><a class="" href="/?s=desi&filter=random">Random videos</a></span>	
+							</div>
+		</div>
+	</div>
+			</header><!-- .page-header -->
+
+			<div>
+				
+<article data-video-id="video_1" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/09/devra_gaal_katleba_2026_s01_desiprime_hindi_hot_web_series.jpg" class="loop-video thumb-block video-preview-item full-width post-14797 post type-post status-publish format-standard has-post-thumbnail hentry category-desiprime category-hot-web-series tag-18-web-series tag-aagmaal tag-aagmaals tag-desi tag-desi-adult-videos tag-desi-hindi-hot-short-film tag-desi-hindi-hot-video tag-desi-hindi-hot-web-series tag-desi-hindi-hot-web-series-2026 tag-desi-hot-short-film tag-desi-hot-videos tag-desi-hot-web-series tag-desi-maals tag-desi-sex tag-desi-sex-videos tag-desi-xxx-web-series tag-desimaals-2026 tag-desiprime tag-desiprime-2026 tag-desiprime-adult-webseries tag-desiprime-hindi-hot-web-series tag-desiprime-hot-web-series tag-desiprime-hot-webseries tag-desiprime-originals tag-desiprime-porn-series tag-desiprime-xxx-series tag-devra-gaal-katleba-2026-hot-short-film tag-devra-gaal-katleba-desiprime-unrated-webseries tag-hindi-hot-web-series tag-hot-web-series tag-hot-web-series-online tag-indian-hot-web-series tag-indian-uncut-webseries tag-mydesi-net tag-uncutmaza tag-unrated-hindi-webseries tag-unrated-hot-web-series tag-watch-devra-gaal-katleba-desiprime-hot-webseries" data-post-id="14797">
+	<a href="https://www.desimaals.fun/devra-gaal-katleba-2026-s01-desiprime-hindi-hot-web-series/" title="Devra Gaal katleba (2026) S01 DesiPrime Hindi Hot Web Series">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/09/devra_gaal_katleba_2026_s01_desiprime_hindi_hot_web_series.jpg" alt="Devra Gaal katleba (2026) S01 DesiPrime Hindi Hot Web Series"></div>			<div class="video-overlay"></div>
+
+			<span class="hd-video">HD</span>			<span class="views"><i class="fa fa-eye"></i> 4K</span>			<span class="duration"><i class="fa fa-clock-o"></i>01:49:53</span>		</div>
+
+		<header class="entry-header">
+			<span>Devra Gaal katleba (2026) S01 DesiPrime Hindi Hot Web Series</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_2" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/09/young_couple_2026_hindi_desi_video.webp" class="loop-video thumb-block video-preview-item full-width post-14633 post type-post status-publish format-standard has-post-thumbnail hentry category-hindi-hot-short-film tag-2026-latest-hot-videos tag-hindi-hot-video tag-hindi-hot-video-2026 tag-watch-young-couple-2026-xxx-video tag-young-couple-2026-adult-video tag-young-couple-2026-desi-adult-videos tag-young-couple-2026-desi-hindi-hot-video tag-young-couple-2026-desimaals tag-young-couple-2026-hindi-hot-video tag-young-couple-2026-porn-video tag-young-couple-desi-hindi-hot-video-2026 tag-young-couple-desi-hindi-xxx-video tag-young-couple-desi-hot-video tag-young-couple-desi-hot-videos tag-young-couple-desi-sex tag-young-couple-desi-sex-videos tag-young-couple-hindi-desi-hot-video tag-young-couple-hindi-xxx-uncut-hot-short tag-young-couple-hot-video tag-young-couple-hot-videos-2026 tag-young-couple-indian-desi-videos-download tag-young-couple-indian-xxx-videos tag-young-couple-new-videos tag-young-couple-uncut-videos tag-young-couple-xxx-videos" data-post-id="14633">
+	<a href="https://www.desimaals.fun/young-couple-2026-hindi-desi-video/" title="Young Couple (2026) Hindi Desi video">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/09/young_couple_2026_hindi_desi_video.webp" alt="Young Couple (2026) Hindi Desi video"></div>			<div class="video-overlay"></div>
+
+						<span class="views"><i class="fa fa-eye"></i> 3K</span>			<span class="duration"><i class="fa fa-clock-o"></i>23:30</span>		</div>
+
+		<header class="entry-header">
+			<span>Young Couple (2026) Hindi Desi video</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_3" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/08/teen_girl_2026_hindi_desi_video.jpg" class="loop-video thumb-block video-preview-item full-width post-14613 post type-post status-publish format-standard has-post-thumbnail hentry category-18-hot-videos tag-amateur-teen-girl tag-close-up-fingering tag-desi-masturbation tag-desi-solo-sex tag-desi-teen-girl tag-finger-fuck tag-hindi-audio tag-hindi-fingering-video tag-hindi-solo-video tag-pussy-fingering tag-pussy-play tag-solo-masturbation tag-teen-girl tag-teen-girl-2026 tag-teen-girl-fingering tag-teen-girl-pussy tag-wet-pussy tag-wet-sounds tag-young-girl-fingering" data-post-id="14613">
+	<a href="https://www.desimaals.fun/teen-girl-2026-hindi-desi-video/" title="Teen Girl (2026) Hindi Desi video">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/08/teen_girl_2026_hindi_desi_video.jpg" alt="Teen Girl (2026) Hindi Desi video"></div>			<div class="video-overlay"></div>
+
+						<span class="views"><i class="fa fa-eye"></i> 2K</span>			<span class="duration"><i class="fa fa-clock-o"></i>07:20</span>		</div>
+
+		<header class="entry-header">
+			<span>Teen Girl (2026) Hindi Desi video</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_4" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/07/chaalbaaz_2026_s01_ep03_desiprime_hindi_hot_web_series.jpg" class="loop-video thumb-block video-preview-item full-width post-14494 post type-post status-publish format-standard has-post-thumbnail hentry category-18-hot-videos category-hot-short-film tag-18-web-series tag-aagmaal tag-aagmaals tag-chaalbaaz-2026-hot-short-film tag-chaalbaaz-desiprime-unrated-webseries tag-desi tag-desi-adult-videos tag-desi-hindi-hot-short-film tag-desi-hindi-hot-video tag-desi-hindi-hot-web-series tag-desi-hindi-hot-web-series-2026 tag-desi-hot-short-film tag-desi-hot-videos tag-desi-hot-web-series tag-desi-maals tag-desi-sex tag-desi-sex-videos tag-desi-xxx-web-series tag-desimaals-2026 tag-desiprime tag-desiprime-2026 tag-desiprime-adult-webseries tag-desiprime-hindi-hot-web-series tag-desiprime-hot-web-series tag-desiprime-hot-webseries tag-desiprime-originals tag-desiprime-porn-series tag-desiprime-xxx-series tag-hindi-hot-web-series tag-hot-web-series tag-hot-web-series-online tag-indian-hot-web-series tag-indian-uncut-webseries tag-mydesi-net-2 tag-uncutmaza tag-unrated-hindi-webseries tag-unrated-hot-web-series tag-watch-chaalbaaz-desiprime-hot-webseries" data-post-id="14494">
+	<a href="https://www.desimaals.fun/chaalbaaz-2026-s01-ep03-desiprime-hindi-hot-web-series/" title="Chaalbaaz (2026) S01 Ep03 DesiPrime Hindi Hot Web Series">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/07/chaalbaaz_2026_s01_ep03_desiprime_hindi_hot_web_series.jpg" alt="Chaalbaaz (2026) S01 Ep03 DesiPrime Hindi Hot Web Series"></div>			<div class="video-overlay"></div>
+
+			<span class="hd-video">HD</span>			<span class="views"><i class="fa fa-eye"></i> 2K</span>			<span class="duration"><i class="fa fa-clock-o"></i>25:27</span>		</div>
+
+		<header class="entry-header">
+			<span>Chaalbaaz (2026) S01 Ep03 DesiPrime Hindi Hot Web Series</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_5" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/06/desi_couple_foursome_2026_hindi_hot_short_film.jpg" class="loop-video thumb-block video-preview-item full-width post-14440 post type-post status-publish format-standard has-post-thumbnail hentry category-18-hot-videos category-hot-short-film tag-2026-hindi-hot-short-film tag-desi-couple-foursome-2026-desi-indian-porn tag-desi-couple-foursome-2026-desi-indian-xxx tag-desi-couple-foursome-2026-hindi-hot-short-film tag-desi-couple-foursome-2026-hot-short-film tag-desi-couple-foursome-adult-short-film tag-desimaals-short-films-2026 tag-hindi-uncut-xxx-short-films tag-hot-short-film-2026 tag-new-2026-short-films tag-uncut-desi-videos tag-uncutdesi tag-xxx-short-films" data-post-id="14440">
+	<a href="https://www.desimaals.fun/desi-couple-foursome-2026-hindi-hot-short-film/" title="Desi Couple Foursome (2026) Hindi Hot Short Film">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/06/desi_couple_foursome_2026_hindi_hot_short_film.jpg" alt="Desi Couple Foursome (2026) Hindi Hot Short Film"></div>			<div class="video-overlay"></div>
+
+						<span class="views"><i class="fa fa-eye"></i> 1K</span>			<span class="duration"><i class="fa fa-clock-o"></i>17:28</span>		</div>
+
+		<header class="entry-header">
+			<span>Desi Couple Foursome (2026) Hindi Hot Short Film</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_6" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/06/lajjo_2026_s01_ep03_desiprime_hindi_hot_web_series.jpg" class="loop-video thumb-block video-preview-item full-width post-14401 post type-post status-publish format-standard has-post-thumbnail hentry category-desiprime category-hot-web-series tag-18-web-series tag-aagmaal tag-aagmaals tag-desi tag-desi-adult-videos tag-desi-hindi-hot-short-film tag-desi-hindi-hot-video tag-desi-hindi-hot-web-series tag-desi-hindi-hot-web-series-2026 tag-desi-hot-short-film tag-desi-hot-videos tag-desi-hot-web-series tag-desi-maals tag-desi-sex tag-desi-sex-videos tag-desi-xxx-web-series tag-desimaals-2026 tag-desiprime tag-desiprime-2026 tag-desiprime-adult-webseries tag-desiprime-hindi-hot-web-series tag-desiprime-hot-web-series tag-desiprime-hot-webseries tag-desiprime-originals tag-desiprime-porn-series tag-desiprime-xxx-series tag-hindi-hot-web-series tag-hot-web-series tag-hot-web-series-online tag-indian-hot-web-series tag-indian-uncut-webseries tag-lajjo-2026-hot-short-film tag-lajjo-desiprime-unrated-webseries tag-mydesi-net-2 tag-uncutmaza tag-unrated-hindi-webseries tag-unrated-hot-web-series tag-watch-lajjo-desiprime-hot-webseries" data-post-id="14401">
+	<a href="https://www.desimaals.fun/lajjo-2026-s01-ep03-desiprime-hindi-hot-web-series/" title="Lajjo (2026) S01 Ep03 DesiPrime Hindi Hot Web Series">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/06/lajjo_2026_s01_ep03_desiprime_hindi_hot_web_series.jpg" alt="Lajjo (2026) S01 Ep03 DesiPrime Hindi Hot Web Series"></div>			<div class="video-overlay"></div>
+
+			<span class="hd-video">HD</span>			<span class="views"><i class="fa fa-eye"></i> 5K</span>			<span class="duration"><i class="fa fa-clock-o"></i>21:13</span>		</div>
+
+		<header class="entry-header">
+			<span>Lajjo (2026) S01 Ep03 DesiPrime Hindi Hot Web Series</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_7" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/06/loan_agent_ne_desi_wife_ko_hard_choda_2026_hot_short_film.jpg" class="loop-video thumb-block video-preview-item full-width post-14374 post type-post status-publish format-standard has-post-thumbnail hentry category-18-hot-videos category-hot-short-film tag-agent-chudai tag-bhabhi-chudai tag-desi-chudai tag-desi-hardcore tag-desi-wife tag-hindi-sex-video tag-indian-wife tag-loan-agent-sex tag-private-room-fuck tag-recovery-agent tag-rough-fuck tag-tight-chut tag-wife-hardcore actors-aakash" data-post-id="14374">
+	<a href="https://www.desimaals.fun/loan-agent-ne-desi-wife-ko-hard-choda-2026-hot-short-film/" title="Loan Agent Ne Desi Wife Ko Hard Choda (2026) Hot Short Film">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/06/loan_agent_ne_desi_wife_ko_hard_choda_2026_hot_short_film.jpg" alt="Loan Agent Ne Desi Wife Ko Hard Choda (2026) Hot Short Film"></div>			<div class="video-overlay"></div>
+
+			<span class="hd-video">HD</span>			<span class="views"><i class="fa fa-eye"></i> 2K</span>			<span class="duration"><i class="fa fa-clock-o"></i>12:32</span>		</div>
+
+		<header class="entry-header">
+			<span>Loan Agent Ne Desi Wife Ko Hard Choda (2026) Hot Short Film</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_8" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/06/desi_step_sister_dining_table_par_chudi_2026_hot_short_film.jpg" class="loop-video thumb-block video-preview-item full-width post-14372 post type-post status-publish format-standard has-post-thumbnail hentry category-18-hot-videos category-hot-short-film tag-brother-sister-sex tag-desi-hardcore tag-desi-step-sister tag-desi-taboo tag-dining-table-fuck tag-family-fantasy tag-hindi-sex-video tag-indian-stepsex tag-step-brother-sex tag-step-siblings tag-table-par-chudai tag-taboo-chudai tag-tight-chut" data-post-id="14372">
+	<a href="https://www.desimaals.fun/desi-step-sister-dining-table-par-chudi-2026-hot-short-film/" title="Desi Step Sister Dining Table Par Chudi (2026) Hot Short Film">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/06/desi_step_sister_dining_table_par_chudi_2026_hot_short_film.jpg" alt="Desi Step Sister Dining Table Par Chudi (2026) Hot Short Film"></div>			<div class="video-overlay"></div>
+
+			<span class="hd-video">HD</span>			<span class="views"><i class="fa fa-eye"></i> 2K</span>			<span class="duration"><i class="fa fa-clock-o"></i>20:02</span>		</div>
+
+		<header class="entry-header">
+			<span>Desi Step Sister Dining Table Par Chudi (2026) Hot Short Film</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_9" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/06/desi_step_bhai_ne_step_behen_ko_hardcore_choda_2026_hindi_hot_short_film.jpg" class="loop-video thumb-block video-preview-item full-width post-14370 post type-post status-publish format-standard has-post-thumbnail hentry category-18-hot-videos category-hot-short-film tag-alone-home-sex tag-brother-sister-chudai tag-desi-step-brother tag-desi-stepsex tag-desi-taboo tag-family-fantasy tag-hardcore-desi tag-hindi-sex-video tag-indian-stepsex tag-step-siblings tag-step-sister-sex tag-taboo-hardcore tag-tight-chut-fuck actors-sudipa" data-post-id="14370">
+	<a href="https://www.desimaals.fun/desi-step-bhai-ne-step-behen-ko-hardcore-choda-2026-hindi-hot-short-film/" title="Desi Step Bhai Ne Step Behen Ko Hardcore Choda (2026) Hindi Hot Short Film">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/06/desi_step_bhai_ne_step_behen_ko_hardcore_choda_2026_hindi_hot_short_film.jpg" alt="Desi Step Bhai Ne Step Behen Ko Hardcore Choda (2026) Hindi Hot Short Film"></div>			<div class="video-overlay"></div>
+
+			<span class="hd-video">HD</span>			<span class="views"><i class="fa fa-eye"></i> 2K</span>			<span class="duration"><i class="fa fa-clock-o"></i>20:36</span>		</div>
+
+		<header class="entry-header">
+			<span>Desi Step Bhai Ne Step Behen Ko Hardcore Choda (2026) Hindi Hot Short Film</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_10" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/06/desi_stepmom_dono_stepsons_se_chudwayi_2026_hot_short_film.jpg" class="loop-video thumb-block video-preview-item full-width post-14368 post type-post status-publish format-standard has-post-thumbnail hentry category-18-hot-videos category-hot-short-film tag-bhabhi-threesome tag-desi-hardcore tag-desi-stepmom tag-desi-threesome tag-double-fuck tag-hindi-threesome tag-horny-stepmom tag-milf-threesome tag-step-family-sex tag-stepmom-threesome tag-stepson-chudai tag-stepsons-sex tag-taboo-threesome" data-post-id="14368">
+	<a href="https://www.desimaals.fun/desi-stepmom-dono-stepsons-se-chudwayi-2026-hot-short-film/" title="Desi Stepmom Dono Stepsons Se Chudwayi (2026) Hot Short Film">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/06/desi_stepmom_dono_stepsons_se_chudwayi_2026_hot_short_film.jpg" alt="Desi Stepmom Dono Stepsons Se Chudwayi (2026) Hot Short Film"></div>			<div class="video-overlay"></div>
+
+			<span class="hd-video">HD</span>			<span class="views"><i class="fa fa-eye"></i> 1K</span>			<span class="duration"><i class="fa fa-clock-o"></i>22:59</span>		</div>
+
+		<header class="entry-header">
+			<span>Desi Stepmom Dono Stepsons Se Chudwayi (2026) Hot Short Film</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_11" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/06/chaalbaaz_2026_s01_ep02_desiprime_hindi_hot_web_series.jpg" class="loop-video thumb-block video-preview-item full-width post-14340 post type-post status-publish format-standard has-post-thumbnail hentry category-18-hot-videos category-desiprime category-hot-web-series tag-18-web-series tag-aagmaal tag-aagmaals tag-chaalbaaz-2026-hot-short-film tag-chaalbaaz-desiprime-unrated-webseries tag-desi tag-desi-adult-videos tag-desi-hindi-hot-short-film tag-desi-hindi-hot-video tag-desi-hindi-hot-web-series tag-desi-hindi-hot-web-series-2026 tag-desi-hot-short-film tag-desi-hot-videos tag-desi-hot-web-series tag-desi-maals tag-desi-sex tag-desi-sex-videos tag-desi-xxx-web-series tag-desimaals-2026 tag-desiprime tag-desiprime-2026 tag-desiprime-adult-webseries tag-desiprime-hindi-hot-web-series tag-desiprime-hot-web-series tag-desiprime-hot-webseries tag-desiprime-originals tag-desiprime-porn-series tag-desiprime-xxx-series tag-hindi-hot-web-series tag-hot-web-series tag-hot-web-series-online tag-indian-hot-web-series tag-indian-uncut-webseries tag-mydesi-net-2 tag-uncutmaza tag-unrated-hindi-webseries tag-unrated-hot-web-series tag-watch-chaalbaaz-desiprime-hot-webseries" data-post-id="14340">
+	<a href="https://www.desimaals.fun/chaalbaaz-2026-s01-ep02-desiprime-hindi-hot-web-series/" title="Chaalbaaz (2026) S01 Ep02 DesiPrime Hindi Hot Web Series">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/06/chaalbaaz_2026_s01_ep02_desiprime_hindi_hot_web_series.jpg" alt="Chaalbaaz (2026) S01 Ep02 DesiPrime Hindi Hot Web Series"></div>			<div class="video-overlay"></div>
+
+			<span class="hd-video">HD</span>			<span class="views"><i class="fa fa-eye"></i> 3K</span>			<span class="duration"><i class="fa fa-clock-o"></i>24:37</span>		</div>
+
+		<header class="entry-header">
+			<span>Chaalbaaz (2026) S01 Ep02 DesiPrime Hindi Hot Web Series</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_12" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/06/desi_horny_girl_friend_ke_ghar_chudwayi_2026_hindi_hot_short_film.jpg" class="loop-video thumb-block video-preview-item full-width post-14313 post type-post status-publish format-standard has-post-thumbnail hentry category-18-hot-videos category-hot-short-film tag-badi-chut tag-big-pussy-fuck tag-desi-girl-sex tag-desi-hardcore tag-desi-horny-girl tag-friend-house-sex tag-friend-ke-ghar tag-hindi-sex-video tag-horny-desi tag-indian-girl-chudai tag-pussy-satisfaction tag-satisfied-fuck tag-tight-chut" data-post-id="14313">
+	<a href="https://www.desimaals.fun/desi-horny-girl-friend-ke-ghar-chudwayi-2026-hindi-hot-short-film/" title="Desi Horny Girl Friend Ke Ghar Chudwayi (2026) Hindi Hot Short Film">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/06/desi_horny_girl_friend_ke_ghar_chudwayi_2026_hindi_hot_short_film.jpg" alt="Desi Horny Girl Friend Ke Ghar Chudwayi (2026) Hindi Hot Short Film"></div>			<div class="video-overlay"></div>
+
+			<span class="hd-video">HD</span>			<span class="views"><i class="fa fa-eye"></i> 4K</span>			<span class="duration"><i class="fa fa-clock-o"></i>10:30</span>		</div>
+
+		<header class="entry-header">
+			<span>Desi Horny Girl Friend Ke Ghar Chudwayi (2026) Hindi Hot Short Film</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_13" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/06/desi_hot_bhabhi_ki_sex_ki_pyaas_2026_hindi_hot_short_film.jpg" class="loop-video thumb-block video-preview-item full-width post-14311 post type-post status-publish format-standard has-post-thumbnail hentry category-18-hot-videos category-hot-short-film tag-bhabhi-chudai tag-bhabhi-pyaas tag-desi-bhabhi tag-desi-milf tag-desperate-fuck tag-hardcore-desi tag-hindi-sex-video tag-horny-bhabhi tag-hot-bhabhi-sex tag-indian-bhabhi tag-sexual-satisfaction tag-tight-chut tag-unsatisfied-wife" data-post-id="14311">
+	<a href="https://www.desimaals.fun/desi-hot-bhabhi-ki-sex-ki-pyaas-2026-hindi-hot-short-film/" title="Desi Hot Bhabhi Ki Sex Ki Pyaas (2026) Hindi Hot Short Film">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/06/desi_hot_bhabhi_ki_sex_ki_pyaas_2026_hindi_hot_short_film.jpg" alt="Desi Hot Bhabhi Ki Sex Ki Pyaas (2026) Hindi Hot Short Film"></div>			<div class="video-overlay"></div>
+
+			<span class="hd-video">HD</span>			<span class="views"><i class="fa fa-eye"></i> 5K</span>			<span class="duration"><i class="fa fa-clock-o"></i>20:48</span>		</div>
+
+		<header class="entry-header">
+			<span>Desi Hot Bhabhi Ki Sex Ki Pyaas (2026) Hindi Hot Short Film</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_14" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/06/desi_milf_wife_ex_se_chudwayi_2026_hindi_hot_short_film.jpg" class="loop-video thumb-block video-preview-item full-width post-14305 post type-post status-publish format-standard has-post-thumbnail hentry category-18-hot-videos category-hot-short-film tag-bhabhi-ex tag-desi-cuckold tag-desi-milf tag-desi-wife tag-ex-boyfriend-sex tag-hardcore-fuck tag-hindi-sex-video tag-husband-dhokha tag-indian-cheating tag-milf-chudai tag-milf-creampie tag-taboo-sex tag-wife-cheating" data-post-id="14305">
+	<a href="https://www.desimaals.fun/desi-milf-wife-ex-se-chudwayi-2026-hindi-hot-short-film/" title="Desi MILF Wife Ex Se Chudwayi (2026) Hindi Hot Short Film">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/06/desi_milf_wife_ex_se_chudwayi_2026_hindi_hot_short_film.jpg" alt="Desi MILF Wife Ex Se Chudwayi (2026) Hindi Hot Short Film"></div>			<div class="video-overlay"></div>
+
+			<span class="hd-video">HD</span>			<span class="views"><i class="fa fa-eye"></i> 2K</span>			<span class="duration"><i class="fa fa-clock-o"></i>09:44</span>		</div>
+
+		<header class="entry-header">
+			<span>Desi MILF Wife Ex Se Chudwayi (2026) Hindi Hot Short Film</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_15" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/06/chaalbaaz_2026_s01_ep01_desiprime_hindi_hot_web_series.jpg" class="loop-video thumb-block video-preview-item full-width post-14276 post type-post status-publish format-standard has-post-thumbnail hentry category-desiprime tag-bold-hindi-series tag-chaalbaaz tag-chaalbaaz-2026 tag-chaalbaaz-episode-1 tag-chaalbaaz-s01-ep01 tag-chaalbaaz-season-1 tag-chaalbaaz-sex-scenes tag-desi-bold-web-series tag-desi-hot-web-series tag-desiprime tag-desiprime-hindi tag-desiprime-web-series tag-hindi-adult-series tag-hindi-hot-drama tag-hindi-hot-web-series tag-hindi-web-series-2026 tag-hot-short-film tag-meetx-style tag-romantic-chudai tag-uncut-web-series" data-post-id="14276">
+	<a href="https://www.desimaals.fun/chaalbaaz-2026-s01-ep01-desiprime-hindi-hot-web-series/" title="Chaalbaaz (2026) S01 Ep01 Desiprime Hindi Hot Web Series">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/06/chaalbaaz_2026_s01_ep01_desiprime_hindi_hot_web_series.jpg" alt="Chaalbaaz (2026) S01 Ep01 Desiprime Hindi Hot Web Series"></div>			<div class="video-overlay"></div>
+
+			<span class="hd-video">HD</span>			<span class="views"><i class="fa fa-eye"></i> 4K</span>			<span class="duration"><i class="fa fa-clock-o"></i>23:33</span>		</div>
+
+		<header class="entry-header">
+			<span>Chaalbaaz (2026) S01 Ep01 Desiprime Hindi Hot Web Series</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_16" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/06/Desi_Slutty_Nurse_Ne_Patient_Ka_Lund_Chusa_Chudi_2026_Hindi_Animated_XXX_Short_Film.jpg" class="loop-video thumb-block video-preview-item full-width post-14216 post type-post status-publish format-standard has-post-thumbnail hentry category-18-hot-videos category-animated-desi-hot-short-film category-animated-hot-short-film category-hot-short-film tag-bhabhi-nurse tag-deepthroat-blowjob tag-desi-hardcore tag-desi-nurse tag-desi-slut tag-hindi-sex-video tag-hospital-sex tag-indian-nurse-sex tag-nurse-chudai tag-patient-sex tag-pink-pussy-lick tag-slutty-nurse tag-tight-chut" data-post-id="14216">
+	<a href="https://www.desimaals.fun/desi-slutty-nurse-ne-patient-ka-lund-chusa-chudi-2026-hindi-animated-xxx-short-film/" title="Desi Slutty Nurse Ne Patient Ka Lund Chusa Chudi (2026) Hindi Animated XXX Short Film">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/06/Desi_Slutty_Nurse_Ne_Patient_Ka_Lund_Chusa_Chudi_2026_Hindi_Animated_XXX_Short_Film.jpg" alt="Desi Slutty Nurse Ne Patient Ka Lund Chusa Chudi (2026) Hindi Animated XXX Short Film"></div>			<div class="video-overlay"></div>
+
+			<span class="hd-video">HD</span>			<span class="views"><i class="fa fa-eye"></i> 2K</span>			<span class="duration"><i class="fa fa-clock-o"></i>15:26</span>		</div>
+
+		<header class="entry-header">
+			<span>Desi Slutty Nurse Ne Patient Ka Lund Chusa Chudi (2026) Hindi Animated XXX Short Film</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_17" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/06/Kundi_2026_Ep03_DesiPrime_Hindi_Hot_Web_Series.jpg" class="loop-video thumb-block video-preview-item full-width post-14208 post type-post status-publish format-standard has-post-thumbnail hentry category-desiprime category-hot-web-series tag-18-web-series tag-aagmaal tag-aagmaals tag-desi tag-desi-adult-videos tag-desi-hindi-hot-short-film tag-desi-hindi-hot-video tag-desi-hindi-hot-web-series tag-desi-hindi-hot-web-series-2026 tag-desi-hot-short-film tag-desi-hot-videos tag-desi-hot-web-series tag-desi-maals tag-desi-sex tag-desi-sex-videos tag-desi-xxx-web-series tag-desimaals-2026 tag-desiprime tag-desiprime-2026 tag-desiprime-adult-webseries tag-desiprime-hindi-hot-web-series tag-desiprime-hot-web-series tag-desiprime-hot-webseries tag-desiprime-originals tag-desiprime-porn-series tag-desiprime-xxx-series tag-hindi-hot-web-series tag-hot-web-series tag-hot-web-series-online tag-indian-hot-web-series tag-indian-uncut-webseries tag-kundi-2026-hot-short-film tag-kundi-desiprime-unrated-webseries tag-mydesi-net-2 tag-uncutmaza tag-unrated-hindi-webseries tag-unrated-hot-web-series tag-watch-kundi-desiprime-hot-webseries" data-post-id="14208">
+	<a href="https://www.desimaals.fun/kundi-2026-ep03-desiprime-hindi-hot-web-series/" title="Kundi (2026) Ep03 DesiPrime Hindi Hot Web Series">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/06/Kundi_2026_Ep03_DesiPrime_Hindi_Hot_Web_Series.jpg" alt="Kundi (2026) Ep03 DesiPrime Hindi Hot Web Series"></div>			<div class="video-overlay"></div>
+
+			<span class="hd-video">HD</span>			<span class="views"><i class="fa fa-eye"></i> 6K</span>			<span class="duration"><i class="fa fa-clock-o"></i>22:59</span>		</div>
+
+		<header class="entry-header">
+			<span>Kundi (2026) Ep03 DesiPrime Hindi Hot Web Series</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_18" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/05/Lajjo_2026_S01_Ep02_DesiPrime_Hindi_Hot_Web_Series.jpg" class="loop-video thumb-block video-preview-item full-width post-14174 post type-post status-publish format-standard has-post-thumbnail hentry category-desiprime tag-18-web-series tag-aagmaal tag-aagmaals tag-desi tag-desi-adult-videos tag-desi-hindi-hot-short-film tag-desi-hindi-hot-video tag-desi-hindi-hot-web-series tag-desi-hindi-hot-web-series-2026 tag-desi-hot-short-film tag-desi-hot-videos tag-desi-hot-web-series tag-desi-maals tag-desi-sex tag-desi-sex-videos tag-desi-xxx-web-series tag-desimaals-2026 tag-desiprime tag-desiprime-2026 tag-desiprime-adult-webseries tag-desiprime-hindi-hot-web-series tag-desiprime-hot-web-series tag-desiprime-hot-webseries tag-desiprime-originals tag-desiprime-porn-series tag-desiprime-xxx-series tag-hindi-hot-web-series tag-hot-web-series tag-hot-web-series-online tag-indian-hot-web-series tag-indian-uncut-webseries tag-lajjo-2026-hot-short-film tag-lajjo-desiprime-unrated-webseries tag-mydesi-net-2 tag-uncutmaza tag-unrated-hindi-webseries tag-unrated-hot-web-series tag-watch-lajjo-desiprime-hot-webseries" data-post-id="14174">
+	<a href="https://www.desimaals.fun/lajjo-2026-s01-ep02-desiprime-hindi-hot-web-series/" title="Lajjo (2026) S01 Ep02 DesiPrime Hindi Hot Web Series">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/05/Lajjo_2026_S01_Ep02_DesiPrime_Hindi_Hot_Web_Series.jpg" alt="Lajjo (2026) S01 Ep02 DesiPrime Hindi Hot Web Series"></div>			<div class="video-overlay"></div>
+
+			<span class="hd-video">HD</span>			<span class="views"><i class="fa fa-eye"></i> 9K</span>			<span class="duration"><i class="fa fa-clock-o"></i>25:49</span>		</div>
+
+		<header class="entry-header">
+			<span>Lajjo (2026) S01 Ep02 DesiPrime Hindi Hot Web Series</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_19" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/05/Kundi_2026_S01_Ep02_DesiPrime_Hindi_Hot_Web_Series.jpg" class="loop-video thumb-block video-preview-item full-width post-14168 post type-post status-publish format-standard has-post-thumbnail hentry category-desiprime tag-18-web-series tag-aagmaal tag-aagmaals tag-desi tag-desi-adult-videos tag-desi-hindi-hot-short-film tag-desi-hindi-hot-video tag-desi-hindi-hot-web-series tag-desi-hindi-hot-web-series-2026 tag-desi-hot-short-film tag-desi-hot-videos tag-desi-hot-web-series tag-desi-maals tag-desi-sex tag-desi-sex-videos tag-desi-xxx-web-series tag-desimaals-2026 tag-desiprime tag-desiprime-2026 tag-desiprime-adult-webseries tag-desiprime-hindi-hot-web-series tag-desiprime-hot-web-series tag-desiprime-hot-webseries tag-desiprime-originals tag-desiprime-porn-series tag-desiprime-xxx-series tag-hindi-hot-web-series tag-hot-web-series tag-hot-web-series-online tag-indian-hot-web-series tag-indian-uncut-webseries tag-kundi-2026-hot-short-film tag-kundi-desiprime-unrated-webseries tag-mydesi-net-2 tag-uncutmaza tag-unrated-hindi-webseries tag-unrated-hot-web-series tag-watch-kundi-desiprime-hot-webseries" data-post-id="14168">
+	<a href="https://www.desimaals.fun/kundi-2026-s01-ep02-desiprime-hindi-hot-web-series/" title="Kundi (2026) S01 Ep02 DesiPrime Hindi Hot Web Series">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/05/Kundi_2026_S01_Ep02_DesiPrime_Hindi_Hot_Web_Series.jpg" alt="Kundi (2026) S01 Ep02 DesiPrime Hindi Hot Web Series"></div>			<div class="video-overlay"></div>
+
+			<span class="hd-video">HD</span>			<span class="views"><i class="fa fa-eye"></i> 9K</span>			<span class="duration"><i class="fa fa-clock-o"></i>17:03</span>		</div>
+
+		<header class="entry-header">
+			<span>Kundi (2026) S01 Ep02 DesiPrime Hindi Hot Web Series</span>
+		</header>
+	</a>
+</article>
+
+<article data-video-id="video_20" data-main-thumb="https://www.desimaals.fun/wp-content/uploads/2026/05/Garam_Reolver_2_2026_DesiPrime_Hindi_Hot_Short_Film.jpg" class="loop-video thumb-block video-preview-item full-width post-14118 post type-post status-publish format-standard has-post-thumbnail hentry category-18-hot-videos category-desiprime category-hot-short-film tag-2026-latest-hot-short-films tag-aagmaal tag-aagmaals tag-desi tag-desi-adult-videos tag-desi-hindi-hot-short-film-2026 tag-desi-hindi-xxx-film tag-desi-hot-short-film tag-desi-hot-video tag-desi-hot-videos tag-desi-maals tag-desi-sex tag-desi-sex-videos tag-desi-xxx-short-films tag-desi-xxx-video tag-desimaals-2026 tag-desiprime tag-desiprime-2026 tag-desiprime-desi-short-film tag-desiprime-hindi-hot-short-film tag-desiprime-hot-short-film tag-desiprime-originals tag-desiprime-uncut-short-films tag-garam-reolver-2-2026 tag-garam-reolver-2-2026-adult-short-film tag-garam-reolver-2-2026-desiprime tag-garam-reolver-2-2026-desiprime-hindi-hot-short-film tag-garam-reolver-2-porn-short-film tag-hindi-desi-hot-short-film tag-hindi-hot-short-film-2026 tag-hindi-xxx-xxx-short-films tag-new-desiprime-short-films" data-post-id="14118">
+	<a href="https://www.desimaals.fun/garam-reolver-2-2026-desiprime-hindi-hot-short-film/" title="Garam Reolver 2 (2026) DesiPrime Hindi Hot Short Film">
+		<div class="post-thumbnail">
+			
+			<div class="post-thumbnail-container"><img class="video-main-thumb" decoding="async" width="300" height="168.75" src="https://www.desimaals.fun/wp-content/uploads/2026/05/Garam_Reolver_2_2026_DesiPrime_Hindi_Hot_Short_Film.jpg" alt="Garam Reolver 2 (2026) DesiPrime Hindi Hot Short Film"></div>			<div class="video-overlay"></div>
+
+			<span class="hd-video">HD</span>			<span class="views"><i class="fa fa-eye"></i> 7K</span>			<span class="duration"><i class="fa fa-clock-o"></i>22:53</span>		</div>
+
+		<header class="entry-header">
+			<span>Garam Reolver 2 (2026) DesiPrime Hindi Hot Short Film</span>
+		</header>
+	</a>
+</article>
+			</div>
+			<div class="pagination"><ul><li><a class="current">1</a></li><li><a href="https://www.desimaals.fun/page/2/?s=desi" class="inactive">2</a></li><li><a href="https://www.desimaals.fun/page/3/?s=desi" class="inactive">3</a></li><li><a href="https://www.desimaals.fun/page/4/?s=desi" class="inactive">4</a></li><li><a href="https://www.desimaals.fun/page/5/?s=desi" class="inactive">5</a></li><li><a href="https://www.desimaals.fun/page/2/?s=desi">Next</a></li><li><a href="https://www.desimaals.fun/page/20/?s=desi">Last</a></li></ul></div>
+				</main><!-- #main -->
+	</section><!-- #primary -->
+
+
+</div><!-- #content -->
+
+<footer id="colophon" class="site-footer
+" role="contentinfo">
+	<div class="row">
+					<div class="happy-footer-mobile">
+				<a href="https://www.tadkax.com/" target="_blank" rel="noopener noreferrer">
+    <img src="https://i.ibb.co/HpXT1dwB/Tadka-X-01.webp" alt="TadkaX" />
+</a>			</div>
+						
+		<div class="clear"></div>
+
+		
+		
+					<div class="site-info">
+				© 2026 Desimaals.com - The Best Desi Porn Site!			</div><!-- .site-info -->
+			</div>
+</footer><!-- #colophon -->
+</div><!-- #page -->
+
+<a class="button" href="#" id="back-to-top" title="Back to top"><i class="fa fa-chevron-up"></i></a>
+
+<script type="speculationrules">
+{"prefetch":[{"source":"document","where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":["/wp-*.php","/wp-admin/*","/wp-content/uploads/*","/wp-content/*","/wp-content/plugins/*","/wp-content/themes/retrotube/*","/*\\?(.+)"]}},{"not":{"selector_matches":"a[rel~=\"nofollow\"]"}},{"not":{"selector_matches":".no-prefetch, .no-prefetch a"}}]},"eagerness":"conservative"}]}
+</script>
+		<div class="modal fade wpst-user-modal" id="wpst-user-modal" tabindex="-1" role="dialog" aria-hidden="true">
+			<div class="modal-dialog" data-active-tab="">
+				<div class="modal-content">
+					<div class="modal-body">
+					<a href="#" class="close" data-dismiss="modal" aria-label="Close"><i class="fa fa-remove"></i></a>
+						<!-- Register form -->
+						<div class="wpst-register">	
+															<div class="alert alert-danger">Registration is disabled.</div>
+													</div>
+
+						<!-- Login form -->
+						<div class="wpst-login">							 
+							<h3>Login to DesiMaals.com</h3>
+						
+							<form id="wpst_login_form" action="https://www.desimaals.fun/" method="post">
+
+								<div class="form-field">
+									<label>Username</label>
+									<input class="form-control input-lg required" name="wpst_user_login" type="text"/>
+								</div>
+								<div class="form-field">
+									<label for="wpst_user_pass">Password</label>
+									<input class="form-control input-lg required" name="wpst_user_pass" id="wpst_user_pass" type="password"/>
+								</div>
+								<div class="form-field lost-password">
+									<input type="hidden" name="action" value="wpst_login_member"/>
+									<button class="btn btn-theme btn-lg" data-loading-text="Loading..." type="submit">Login</button> <a class="alignright" href="#wpst-reset-password">Lost Password?</a>
+								</div>
+								<input type="hidden" id="login-security" name="login-security" value="ced66e8389" /><input type="hidden" name="_wp_http_referer" value="/?s=desi" />							</form>
+							<div class="wpst-errors"></div>
+						</div>
+
+						<!-- Lost Password form -->
+						<div class="wpst-reset-password">							 
+							<h3>Reset Password</h3>
+							<p>Enter the username or e-mail you used in your profile. A password reset link will be sent to you by email.</p>
+						
+							<form id="wpst_reset_password_form" action="https://www.desimaals.fun/" method="post">
+								<div class="form-field">
+									<label for="wpst_user_or_email">Username or E-mail</label>
+									<input class="form-control input-lg required" name="wpst_user_or_email" id="wpst_user_or_email" type="text"/>
+								</div>
+								<div class="form-field">
+									<input type="hidden" name="action" value="wpst_reset_password"/>
+									<button class="btn btn-theme btn-lg" data-loading-text="Loading..." type="submit">Get new password</button>
+								</div>
+								<input type="hidden" id="password-security" name="password-security" value="ced66e8389" /><input type="hidden" name="_wp_http_referer" value="/?s=desi" />							</form>
+							<div class="wpst-errors"></div>
+						</div>
+
+						<div class="wpst-loading">
+							<p><i class="fa fa-refresh fa-spin"></i><br>Loading...</p>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<span class="wpst-register-footer">Don&#039;t have an account? <a href="#wpst-register">Sign up</a></span>
+						<span class="wpst-login-footer">Already have an account? <a href="#wpst-login">Login</a></span>
+					</div>				
+				</div>
+			</div>
+		</div>
+		<script id="wpst-navigation-js" src="https://www.desimaals.fun/wp-content/themes/retrotube/assets/js/navigation.js?ver=1.0.0"></script>
+<script id="wpst-lazyload-js" src="https://www.desimaals.fun/wp-content/themes/retrotube/assets/js/lazyload.js?ver=1.0.0"></script>
+<script id="wpst-main-js-extra">
+var wpst_ajax_var = {"url":"https://www.desimaals.fun/wp-admin/admin-ajax.php","nonce":"9626f4259f","ctpl_installed":"1","is_mobile":""};
+var objectL10nMain = {"readmore":"Read more","close":"Close"};
+var options = {"thumbnails_ratio":"16/9","enable_views_system":"on","enable_rating_system":"on"};
+//# sourceURL=wpst-main-js-extra
+</script>
+<script id="wpst-main-js" src="https://www.desimaals.fun/wp-content/themes/retrotube/assets/js/main.js?ver=1.14.0.1774499660"></script>
+<script id="wpst-skip-link-focus-fix-js" src="https://www.desimaals.fun/wp-content/themes/retrotube/assets/js/skip-link-focus-fix.js?ver=1.0.0"></script>
+<script id="wp-emoji-settings" type="application/json">
+{"baseUrl":"https://s.w.org/images/core/emoji/17.0.2/72x72/","ext":".png","svgUrl":"https://s.w.org/images/core/emoji/17.0.2/svg/","svgExt":".svg","source":{"concatemoji":"https://www.desimaals.fun/wp-includes/js/wp-emoji-release.min.js?ver=7.1.1"}}
+</script>
+<script type="module">
+/*! This file is auto-generated */
+var e="script#wp-emoji-settings",t=document.querySelector(e);if(!(t instanceof HTMLScriptElement))throw new Error("Element missing: "+e);const r=JSON.parse(t.text),s=(window._wpemojiSettings=r,"wpEmojiSettingsSupports"),o=["flag","emoji"];function i(e){try{var t={supportTests:e,timestamp:(new Date).valueOf()};sessionStorage.setItem(s,JSON.stringify(t))}catch(e){}}function c(e,t,n){e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(t,0,0);t=new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data);e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(n,0,0);const r=new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data);return t.every((e,t)=>e===r[t])}function p(e,t){e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(t,0,0);var n=e.getImageData(16,16,1,1);for(let e=0;e<n.data.length;e++)if(0!==n.data[e])return!1;return!0}function u(e,t,n,r){switch(t){case"flag":return n(e,"\ud83c\udff3\ufe0f\u200d\u26a7\ufe0f","\ud83c\udff3\ufe0f\u200b\u26a7\ufe0f")?!1:!n(e,"\ud83c\udde8\ud83c\uddf6","\ud83c\udde8\u200b\ud83c\uddf6")&&!n(e,"\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f","\ud83c\udff4\u200b\udb40\udc67\u200b\udb40\udc62\u200b\udb40\udc65\u200b\udb40\udc6e\u200b\udb40\udc67\u200b\udb40\udc7f");case"emoji":return!r(e,"\ud83e\u1fac8")}return!1}function f(e,t,n,r){let a;const s=(a="undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?new OffscreenCanvas(300,150):document.createElement("canvas")).getContext("2d",{willReadFrequently:!0}),o=(s.textBaseline="top",s.font="600 32px Arial",{});return e.forEach(e=>{o[e]=t(s,e,n,r)}),o}function a(e){var t=document.createElement("script");t.src=e,t.defer=!0,document.head.appendChild(t)}r.supports={everything:!0,everythingExceptFlag:!0},new Promise(t=>{let n=function(){try{var e=JSON.parse(sessionStorage.getItem(s));if("object"==typeof e&&"number"==typeof e.timestamp&&(new Date).valueOf()<e.timestamp+604800&&"object"==typeof e.supportTests)return e.supportTests}catch(e){}return null}();if(!n){if("undefined"!=typeof Worker&&"undefined"!=typeof OffscreenCanvas&&"undefined"!=typeof URL&&URL.createObjectURL&&"undefined"!=typeof Blob)try{var e="postMessage("+f.toString()+"("+[JSON.stringify(o),u.toString(),c.toString(),p.toString()].join(",")+"));",r=new Blob([e],{type:"text/javascript"});const a=new Worker(URL.createObjectURL(r),{name:"wpTestEmojiSupports"});return void(a.onmessage=e=>{i(n=e.data),a.terminate(),t(n)})}catch(e){}i(n=f(o,u,c,p))}t(n)}).then(e=>{for(const n in e)r.supports[n]=e[n],r.supports.everything=r.supports.everything&&r.supports[n],"flag"!==n&&(r.supports.everythingExceptFlag=r.supports.everythingExceptFlag&&r.supports[n]);var t;r.supports.everythingExceptFlag=r.supports.everythingExceptFlag&&!r.supports.flag,r.supports.everything||((t=r.source||{}).concatemoji?a(t.concatemoji):t.wpemoji&&t.twemoji&&(a(t.twemoji),a(t.wpemoji)))});
+//# sourceURL=https://www.desimaals.fun/wp-includes/js/wp-emoji-loader.min.js
+</script>
+
+<!-- Other scripts -->
+<script data-cfasync="false">!function(){"use strict";for(var n=decodeURI("wd%60andp%5EjZd%5CZZQP_%5DQYUNURVWGLIECONDPP?MCIL:BI;%3C65?%3C/6:0%3Eq%3C,3-%25160-+-%7D%20%20%7Dyyut#t%20v$v!ryz!nQ%7BkrvhrmabcAkh%5Bbfkjaie%5EUbPZYUY%5D%5DIUIJ%5EIIQOOSMP%3CAS%3E%3E9D886=3;=05/-5*(/)'/+1)#%7C%20(yzzvzzv)yp%25x%7Brkj%7Cltfeffggvonih%5D%5C%5Bcba%5CZk%5BSRcW_dPSa%60MN%5DLWKMJITWOJAAKKK:=v?vCB%3E@@o8%22+;604,C2$+%25%222#1)%7C-!&$CBQTedSPj33H76o4EEEEEEEEEEEEEEEEEEEEEEEEEEKKKKKKKKKKKKKKKKKKKKKKKKKK__________3&%3Cv16#'m,%25).,T%3C~xPO9ls96I3ej5%2262=1/%5E+($%3CX)%22%5Cgdr%5Eb%7BN%20%7CC%5DbOS/_MUZTRWQVCGQQ=MN8H:7A@@#10@@0AnA10.:,3.862%227-%7Co!'~'!,#s%5CVVoasp%7B%7Dnnzfekrvesedlmh%5Cn_gickYaV%60bR%5DY%5B%5D.NX%5BNTVLGOT@@RFKIa0AEhf%5COYIgdVISw+,p5:*0Kb10+#%7B0%20--vux!ttuv%22%22%22~txptvifpVvpr%60ebdonik1%25$WYSdi%5DQTQ_%3ERUL%60TRH1GFRCQ@@%3CN:d23ut!%25vOZCA2Wa/)39*").replace(/((x40){2})/g,"$2").split("").map(((n,t)=>{const r=n.charCodeAt(0)-32;return r>=0&&r<95?String.fromCharCode(32+(r+t)%95):n})).join(""),t=[0,9,16,23,29,35,41,47,53,59,65,71,75,79,80,81,91,104,107,110,112,115,123,126,131,134,141,143,149,155,161,174,178,180,181,187,188,190,192,194,197,200,204,208,213,219,226,234,241,250,251,251,257,265,267,268,273,275,279,280,281,343,357,358,359,362,368,384,396,397,407,419,421,426,429,431,437,441,446,468,469,472,478,486,492,502,513,537,542,549,556,562,574,582,589,606,611,612,613,619,620,625,630],r=0;r<t.length-1;r++)t[r]=n.substring(t[r],t[r+1]);var o=[t[0],t[1],t[2],t[3],t[4],t[5],t[6],t[7],t[8],t[9],t[10]];o.push(o[1]+t[11]);var e=window,s=e.Math,i=e.Error,c=e.RegExp,u=e.document,l=e.navigator,h=e.Uint8Array;r=[t[12],o[7],t[13]+o[8],t[14]+o[8],t[15],t[16],t[17],t[18],t[19],t[20],t[21]];const f=t[22]+o[10],E={2:f+t[23],15:f+t[23],9:f+o[4],16:f+o[4],10:f+o[3],17:f+o[3],19:f+t[24],20:f+t[24],21:f+t[24]},a=t[25]+o[10],d={2:o[2],15:o[2],9:o[4],16:o[4],10:o[3],17:o[3],5:t[26],7:t[26],19:t[24],20:t[24],21:t[24]},v={15:t[27],16:t[28],17:t[29],19:o[6],20:o[6],21:o[6]},K=t[30],C=K+t[31],w=K+o[7],p=t[32]+o[1]+t[33],B=t[34],_=B+(o[1]+t[35]),D=B+o[11],I=B+(o[11]+t[36]),g=[t[37],t[38],t[39],t[40],t[41],t[42],t[43],t[44],t[45],t[46]],x={0:t[47],1:t[48]};class y extends i{constructor(n,o=0,s){super(n+(s?t[49]+s:t[50])),this[r[0]]=x[o],e.Object.setPrototypeOf(this,y.prototype)}}function P(n,r,o){try{return t[51],n()}catch(n){if(r)return r(n)}}const Q=n=>{const[o]=n.split(t[53]);let[e,s,i]=((n,t)=>{let[r,o,...e]=n.split(t);return o=[o,...e].join(t),[r,o,!!e.length]})(n,t[54]);i&&P((()=>{throw new y(t[55])}),typeof handleException===t[52]?n=>{null===handleException||void 0===handleException||handleException(n)}:undefined);const u=new c(t[56]+o+t[57],t[58]),[l,...h]=e.replace(u,t[50]).split(t[59]);return{protocol:o,origin:e,[r[1]]:l,path:h.join(t[59]),search:s}},b=t[60],A=[[97,122],[65,90],[48,57]],O=t[61],R=(n,t)=>s.floor(s.random()*(t-n+1))+n;function S(n){let r=t[50];for(let t=0;t<n;t++)r+=b.charAt(s.floor(s.random()*b.length));return r}const V=()=>{const n=g[R(0,g.length-1)],r=R(0,1)?R(1,999999):(n=>{let r=t[50];for(let t=0;t<n;t++)r+=e.String.fromCharCode(R(97,122));return r})(R(2,6));return n+t[62]+r},k=(n,r)=>(null==n?void 0:n.length)?n.split(t[63]).map((n=>{const o=n.indexOf(t[62])+1,e=n.slice(0,o),s=n.slice(o);return e+r(s)})).join(t[63]):t[50],M=(n,r)=>{const{search:o,origin:i}=Q(n),c=o?o.split(t[63]):[],[u,l]=((n,t)=>{const r=[],o=[];return n.forEach((n=>{n.indexOf(t)>-1?o.push(n):r.push(n)})),[r,o]})(c,K);if(!u.length)return n;const h=((n,t)=>{const r=[],o=R(n,t);for(let n=0;n<o;n++)r.push(V());return r})(...c.length>4?[0,2]:[5,9]),f=t[64]+r;u.indexOf(f)<0&&u.push(f);const E=(n=>{const t=[...n];let r=t.length;for(;0!==r;){const n=s.floor(s.random()*r);r--,[t[r],t[n]]=[t[n],t[r]]}return t})([...u,...h]);let a=((n,r)=>{const o=(n=>{let t=n%71387;return()=>t=(23251*t+12345)%71387})((n=>n.split(t[50]).reduce(((n,t)=>31*n+t.charCodeAt(0)&33554431),19))(n)),s=(i=r,k(i,e.decodeURIComponent)).split(t[50]).map((n=>((n,t)=>{const r=n.charCodeAt(0);for(const n of A){const[o,s]=n;if(r>=o&&r<=s){const n=s-o+1,i=o+(r-o+t())%n;return e.String.fromCharCode(i)}}return n})(n,o))).join(t[50]);var i;return n+t[63]+(n=>k(n,e.encodeURIComponent))(s)})(S(R(2,6))+t[62]+S(R(2,6)),E.join(t[63]));return l.length>0&&(a+=t[63]+l.join(t[63])),i+t[54]+a},N=n=>{const r=new c(C+t[65]).exec(n.location.href),o=r?+r[1]:null;return null!=o?o:e.Date.now()},T=new c(t[67]);function U(n,r){const o=function(n){const r=new c(w+t[66]).exec(n.location.href);return r&&r[1]?r[1]:null}(n);return o?r.replace(T,t[68]+o+t[59]):r}function z(){if(l){const n=/Mac/.test(l.userAgent)&&l[O]>2,t=/iPhone|iPad|iPod/.test(l.userAgent);return n||t}return!1}function W(){return l&&/android/i.test(l.userAgent)}const Y=o[0];function Z(){return t[71]+o[9]in e||t[72]+o[9]in e||t[73]+o[9]+t[74]in e||P((()=>!!(e[Y]||l[Y]||u.documentElement.getAttribute(Y))),(()=>!1))||t[75]in e||t[76]in e||t[77]in e||t[78]in e||t[32]+o[0]+t[79]+o[5]+t[80]in u||(z()||W())&&l&&/Mobi/i.test(l.userAgent)&&!function(){try{return u.createEvent(t[69]),t[70]in u.documentElement}catch(n){return!1}}()||function(){var n;const r=t[81],o=t[82],s=t[83],i=t[84],u=t[85];let h=!1;var f,E;return l&&e[r]&&(W()||z())&&(h=l[O]<2&&new c(t[86]).test(l[o]),z()&&(h=h&&(f=null!==(n=l[s])&&void 0!==n?n:t[50],E=t[87],!(f.indexOf(E)>-1))&&e[r][i]<32&&!!e[r][u])),h}()}const $=t[89];function j(){if(((n,o=e)=>{const[s]=((n,o)=>{let e;try{if(e=o[n],!e)return[!1,e];const s=t[32]+n+t[88];return e[r[2]](s,s),e[r[3]](s)!==s?[!1,e]:(e[r[4]](s),[!0])}catch(n){return[!1,e,n]}})(n,o);return s})(t[91]))try{const n=e.localStorage[r[3]]($);return[n?e.JSON.parse(n):null,!1]}catch(n){return[null,!0]}return[null,!0]}function m(n,r,o){let e=(/https?:///.test(n)?t[50]:t[92])+n;return r&&(e+=t[59]+r),o&&(e+=t[54]+o),e}const L=(()=>{var n;const[o,s]=j();if(!s){const s=null!==(n=function(n){if(!n)return null;const r={};return e.Object.keys(n).forEach((o=>{const s=n[o];(function(n){const r=null==n?void 0:n[0],o=null==n?void 0:n[1];return typeof r===t[90]&&e.isFinite(+o)&&o>e.Date.now()})(s)&&(r[o]=s)})),r}(o))&&void 0!==n?n:{};e.localStorage[r[2]]($,e.JSON.stringify(s))}return{get:n=>{const[t]=j();return null==t?void 0:t[n]},set:(n,t,o)=>{const i=[t,e.Date.now()+1e3*o],[c]=j(),u=null!=c?c:{};u[n]=i,s||e.localStorage[r[2]]($,e.JSON.stringify(u))}}})(),G=(H=L,(n,t)=>{const{[r[1]]:o,path:e,search:s}=Q(n),i=H.get(o);if(i)return[m(i[0],e,s),!1];if((null==t?void 0:t[r[5]])&&(null==t?void 0:t[r[6]])){const{[r[1]]:n}=Q(null==t?void 0:t[r[5]]);return n!==o&&H.set(o,t[r[5]],t[r[6]]),[m(t[r[5]],e,s),!0]}return[n,!1]});var H;const J=[1,3,6,5,8,9,10,11,12,13,14,18,22],F=t[93],X=t[94];class q{constructor(n,t,o){this.t=n,this.o=t,this.i=o,this.u=u.currentScript,this.l=n=>this.h.then((t=>t&&t[r[7]](this.v(n)))),this.K=n=>h.from(e.atob(n),(n=>n.charCodeAt(0))),this.C=n=>0!=+n,this.h=this.p(),this[r[8]]=this.B(),e[p]=this[r[8]],e[I]=M}in(n){!this.C(n)||e[a+d[n]]||e[E[n]]||this._(n)}_(n){this.l(n).then((r=>{e[D+d[n]]=this.o;const s=this.D(),c=v[n],l=G(U(e,r))[0];if(c){const r=t[95]+c,e=u.querySelector(o[5]+t[96]+r+t[97]);if(!e)throw new i(t[98]+n);const l=e.getAttribute(r).trim();e.removeAttribute(r),s.setAttribute(r,l)}s.src=l,u.head.appendChild(s)}))}B(){return e[_]={},e.Promise[r[9]](J.map((n=>this.l(n).then((t=>{e[_][n]=t?U(e,t):void 0}))))).then((()=>!0))}v(n){const r=l?l.userAgent:t[50],o=e.location.hostname||t[50],s=e.innerHeight,i=e.innerWidth,c=e.sessionStorage?1:0,h=u.cookie?u.cookie.length:0,f=this.I(),E=Z()?1:0;return[s,i,c,N(e),0,n,o.slice(0,100),h,f,r.slice(0,15),E].join(t[99])}I(){const n=(new e.Date)[X]();return!n||n>720||n<-720?0:720+n}p(){const n=e.WebAssembly&&e.WebAssembly.instantiate;return n?n(this.K(this.t),{}).then((({[r[10]]:{exports:n}})=>{const o=n.memory,s=n[r[7]],i=new e.TextEncoder,c=new e.TextDecoder(t[100]);return{[r[7]]:n=>{const t=i.encode(n),r=new h(o.buffer,0,t.length);r.set(t);const e=r.byteOffset+t.length,u=s(r,t.length,e),l=new h(o.buffer,e,u);return c.decode(l)}}})):e.Promise.resolve(null)}D(){const n=u.createElement(o[5]);return e.Object.assign(n.dataset,{[F]:t[101]},this.u?this.u.dataset:{}),n.async=!0,n}}!function(){const n=new q("AGFzbQEAAAABHAVgAAF/YAN/f38Bf2ADf39/AX5gAX8AYAF/AX8DCQgAAQIBAAMEAAQFAXABAQEFBgEBgAKAAgYJAX8BQdCIwAILB2cHBm1lbW9yeQIAA3VybAADGV9faW5kaXJlY3RfZnVuY3Rpb25fdGFibGUBABBfX2Vycm5vX2xvY2F0aW9uAAcJc3RhY2tTYXZlAAQMc3RhY2tSZXN0b3JlAAUKc3RhY2tBbGxvYwAGCr0ICCEBAX9BwAhBwAgoAgBBE2xBoRxqQYfC1y9wIgA2AgAgAAuTAQEFfxAAIAEgAGtBAWpwIABqIgQEQEEAIQBBAyEBA0AgAUEDIABBA3AiBhshARAAIgVBFHBBkAhqLQAAIQMCfyAHQQAgBhtFBEBBACAFIAFwDQEaIAVBBnBBgwhqLQAAIQMLQQELIQcgACACaiADQbQILQAAazoAACABQQFrIQEgAEEBaiIAIARJDQALCyACIARqC3ECA38CfgJAIAFBAEwNAANAIARBAWohAyACIAUgACAEai0AAEEsRmoiBUYEQCABIANMDQIDQCAAIANqMAAAIgdCLFENAyAGQgp+IAd8QjB9IQYgA0EBaiIDIAFHDQALDAILIAMhBCABIANKDQALCyAGC+4FAgd/A34gACABQQMQAiEKIAAgAUEFEAIhDEGwCCgCACIDQTJqIgQgBGxB6AdsIQUCQCAKQoCYuvqxM31C/4/kwARWDQAgACABQQoQAkIBUg0AIAogA0ECaiADQQhrbiAFbK19IQoLIANBBGshBCAKQoC4gvy6M31CgKjM+wBUIQYCfyAKQoCQiNqvM31CgPjAvxdaBEAgA0EOaiEBQYCAgAIMAQsgACABQQgQAiADQQZsIgAgA0EBdEEEamytgqciASAAIANBB2tsIgduIghBfXFBAUchACAIQQVGBEAgASAHQQNubiAAaiEACyADQQ5qIgFBAXYgBCAKQoDAtJy9M31CgKjM+wBUGyAEIABBAUYbIQQgAEEXdEGAgIACcgshAEHACCAKQbgIKQMAIgsgCiALVBsgBa2AIgsgASAEIApCgIDx7ccwVCIHG62Ap0EAIAAgCkKAkMyn9jFUIggbcjYCABAAGhAAGiACQujo0YO3zs6XLzcAAEEHQQpBCCAKQoDQxZeDMlQbIApCgJaineUwVCIEG0ELQQwgBBsgAkEIahABIQMjAEEQayIAJAAgA0EuOgAAIABB4961AzYCBCAAQYIILQAAOgACIABBgAgvAAA7AQAgACAANgIMIAAgAEEEajYCCCADQQFqIQVBACEDIABBCGogBkECdGooAgAiCS0AACIGBEADQCADIAVqIAY6AAAgCSADQQFqIgNqLQAAIgYNAAsLIABBEGokACADIAVqIQAQABpBwAggCyABrYAgDEIbhkIAQoCAgCBCgICAMEKAgIAIQoCAgBggDEIIURtCgICAEkKAgMANIApCgIiX2qwyVBsgCBsgCkKAmMauzzFUGyAEGyAHG4SEPgIAEAAaQQJBBEEFIApCgJDqgNMyVCIBGxAAQQNwIgMbIQRBBUEIIAEbIQVBACEBA0AgAEEvOgAAIAEgA0YhBiAEIAUgAEEBahABIQAgAUEBaiEBIAZFDQALIAAgAmsLBAAjAAsGACAAJAALEAAjACAAa0FwcSIAJAAgAAsFAEHECAsLSQIAQYAICy5pbgCeoqassrYAAAAAAAAAn6Cho6Slp6ipqqutrq+wsbO0tbdtbnBvcnF0c3Z1AEGwCAsOCgAAAD0AAAD/n1h4nAE=","12","1.1.9-st");e["ajaerxtl"]=t=>n.in(t)}()}();</script>
+<script data-cfasync="false" data-clocid="2098101" async src="//endlesshandbaglinked.com/on.js" onerror="ajaerxtl(15)" onload="ajaerxtl(15)"></script>
+<!-- Mobile scripts -->
+
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"b374e8f20d8f46b2b564c9ef37462bcb","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>
+
+
+<!-- Page uncached by LiteSpeed Cache 7.8.1 on 2026-09-18 10:15:45 -->

@@ -117,7 +117,7 @@ class AppContainer(val context: Context) {
     private fun createDefaultManifest(): ProviderManifest {
         return ProviderManifest(
             schemaVersion = 1,
-            configVersion = 133,
+            configVersion = 134,
             minimumAppVersion = 4,
             forceUpdate = true,
             generatedAt = System.currentTimeMillis(),
@@ -1101,6 +1101,50 @@ class AppContainer(val context: Context) {
                     contentPolicy = ContentPolicy(
                         rightsStatus = "Public Web Index",
                         disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 25. BMaal (18+ Hot Web Series & OTT Platforms)
+                ProviderConfig(
+                    id = "bmaal",
+                    familyId = "web_series_family",
+                    domains = listOf("https://bmaal.io", "https://bmaal.com"),
+                    validationMarker = "bmaal",
+                    name = "BMaal",
+                    enabled = true,
+                    baseUrl = "https://bmaal.io",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/?s={query}",
+                        page = "/page/{page}/",
+                        categories = "/ott/"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "article.video-card, article.post, article",
+                        title = "h2.loop-title a, h2.loop-title, h2 a, a[title]",
+                        thumbnail = "div.video-thumbnail img, img.wp-post-image, img",
+                        thumbnailAttr = "src",
+                        detailUrl = "div.video-thumbnail a, h2.loop-title a, a",
+                        duration = "span.video-duration-badge, .duration",
+                        detailTitle = "h1.entry-title, h1",
+                        detailDescription = ".series-description, .entry-content p, .video-details, p",
+                        detailThumbnail = "meta[property='og:image'], img.wp-post-image, img",
+                        player = "div.xplayer, video, iframe",
+                        videoSource = "div.xplayer-lazy-source, .xplayer-lazy-source, meta[itemprop*='embedUrl'], video source[src], video[src], source[type='video/mp4']",
+                        videoSourceAttr = "data-src",
+                        relatedItems = ".related-series article, .related-videos article, article.video-card"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Web Index",
+                        disclaimer = "Aggregated public reference media feed."
                     )
                 )
             )
