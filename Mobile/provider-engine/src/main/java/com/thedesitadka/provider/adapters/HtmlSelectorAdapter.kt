@@ -17,6 +17,8 @@ import com.thedesitadka.core.network.NetworkClient
 import com.thedesitadka.core.security.StreamHubLogger
 import com.thedesitadka.provider.ProviderAdapter
 import com.thedesitadka.core.config.DomainResolver
+import com.thedesitadka.provider.plugins.HostResolverEngine
+import com.thedesitadka.provider.plugins.VixeoResolverPlugin
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
@@ -70,25 +72,7 @@ class HtmlSelectorAdapter(
             val catPath = nav?.categories ?: "/"
             val targetUrl = resolveUrl(catPath)
             val html = NetworkClient.fetchString(targetUrl)
-            val doc = Jsoup.parse(html, activeBaseUrl)
-
-            val categoryElements = doc.select("a[href*='/category/'], a[href*='/categories/'], a[href*='/ott/'], a[href*='/series/'], .category-list a, .categories a, div.thumb-cat p.title a, .thumb-block.thumb-cat p.title a, a.taxonomy-item-card")
-            val categories = categoryElements.mapNotNull { el ->
-                val rawName = el.select(".taxonomy-name, .cat-name, span.title, p.title").firstOrNull()?.text()?.trim()
-                    ?.ifEmpty { null }
-                    ?: el.text().substringBefore("\n").trim()
-                val name = rawName.replace(Regex("""\s+"""), " ")
-                val href = el.attr("href").trim()
-                if (name.isNotBlank() && href.isNotBlank()) {
-                    if (href.contains("/photos/", ignoreCase = true) || href.contains("/creators/", ignoreCase = true) || href.contains("/pornstars/", ignoreCase = true)
-                        || href.endsWith("/ott/") || href.endsWith("/series/") || isNonContentLink(name, href)) {
-                        return@mapNotNull null
-                    }
-                    val id = href.trimEnd('/').substringAfterLast('/')
-                    Category(id = id, name = name, url = resolveUrl(href))
-                } else null
-            }.distinctBy { it.id }
-
+            val categories = parseCategoriesHtml(html)
             Result.success(categories)
         } catch (e: Exception) {
             StreamHubLogger.e("HtmlSelectorAdapter", "Failed to fetch categories: ${e.message}")
@@ -235,6 +219,14 @@ class HtmlSelectorAdapter(
             getEffectiveBaseUrl()
             val fullUrl = resolveUrl(detailUrl)
             val html = NetworkClient.fetchString(fullUrl)
+            val doc = Jsoup.parse(html, activeBaseUrl)
+
+            // 0. High priority: Check registered host plugins for third-party embeds (e.g. Vixeo)
+            val hostResolved = HostResolverEngine.resolveFirstSupportedEmbed(doc, fullUrl)
+            if (hostResolved != null && hostResolved.isSuccess) {
+                return@withContext Result.success(listOf(hostResolved.getOrThrow()))
+            }
+
             parsePlayableMediaHtml(html, fullUrl)
         } catch (e: Exception) {
             Result.failure(StreamHubError.PlaybackError(500, "Failed to resolve media: ${e.message}", e))
@@ -342,6 +334,7 @@ class HtmlSelectorAdapter(
                 }.sortedByDescending { u ->
                     val lu = u.lowercase()
                     when {
+                        HostResolverEngine.canHandle(u) -> 200
                         lu.contains("luluvdo") || lu.contains("lulustream") || lu.contains("luluvid") -> 100
                         lu.contains("/e/") || lu.contains("tube279") || lu.contains("streamtape") || lu.contains("cdn1") -> 90
                         lu.contains("player") || lu.contains("embed") -> 50
@@ -439,6 +432,14 @@ class HtmlSelectorAdapter(
                                     } else throw e
                                 }
                                 if (iframeHtml.isNotBlank() && !iframeHtml.contains("Just a moment...") && !iframeHtml.contains("Attention Required! | Cloudflare")) {
+                                    val hostPlugin = HostResolverEngine.findPluginForUrl(iframeSrc)
+                                    if (hostPlugin is VixeoResolverPlugin) {
+                                        val vixeoRes = hostPlugin.parseVixeoHtml(iframeHtml, iframeSrc)
+                                        if (vixeoRes.isSuccess) {
+                                            sources.add(vixeoRes.getOrThrow())
+                                            break
+                                        }
+                                    }
                                     val unpacked = if (iframeHtml.contains("eval(function(p,a,c,k,e")) unpackDeanEdwards(iframeHtml) else iframeHtml
                                     val iframeDoc = Jsoup.parse(unpacked, iframeSrc)
                                     val innerVideos = iframeDoc.select("video source[src], video[src], source[type='video/mp4']")
@@ -596,6 +597,28 @@ class HtmlSelectorAdapter(
         }
     }
 
+    fun parseCategoriesHtml(html: String): List<Category> {
+        val doc = Jsoup.parse(html, activeBaseUrl)
+        val categoryElements = doc.select(
+            "a[href*='/category/'], a[href*='/categories/'], a[href*='/channels/'], a[href*='/models/'], a[href*='/pornstars/'], a[href*='/sites/'], a[href*='/studios/'], a[href*='/studio/'], a[href*='/tags/'], a[href*='/tag/'], a[href*='/genre/'], a[href*='/genres/'], a[href*='/ott/'], a[href*='/series/'], a[href*='/paysite/'], a[href*='/girls'], .category-list a, .categories a, div.thumb-cat p.title a, .thumb-block.thumb-cat p.title a, a.taxonomy-item-card"
+        )
+        return categoryElements.mapNotNull { el ->
+            val rawName = el.select(".taxonomy-name, .cat-name, span.title, p.title").firstOrNull()?.text()?.trim()
+                ?.ifEmpty { null }
+                ?: el.text().substringBefore("\n").trim()
+            val name = rawName.replace(Regex("""\s+"""), " ")
+            val href = el.attr("href").trim()
+            if (name.isNotBlank() && href.isNotBlank()) {
+                if (href.contains("/photos/", ignoreCase = true) || href.contains("/gallery/", ignoreCase = true)
+                    || href.endsWith("/ott/") || href.endsWith("/series/") || isNonContentLink(name, href)) {
+                    return@mapNotNull null
+                }
+                val id = href.trimEnd('/').substringAfterLast('/')
+                Category(id = id, name = name, url = resolveUrl(href))
+            } else null
+        }.distinctBy { it.id }
+    }
+
     fun parseListingHtml(html: String, page: Int): Result<FeedPage> {
         val doc = Jsoup.parse(html, activeBaseUrl)
         val itemSelector = selectors?.item ?: "article, div.post, div.video-item, div.item"
@@ -604,6 +627,12 @@ class HtmlSelectorAdapter(
         val isFsiBlog = config.id.contains("fsiblog", ignoreCase = true)
 
         val items = elements.mapNotNull { el ->
+            // Carousel and slider filter: omit repeating slider slides and clones
+            if (el.hasClass("slide") || el.hasClass("bx-clone") ||
+                el.closest(".bx-wrapper, .featured-carousel, .carousel, .featured-slider, .owl-carousel, .swiper-wrapper") != null) {
+                return@mapNotNull null
+            }
+
             val linkEl = if (el.tagName().equals("a", ignoreCase = true) && el.hasAttr("href")) el else el.select(selectors?.detailUrl ?: "a").firstOrNull() ?: return@mapNotNull null
             val href = linkEl.attr("href").trim()
             if (href.isBlank() || href.contains("THUMBNUM", ignoreCase = true) || href.startsWith("#") || href.startsWith("javascript:")) {
@@ -722,6 +751,7 @@ class HtmlSelectorAdapter(
         // 2. High priority lazy attributes on img
         imgEl?.let { img ->
             candidates.add(img.attr("data-webp"))
+            candidates.add(img.attr("data-mzl"))
             candidates.add(img.attr("data-src"))
             candidates.add(img.attr("data-lazy-src"))
             candidates.add(img.attr("data-original"))

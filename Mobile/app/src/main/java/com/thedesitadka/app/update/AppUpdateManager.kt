@@ -44,6 +44,20 @@ object AppUpdateManager {
      */
     suspend fun checkForUpdates(): Result<UpdateInfo> = withContext(Dispatchers.IO) {
         val currentVersion = BuildConfig.VERSION_NAME.trim()
+        if (BuildConfig.DEBUG) {
+            return@withContext Result.success(
+                UpdateInfo(
+                    isUpdateAvailable = false,
+                    isForceUpdate = false,
+                    latestVersionName = currentVersion,
+                    currentVersionName = currentVersion,
+                    releaseTitle = "Up to date (Debug)",
+                    releaseNotes = "Debug test build — update check bypassed for testing.",
+                    downloadUrl = "",
+                    expectedSha256 = null
+                )
+            )
+        }
         try {
             val headers = mapOf(
                 "Accept" to "application/vnd.github.v3+json",

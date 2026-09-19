@@ -45,7 +45,7 @@ Write-Host "[*] Current Version: $currentName (versionCode: $currentCode)" -Fore
 
 # 2. Determine target version
 $targetName = $NewVersion
-$targetCode = $currentCode + 1
+$targetCode = $currentCode
 
 if ([string]::IsNullOrWhiteSpace($targetName)) {
     $parts = $currentName.Split('.')
@@ -54,6 +54,11 @@ if ([string]::IsNullOrWhiteSpace($targetName)) {
         $targetName = "$($parts[0]).$($parts[1]).$patch"
     } else {
         $targetName = "$currentName.1"
+    }
+    $targetCode = $currentCode + 1
+} else {
+    if ($targetName -ne $currentName) {
+        $targetCode = $currentCode + 1
     }
 }
 

@@ -171,6 +171,18 @@ private fun UpdateGateScreen(container: AppContainer) {
         }
 
         // 3. Check for updates from official GitHub release
+        if (BuildConfig.DEBUG) {
+            StreamHubLogger.i("MainActivity", "Debug build (v${BuildConfig.VERSION_NAME}) — bypassing update gate for testing.")
+            val configActivated = container.activateConfigurationIfValid()
+            if (!configActivated) {
+                blockReason = "Configuration incompatible with application version ${BuildConfig.VERSION_NAME} (code ${BuildConfig.VERSION_CODE}).\n\nPlease update to the latest official release."
+                gateState = GateState.BLOCKED
+            } else {
+                gateState = GateState.PASSED
+            }
+            return@LaunchedEffect
+        }
+
         val result = AppUpdateManager.checkForUpdates()
         result.onSuccess { info ->
             if (info.isUpdateAvailable) {
@@ -414,21 +426,23 @@ private fun UpdateGateScreen(container: AppContainer) {
 
 @Composable
 private fun AppNavigationContent(container: AppContainer) {
-    val isHomeSelectionCompleted by container.preferenceStore.homeSelectionCompletedFlow.collectAsState(initial = true)
-    var showSelectionScreen by remember { mutableStateOf(false) }
+    val isHomeSelectionCompleted by container.preferenceStore.homeSelectionCompletedFlow.collectAsState(initial = null)
 
-    LaunchedEffect(isHomeSelectionCompleted) {
-        if (!isHomeSelectionCompleted) {
-            showSelectionScreen = true
+    if (isHomeSelectionCompleted == null) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
         }
+        return
     }
 
-    if (showSelectionScreen) {
+    if (isHomeSelectionCompleted == false) {
         HomeSourceSelectionScreen(
             providerEngine = container.providerEngine,
             preferenceStore = container.preferenceStore,
             onCompleted = {
-                showSelectionScreen = false
                 container.dashboardRepository.clearCacheAndReload()
             }
         )
@@ -509,6 +523,7 @@ private fun AppNavigationContent(container: AppContainer) {
                     providerEngine = container.providerEngine,
                     dashboardRepository = container.dashboardRepository,
                     watchHistoryFlow = container.database.watchHistoryDao().getRecentHistory(),
+                    preferenceStore = container.preferenceStore,
                     monetizationManager = container.monetizationManager,
                     onVideoClick = { video ->
                         activeVideoItem = video
@@ -519,6 +534,9 @@ private fun AppNavigationContent(container: AppContainer) {
                     },
                     onSearchClick = {
                         navController.navigate(Screen.Search.route)
+                    },
+                    onCustomizeSourcesClick = {
+                        navController.navigate(Screen.Settings.route)
                     }
                 )
             }
@@ -598,6 +616,7 @@ private fun AppNavigationContent(container: AppContainer) {
                     configRepository = container.configRepository,
                     providerEngine = container.providerEngine,
                     preferenceStore = container.preferenceStore,
+                    dashboardRepository = container.dashboardRepository,
                     monetizationManager = container.monetizationManager,
                     onDiagnosticsClick = { navController.navigate(Screen.Diagnostics.route) },
                     onBackClick = { navController.popBackStack() }

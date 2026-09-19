@@ -49,6 +49,20 @@ class DashboardRepository(
     private val fetchJobs = ConcurrentHashMap<String, Job>()
     private val mutex = Mutex()
 
+    init {
+        preferenceStore?.selectedHomeProvidersFlow?.let { flow ->
+            scope.launch {
+                var previousSet: Set<String>? = null
+                flow.collect { currentSet ->
+                    if (previousSet != null && previousSet != currentSet) {
+                        clearCacheAndReload()
+                    }
+                    previousSet = currentSet
+                }
+            }
+        }
+    }
+
     private data class CachedCategoryData(
         val videos: List<VideoItem>,
         val timestamp: Long
@@ -131,11 +145,26 @@ class DashboardRepository(
         flow: MutableStateFlow<DashboardState>
     ) {
         val allActiveProviders = providerEngine.getActiveProviders()
+        val isSelectionDone = preferenceStore?.isHomeSelectionCompleted() ?: false
         val selectedHomeProviders = preferenceStore?.getSelectedHomeProviders() ?: emptySet()
-        val candidateProviders = if (selectedHomeProviders.isNotEmpty()) {
+        val candidateProviders = if (isSelectionDone && selectedHomeProviders.isNotEmpty()) {
             allActiveProviders.filter { it.id in selectedHomeProviders }
+        } else if (isSelectionDone && selectedHomeProviders.isEmpty()) {
+            emptyList()
         } else {
             allActiveProviders
+        }
+
+        if (candidateProviders.isEmpty()) {
+            flow.update {
+                it.copy(
+                    videos = emptyList(),
+                    isLoading = false,
+                    isRefreshing = false,
+                    errorMessage = if (isSelectionDone && selectedHomeProviders.isEmpty()) "No sites selected for Home. Please customize sources in Settings." else null
+                )
+            }
+            return
         }
 
         val providersToQuery = when (categoryId) {

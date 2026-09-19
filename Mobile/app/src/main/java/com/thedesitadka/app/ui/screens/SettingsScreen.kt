@@ -77,6 +77,7 @@ import com.thedesitadka.app.update.AppUpdateManager
 import com.thedesitadka.app.update.UpdateInfo
 import androidx.compose.material3.LinearProgressIndicator
 import com.thedesitadka.app.ui.challenge.CloudflareChallengeActivity
+import com.thedesitadka.app.data.DashboardRepository
 import com.thedesitadka.app.storage.PreferenceStore
 import com.thedesitadka.core.config.ConfigRepository
 import com.thedesitadka.provider.ProviderEngine
@@ -88,6 +89,7 @@ fun SettingsScreen(
     configRepository: ConfigRepository,
     providerEngine: ProviderEngine,
     preferenceStore: PreferenceStore,
+    dashboardRepository: DashboardRepository? = null,
     monetizationManager: MonetizationManager? = null,
     onResetToDefault: (() -> Unit)? = null,
     onDiagnosticsClick: () -> Unit,
@@ -815,6 +817,7 @@ fun SettingsScreen(
                         if (tempSelectedHomeProviders.isNotEmpty()) {
                             coroutineScope.launch {
                                 preferenceStore.saveSelectedHomeProviders(tempSelectedHomeProviders)
+                                dashboardRepository?.clearCacheAndReload()
                                 showHomeSitesDialog = false
                                 Toast.makeText(context, "Home selection saved", Toast.LENGTH_SHORT).show()
                             }

@@ -14,8 +14,8 @@ android {
         applicationId = "com.thedesitadka.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 8
-        versionName = "1.0.7"
+        versionCode = 10
+        versionName = "1.0.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -35,7 +35,6 @@ android {
         }
         debug {
             isMinifyEnabled = false
-            applicationIdSuffix = ".debug"
         }
     }
 
@@ -62,7 +61,7 @@ android {
 }
 
 // KSP generates Room _Impl files in both byRounds/1/ (intermediate) and the root output dir.
-// Both end up on the compile classpath → "duplicate class" error in release builds.
+// Both end up on the compile classpath â†’ "duplicate class" error in release builds.
 // Fix: exclude byRounds pattern from JavaCompile source trees at execution time.
 afterEvaluate {
     listOf("Release", "Debug").forEach { variant ->
@@ -127,3 +126,4 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
+

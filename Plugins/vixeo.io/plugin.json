@@ -1,0 +1,38 @@
+{
+  "id": "vixeo",
+  "name": "Vixeo.io Host Resolver Plugin",
+  "version": "1.0.0",
+  "description": "Resolves third-party hosted video iframes from vixeo.io (and vidsonic.net) to direct HLS/MP4 streams.",
+  "author": "TheDesiTadka Engine",
+  "type": "host_resolver",
+  "domains": [
+    "vixeo.io",
+    "vidsonic.net"
+  ],
+  "urlPatterns": [
+    "^https?://(?:www\\.)?vixeo\\.io/e/([A-Za-z0-9_-]+)",
+    "^https?://(?:www\\.)?vixeo\\.io/embed/([A-Za-z0-9_-]+)",
+    "^https?://(?:www\\.)?vixeo\\.io/d/([A-Za-z0-9_-]+)",
+    "^https?://(?:www\\.)?vixeo\\.io/([A-Za-z0-9_-]+)"
+  ],
+  "dom": {
+    "containerSelector": "#streamsonic-player-root",
+    "configAttribute": "data-config"
+  },
+  "decryption": {
+    "method": "base64_json_hex_reverse",
+    "steps": [
+      "1. Read data-config attribute from #streamsonic-player-root element",
+      "2. Base64 decode data-config into UTF-8 JSON string",
+      "3. Parse JSON and read 'source' field",
+      "4. Strip all pipe '|' characters",
+      "5. Convert two-character hex pairs into characters",
+      "6. Reverse string characters to obtain direct stream URL (e.g. index.m3u8 or video.mp4)"
+    ]
+  },
+  "headers": {
+    "Referer": "https://vixeo.io/",
+    "Origin": "https://vixeo.io",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+  }
+}

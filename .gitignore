@@ -3,6 +3,7 @@
 .gradle
 /local.properties
 /.idea
+.kotlin/
 .DS_Store
 **/build/
 build/
@@ -30,3 +31,5 @@ __pycache__/
 venv/
 release/
 scratch/
+*.apk
+*.aab

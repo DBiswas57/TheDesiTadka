@@ -3,6 +3,7 @@ package com.thedesitadka.app.ui.screens
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -43,6 +44,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -67,6 +69,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.thedesitadka.app.R
 import com.thedesitadka.app.data.DashboardRepository
+import com.thedesitadka.app.storage.PreferenceStore
 import com.thedesitadka.app.storage.WatchHistoryEntity
 import com.thedesitadka.app.ui.challenge.CloudflareChallengeActivity
 import com.thedesitadka.app.ui.components.EmptyStateView
@@ -89,13 +92,18 @@ fun HomeScreen(
     providerEngine: ProviderEngine,
     dashboardRepository: DashboardRepository,
     watchHistoryFlow: Flow<List<WatchHistoryEntity>>,
+    preferenceStore: PreferenceStore? = null,
     monetizationManager: MonetizationManager? = null,
     onVideoClick: (VideoItem) -> Unit,
     onProviderClick: (String) -> Unit,
-    onSearchClick: () -> Unit
+    onSearchClick: () -> Unit,
+    onCustomizeSourcesClick: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val activeProviders = remember { providerEngine.getActiveProviders() }
+    val selectedHomeProviders by preferenceStore?.selectedHomeProvidersFlow?.collectAsState(
+        initial = emptySet()
+    ) ?: remember { mutableStateOf(emptySet()) }
 
     // Preserve selected category across navigation
     var selectedCategoryId by rememberSaveable { mutableStateOf("all") }
@@ -385,6 +393,72 @@ fun HomeScreen(
                     ),
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
                 )
+            }
+
+            // Contributing Sources Badge Row
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                val contributingProviders = remember(activeProviders, selectedHomeProviders) {
+                    if (selectedHomeProviders.isEmpty()) {
+                        activeProviders
+                    } else {
+                        activeProviders.filter { it.id in selectedHomeProviders }
+                    }
+                }
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                ) {
+                    Column(modifier = Modifier.padding(10.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Contributing to Home (${contributingProviders.size} sites)",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            )
+                            if (onCustomizeSourcesClick != null) {
+                                Text(
+                                    text = "Customize ⚙",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    ),
+                                    modifier = Modifier.clickable { onCustomizeSourcesClick() }
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            items(contributingProviders) { p ->
+                                Surface(
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = MaterialTheme.colorScheme.surface,
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                                ) {
+                                    Text(
+                                        text = p.name,
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = Color.White
+                                        ),
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             // Loading Skeletons

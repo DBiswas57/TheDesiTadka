@@ -114,10 +114,11 @@ class AppContainer(val context: Context) {
 
     fun getDefaultManifest(): ProviderManifest = createDefaultManifest()
 
-    private fun createDefaultManifest(): ProviderManifest {
+    companion object {
+        fun createDefaultManifest(): ProviderManifest {
         return ProviderManifest(
             schemaVersion = 1,
-            configVersion = 140,
+            configVersion = 145,
             minimumAppVersion = 4,
             forceUpdate = true,
             generatedAt = System.currentTimeMillis(),
@@ -126,11 +127,11 @@ class AppContainer(val context: Context) {
                 ProviderConfig(
                     id = "kamababa1",
                     familyId = "clean_tube_family",
-                    domains = listOf("https://www.kamababa1.com", "https://kamababa1.com"),
+                    domains = listOf("https://www.mykamababa.com", "https://mykamababa.com", "https://www.kamababa1.com", "https://kamababa1.com"),
                     validationMarker = "kamababa",
                     name = "KamaBaba",
                     enabled = true,
-                    baseUrl = "https://www.kamababa1.com",
+                    baseUrl = "https://www.mykamababa.com",
                     adapter = "html_selector",
                     capabilities = listOf(
                         ProviderCapability.HOME,
@@ -150,7 +151,7 @@ class AppContainer(val context: Context) {
                         title = "a[title], h2.entry-title a, h2 a",
                         thumbnail = "img.video-main-thumb, img",
                         thumbnailAttr = "src",
-                        detailUrl = "a[href*='kamababa1.com/']",
+                        detailUrl = "a.video-preview-link, a[href*='kamababa'], a",
                         duration = ".duration",
                         detailTitle = "h1",
                         detailDescription = ".entry-content p, .video-details, p",
@@ -997,16 +998,17 @@ class AppContainer(val context: Context) {
                         ProviderCapability.DOWNLOAD
                     ),
                     navigation = NavigationConfig(
-                        home = "/",
+                        home = "/todays-selection",
                         search = "/search/{query}/",
-                        page = "/{page}"
+                        page = "/todays-selection/{page}",
+                        categories = "/"
                     ),
                     selectors = SelectorConfig(
-                        item = "div.thumb-block.thumb-cat, div.thumb-block, div.mozaique > div",
-                        title = "p.title a, a[title], .title a",
+                        item = "div.thumb-block:not(.thumb-cat), div.thumb-block, div.mozaique > div",
+                        title = "p.title a, .title a, a[title]",
                         thumbnail = "img",
-                        thumbnailAttr = "src",
-                        detailUrl = "p.title a, a[href*='/todays-selection'], a[href*='/search/'], a[href*='/your-suggestions/'], a[href^='/video'], a",
+                        thumbnailAttr = "data-mzl, src, data-src",
+                        detailUrl = "p.title a, .thumb a, a[href*='/video-'], a[href*='/video'], a",
                         duration = "span.duration",
                         detailTitle = "h1",
                         detailThumbnail = "meta[property='og:image']",
@@ -1356,8 +1358,783 @@ class AppContainer(val context: Context) {
                         rightsStatus = "Public Web Index",
                         disclaimer = "Aggregated public reference media feed."
                     )
+                ),
+                // 30. Brazzers Official
+                ProviderConfig(
+                    id = "brazzers",
+                    familyId = "studio_family",
+                    domains = listOf("https://www.brazzers.com", "https://brazzers.com"),
+                    validationMarker = "brazzers",
+                    name = "Brazzers",
+                    enabled = true,
+                    baseUrl = "https://www.brazzers.com",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/videos",
+                        search = "/videos?q={query}",
+                        page = "/videos/page/{page}",
+                        categories = "/categories"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "div[class*='e1qkfw3j2'], div.scene-card, a[href*='/video/']",
+                        title = "a[title], img[alt], [title], a",
+                        thumbnail = "img, picture source",
+                        thumbnailAttr = "src, srcset, data-src",
+                        detailUrl = "a[href*='/video/'], a",
+                        duration = ".duration, [class*='duration']",
+                        detailTitle = "h1",
+                        detailDescription = "p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "video",
+                        videoSource = "video source[src], video[src]",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Aggregation Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 31. BrazzPW
+                ProviderConfig(
+                    id = "brazzpw",
+                    familyId = "clean_tube_family",
+                    domains = listOf("https://brazzpw.xyz", "https://brazzpw.com"),
+                    validationMarker = "brazzpw",
+                    name = "BrazzPW",
+                    enabled = true,
+                    baseUrl = "https://brazzpw.xyz",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/?s={query}",
+                        page = "/page/{page}/",
+                        categories = "/categories/"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "article.thumb-block, article.video-preview-item, article, div.post",
+                        title = "h2.entry-title a, a[title], h2 a, a",
+                        thumbnail = "img.video-main-thumb, img",
+                        thumbnailAttr = "src, data-src",
+                        detailUrl = "a[href*='brazzpw.xyz/'], a[href*='brazzpw.com/'], a",
+                        duration = ".duration",
+                        detailTitle = "h1.entry-title, h1",
+                        detailDescription = ".entry-content p, p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "iframe[src*='player'], video",
+                        videoSource = "video source[src], video[src], source[type='video/mp4']",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Aggregation Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 32. FPO.xxx
+                ProviderConfig(
+                    id = "fpo",
+                    familyId = "clean_tube_family",
+                    domains = listOf("https://www.fpo.xxx", "https://fpo.xxx"),
+                    validationMarker = "fpo",
+                    name = "FPO.xxx",
+                    enabled = true,
+                    baseUrl = "https://www.fpo.xxx",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/new-1/",
+                        search = "/search/{query}/",
+                        page = "/new-{page}/",
+                        categories = "/categories/"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "div.item, div.video-item, div.thumb",
+                        title = "a.title, strong.title, a[title]",
+                        thumbnail = "img",
+                        thumbnailAttr = "data-src, src",
+                        detailUrl = "a[href*='/video/'], a.title, a",
+                        duration = ".duration, span.time",
+                        detailTitle = "h1",
+                        detailDescription = ".description, p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "video",
+                        videoSource = "video source[src], video[src]",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Web Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 33. Hello.porn
+                ProviderConfig(
+                    id = "hello",
+                    familyId = "clean_tube_family",
+                    domains = listOf("https://hello.porn"),
+                    validationMarker = "hello",
+                    name = "Hello.porn",
+                    enabled = true,
+                    baseUrl = "https://hello.porn",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/trending",
+                        search = "/search?q={query}",
+                        page = "/trending?page={page}",
+                        categories = "/categories"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "div.item, div.video-item, div.thumb, div.card",
+                        title = "a.title, [title], a",
+                        thumbnail = "img",
+                        thumbnailAttr = "data-src, src",
+                        detailUrl = "a[href*='/video'], a",
+                        duration = ".duration",
+                        detailTitle = "h1",
+                        detailDescription = "p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "video",
+                        videoSource = "video source[src], video[src]",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Aggregation Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 34. HQPorner
+                ProviderConfig(
+                    id = "hqporner",
+                    familyId = "clean_tube_family",
+                    domains = listOf("https://hqporner.com"),
+                    validationMarker = "hqporner",
+                    name = "HQPorner",
+                    enabled = true,
+                    baseUrl = "https://hqporner.com",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/?q={query}",
+                        page = "/?page={page}",
+                        categories = "/categories"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "section.box.feature, section.feature, div.video-item, div.item, div.thumb, div.post, article",
+                        title = "h3.meta-data-title a, a.title, h3 a, a[title], a",
+                        thumbnail = "img",
+                        thumbnailAttr = "data-src, src",
+                        detailUrl = "a[href*='/hdporn/'], a",
+                        duration = ".duration",
+                        detailTitle = "h1",
+                        detailDescription = "p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "video, iframe",
+                        videoSource = "video source[src], video[src]",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Aggregation Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 35. MAX.porn
+                ProviderConfig(
+                    id = "max",
+                    familyId = "clean_tube_family",
+                    domains = listOf("https://max.porn", "http://max.porn"),
+                    validationMarker = "max",
+                    name = "MAX.porn",
+                    enabled = true,
+                    baseUrl = "https://max.porn",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/search/{query}/",
+                        page = "/latest-updates/{page}/",
+                        categories = "/channels/"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "div.item, div.video-item, div.thumb",
+                        title = "a.title, [title], a",
+                        thumbnail = "img",
+                        thumbnailAttr = "data-src, src",
+                        detailUrl = "a[href*='/videos/'], a",
+                        duration = ".duration",
+                        detailTitle = "h1",
+                        detailDescription = "p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "video",
+                        videoSource = "video source[src], video[src]",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Aggregation Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 36. Netfapx
+                ProviderConfig(
+                    id = "netfapx",
+                    familyId = "clean_tube_family",
+                    domains = listOf("https://netfapx.com"),
+                    validationMarker = "netfapx",
+                    name = "Netfapx",
+                    enabled = true,
+                    baseUrl = "https://netfapx.com",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/?s={query}",
+                        page = "/page/{page}/",
+                        categories = "/category/"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "article, div.post, div.video-item",
+                        title = "h2.entry-title a, h2 a, a[title]",
+                        thumbnail = "img",
+                        thumbnailAttr = "data-src, src",
+                        detailUrl = "h2.entry-title a, a[href*='netfapx.com/20'], a",
+                        duration = ".duration",
+                        detailTitle = "h1.entry-title, h1",
+                        detailDescription = ".entry-content p, p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "video, iframe",
+                        videoSource = "video source[src], video[src]",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Aggregation Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 37. OK.porn
+                ProviderConfig(
+                    id = "ok_porn",
+                    familyId = "clean_tube_family",
+                    domains = listOf("https://ok.porn"),
+                    validationMarker = "ok.porn",
+                    name = "OK.porn",
+                    enabled = true,
+                    baseUrl = "https://ok.porn",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/search/{query}/",
+                        page = "/latest-updates/{page}/",
+                        categories = "/channels/"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "div.item, div.video-card, div.thumb",
+                        title = "a.title, [title], a",
+                        thumbnail = "img",
+                        thumbnailAttr = "data-src, src",
+                        detailUrl = "a[href*='/videos/'], a",
+                        duration = ".duration",
+                        detailTitle = "h1",
+                        detailDescription = "p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "video",
+                        videoSource = "video source[src], video[src]",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Web Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 38. OK.xxx
+                ProviderConfig(
+                    id = "ok_xxx",
+                    familyId = "clean_tube_family",
+                    domains = listOf("https://ok.xxx"),
+                    validationMarker = "ok.xxx",
+                    name = "OK.xxx",
+                    enabled = true,
+                    baseUrl = "https://ok.xxx",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/search/{query}/",
+                        page = "/latest-updates/{page}/",
+                        categories = "/channels/"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "div.item, div.video-card, div.thumb",
+                        title = "a.title, [title], a",
+                        thumbnail = "img",
+                        thumbnailAttr = "data-src, src",
+                        detailUrl = "a[href*='/videos/'], a",
+                        duration = ".duration",
+                        detailTitle = "h1",
+                        detailDescription = "p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "video",
+                        videoSource = "video source[src], video[src]",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Web Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 39. PerfectGirls
+                ProviderConfig(
+                    id = "perfectgirls",
+                    familyId = "clean_tube_family",
+                    domains = listOf("https://www.perfectgirls.xxx", "https://perfectgirls.xxx"),
+                    validationMarker = "perfectgirls",
+                    name = "PerfectGirls",
+                    enabled = true,
+                    baseUrl = "https://www.perfectgirls.xxx",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/search/{query}/",
+                        page = "/{page}/",
+                        categories = "/channels/"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "div.item, div.video-item, div.card",
+                        title = "a.title, [title], a",
+                        thumbnail = "img",
+                        thumbnailAttr = "data-src, src",
+                        detailUrl = "a[href*='/video/'], a[href*='/videos/'], a",
+                        duration = ".duration",
+                        detailTitle = "h1",
+                        detailDescription = "p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "video",
+                        videoSource = "video source[src], video[src]",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Web Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 40. Porn4Days
+                ProviderConfig(
+                    id = "porn4days",
+                    familyId = "clean_tube_family",
+                    domains = listOf("https://porn4days.pw"),
+                    validationMarker = "porn4days",
+                    name = "Porn4Days",
+                    enabled = true,
+                    baseUrl = "https://porn4days.pw",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/newest",
+                        search = "/search/{query}",
+                        page = "/newest/page{page}/",
+                        categories = "/paysitelist"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "div.card, div.video-item, div.col-6, div.col-md-3",
+                        title = "a[title], img[alt], h5, .card-title, a",
+                        thumbnail = "img.card-img-top, img",
+                        thumbnailAttr = "src, data-src",
+                        detailUrl = "a[href*='video/'], a",
+                        duration = ".duration",
+                        detailTitle = "h1",
+                        detailDescription = "p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "video",
+                        videoSource = "video source[src], video[src]",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Aggregation Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 41. PornHat
+                ProviderConfig(
+                    id = "pornhat",
+                    familyId = "clean_tube_family",
+                    domains = listOf("https://www.pornhat.com", "https://pornhat.com"),
+                    validationMarker = "pornhat",
+                    name = "PornHat",
+                    enabled = true,
+                    baseUrl = "https://www.pornhat.com",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/search/{query}/",
+                        page = "/latest-updates/{page}/",
+                        categories = "/channels/"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "div.item, div.thumb, div.video-item",
+                        title = "a.title, [title], a",
+                        thumbnail = "img",
+                        thumbnailAttr = "data-src, src",
+                        detailUrl = "a[href*='/video/'], a[href*='/videos/'], a",
+                        duration = ".duration",
+                        detailTitle = "h1",
+                        detailDescription = "p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "video",
+                        videoSource = "video source[src], video[src]",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Web Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 42. PornHD4K
+                ProviderConfig(
+                    id = "pornhd4k",
+                    familyId = "clean_tube_family",
+                    domains = listOf("https://pornhd4k.net"),
+                    validationMarker = "pornhd4k",
+                    name = "PornHD4K",
+                    enabled = true,
+                    baseUrl = "https://pornhd4k.net",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/?s={query}",
+                        page = "/premium-porn-hd/page-{page}",
+                        categories = "/studio/bangbros"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "div.item, div.film-poster, div.video-item",
+                        title = "a.title, h3 a, [title], a",
+                        thumbnail = "img",
+                        thumbnailAttr = "data-src, src",
+                        detailUrl = "a[href*='/movies/'], a",
+                        duration = ".duration",
+                        detailTitle = "h1",
+                        detailDescription = "p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "video, iframe",
+                        videoSource = "video source[src], video[src]",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Web Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 43. PornHouse
+                ProviderConfig(
+                    id = "pornhouse",
+                    familyId = "clean_tube_family",
+                    domains = listOf("https://pornhouse.me"),
+                    validationMarker = "pornhouse",
+                    name = "PornHouse",
+                    enabled = true,
+                    baseUrl = "https://pornhouse.me",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/?s={query}",
+                        page = "/porn-hd-free-full-1080p/page-{page}",
+                        categories = "/tag/asian"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "div.item, div.film-poster, div.video-item",
+                        title = "a.title, h3 a, [title], a",
+                        thumbnail = "img",
+                        thumbnailAttr = "data-src, src",
+                        detailUrl = "a[href*='/movies/'], a",
+                        duration = ".duration",
+                        detailTitle = "h1",
+                        detailDescription = "p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "video, iframe",
+                        videoSource = "video source[src], video[src]",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Web Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 44. PornMZ
+                ProviderConfig(
+                    id = "pornmz",
+                    familyId = "clean_tube_family",
+                    domains = listOf("https://pornmz.com"),
+                    validationMarker = "pornmz",
+                    name = "PornMZ",
+                    enabled = true,
+                    baseUrl = "https://pornmz.com",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/?s={query}",
+                        page = "/page/{page}?filter=latest",
+                        categories = "/categories"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "article.thumb-block, article.video-preview-item, article, div.item",
+                        title = "a[title], h2.entry-title a, h2 a, a.title",
+                        thumbnail = "img.video-main-thumb, img",
+                        thumbnailAttr = "src",
+                        detailUrl = "a[href*='/video/'], a[href*='pornmz.com/video/'], a",
+                        duration = ".duration",
+                        detailTitle = "h1.entry-title, h1",
+                        detailDescription = ".entry-content p, p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "iframe, video",
+                        videoSource = "video source[src], video[src]",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Aggregation Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 45. Pornstars.tube
+                ProviderConfig(
+                    id = "pornstars_tube",
+                    familyId = "clean_tube_family",
+                    domains = listOf("https://pornstars.tube", "http://pornstars.tube"),
+                    validationMarker = "pornstars.tube",
+                    name = "Pornstars.tube",
+                    enabled = true,
+                    baseUrl = "https://pornstars.tube",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/search/{query}/",
+                        page = "/latest-updates/{page}/",
+                        categories = "/models/"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "div.item, div.video-card, div.thumb",
+                        title = "a.title, [title], a",
+                        thumbnail = "img",
+                        thumbnailAttr = "data-src, src",
+                        detailUrl = "a[href*='/videos/'], a",
+                        duration = ".duration",
+                        detailTitle = "h1",
+                        detailDescription = "p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "video",
+                        videoSource = "video source[src], video[src]",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Web Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 46. SxyPrn
+                ProviderConfig(
+                    id = "sxyprn",
+                    familyId = "clean_tube_family",
+                    domains = listOf("https://sxyprn.com"),
+                    validationMarker = "sxyprn",
+                    name = "SxyPrn",
+                    enabled = true,
+                    baseUrl = "https://sxyprn.com",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/?s={query}",
+                        page = "/orgasm/{page}",
+                        categories = "/popular/top-pop.html"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "div.post_el_small, div.post_el",
+                        title = "div.post_text, a.ps_link, a",
+                        thumbnail = "img.mini_post_vid_thumb, img",
+                        thumbnailAttr = "src, data-src",
+                        detailUrl = "a[href*='/post/'], a",
+                        duration = ".post_control_time, .duration",
+                        detailTitle = "h1",
+                        detailDescription = "p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "video, iframe",
+                        videoSource = "video source[src], video[src]",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Web Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 47. WatchXXXFree
+                ProviderConfig(
+                    id = "watchxxxfree",
+                    familyId = "clean_tube_family",
+                    domains = listOf("https://watchxxxfree.xyz", "https://justfullporn.net"),
+                    validationMarker = "watchxxxfree",
+                    name = "WatchXXXFree",
+                    enabled = true,
+                    baseUrl = "https://watchxxxfree.xyz",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/?filter=latest",
+                        search = "/?s={query}",
+                        page = "/page/{page}/?filter=latest",
+                        categories = "/categories/"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "div.videos-list article, div.videos-list .loop-video, article.thumb-block:not(.slide):not(.bx-clone)",
+                        title = "a[title], img[alt], h2.entry-title a, h2 a, a",
+                        thumbnail = "img.video-main-thumb, img",
+                        thumbnailAttr = "src",
+                        detailUrl = "a[href*='watchxxxfree.xyz/'], a[href*='/'], a",
+                        duration = ".duration",
+                        detailTitle = "h1.entry-title, h1",
+                        detailDescription = ".entry-content p, p",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "iframe[src*='vixeo.io'], iframe, video",
+                        videoSource = "iframe[src*='vixeo.io'], video source[src], video[src]",
+                        videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Aggregation Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
                 )
             )
         )
     }
+}
 }

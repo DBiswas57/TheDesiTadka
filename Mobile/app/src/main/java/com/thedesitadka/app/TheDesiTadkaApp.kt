@@ -74,7 +74,7 @@ class TheDesiTadkaApp : Application(), ImageLoaderFactory {
                 val host = orig.url.host.lowercase()
                 val referer = when {
                     host.contains("pvtcdn.com") || host.contains("masa49") -> "https://www.masa49.nl/"
-                    host.contains("kamababa") -> "https://www.kamababa1.com/"
+                    host.contains("kamababa") -> "https://www.mykamababa.com/"
                     host.contains("fry99") -> "https://fry99.cc/"
                     host.contains("masahub") -> "https://masahub2.com/"
                     host.contains("aagmaal") || host.contains("aagimg") -> "https://aagmaal.date/"

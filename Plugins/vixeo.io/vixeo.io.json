@@ -1,0 +1,1910 @@
+{
+  "session": {
+    "url": "https://o.bwreq22gl721ocbxnmi8rqg2468binmn.cfd",
+    "capturedAt": "2026-09-19T08:01:57.990Z",
+    "requestCount": 68
+  },
+  "requests": [
+    {
+      "id": "1881809143:27944.149",
+      "method": "GET",
+      "url": "https://o.bwreq22gl721ocbxnmi8rqg2468binmn.cfd/khUo6Vmwgjvmv88oy9t/qEvkJ",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          ":authority": "o.bwreq22gl721ocbxnmi8rqg2468binmn.cfd",
+          ":method": "GET",
+          ":path": "/khUo6Vmwgjvmv88oy9t/qEvkJ",
+          ":scheme": "https",
+          "sec-fetch-storage-access": "none"
+        }
+      },
+      "response": {
+        "headers": {
+          "accept-ch": "sec-ch-ua-platform-version,sec-ch-ua-model,sec-ch-ua-full-version,sec-ch-ua-full-version-list",
+          "cache-control": "no-cache, no-store, must-revalidate",
+          "content-encoding": "gzip",
+          "content-type": "text/javascript;charset=UTF-8",
+          "date": "Sat, 19 Sep 2026 08:00:36 GMT",
+          "expires": "0",
+          "pragma": "no-cache",
+          "server": "nginx",
+          "set-cookie": "••••••••",
+          "strict-transport-security": "max-age=1",
+          "vary": "Accept-Encoding",
+          "x-content-type-options": "nosniff"
+        }
+      },
+      "timing": {
+        "duration": null
+      }
+    },
+    {
+      "id": "1881809143:4128",
+      "method": "GET",
+      "url": "https://o.bwreq22gl721ocbxnmi8rqg2468binmn.cfd/khUo6Vmwgjvmv88oy9t/qEvkJ",
+      "status": 200,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-ch-ua-mobile": "?0",
+          "Sec-Fetch-Storage-Access": "none"
+        }
+      },
+      "response": {
+        "headers": {
+          "server": "nginx",
+          "date": "Sat, 19 Sep 2026 08:00:36 GMT",
+          "content-type": "text/javascript;charset=UTF-8",
+          "accept-ch": "sec-ch-ua-platform-version,sec-ch-ua-model,sec-ch-ua-full-version,sec-ch-ua-full-version-list",
+          "cache-control": "no-cache, no-store, must-revalidate",
+          "pragma": "no-cache",
+          "expires": "0",
+          "content-encoding": "gzip",
+          "vary": "Accept-Encoding",
+          "strict-transport-security": "max-age=1",
+          "x-content-type-options": "nosniff"
+        }
+      },
+      "error": "net::ERR_ABORTED",
+      "timing": {
+        "duration": 3376.922119140625
+      }
+    },
+    {
+      "id": "1881809143:17B62088E9389F630B88CA6E271F8650",
+      "method": "GET",
+      "url": "https://vixeo.io/e/EQkJKzs7LwIf",
+      "status": 200,
+      "type": "document",
+      "request": {
+        "headers": {
+          "upgrade-insecure-requests": "1",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          ":authority": "vixeo.io",
+          ":method": "GET",
+          ":path": "/e/EQkJKzs7LwIf",
+          ":scheme": "https",
+          "cache-control": "max-age=0",
+          "cookie": "••••••••",
+          "priority": "u=0, i",
+          "sec-fetch-user": "?1"
+        }
+      },
+      "response": {
+        "headers": {
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "cache-control": "private, no-store",
+          "cf-cache-status": "DYNAMIC",
+          "cf-ray": "a3d70ed41eb13f82-SIN",
+          "content-encoding": "zstd",
+          "content-type": "text/html; charset=UTF-8",
+          "cross-origin-resource-policy": "cross-origin",
+          "date": "Sat, 19 Sep 2026 08:00:39 GMT",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "origin-agent-cluster": "?1",
+          "referrer-policy": "no-referrer",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=FMzeW6LbcdHL2VuqEzuEfpOva%2BNqMO3E%2FZ3GtfWMEbAyyfUOIOBtTlzvE6QKtFACR0kH95LWH%2Fs3NFi4EWJm%2FSubykFn%2BRrT35RMwyP1ZeRZz7nWgkPFmY0oFw%3D%3D\"}]}",
+          "server": "cloudflare",
+          "server-timing": "cfCacheStatus;desc=\"DYNAMIC\"\ncfEdge;dur=7,cfOrigin;dur=368",
+          "strict-transport-security": "max-age=15552000; includeSubDomains",
+          "vary": "Origin\naccept-encoding",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-download-options": "noopen",
+          "x-permitted-cross-domain-policies": "none",
+          "x-xss-protection": "0"
+        },
+        "bodyExcluded": true,
+        "bodyExcludedReason": "size-limit"
+      },
+      "timing": {
+        "duration": -1789602124237.4849
+      }
+    },
+    {
+      "id": "1881809143:27944.150",
+      "method": "POST",
+      "url": "https://usrpubtrk.com/ut/hb.php?cb=0.2881998853529737&v=1",
+      "status": 0,
+      "type": "ping",
+      "request": {
+        "query": {
+          "cb": "0.2881998853529737",
+          "v": "1"
+        },
+        "headers": {
+          "Content-Type": "text/plain; charset=utf-8",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132892.511
+      }
+    },
+    {
+      "id": "1881809143:4129",
+      "method": "GET",
+      "url": "https://vixeo.io/e/EQkJKzs7LwIf",
+      "status": 200,
+      "type": "document",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Upgrade-Insecure-Requests": "1",
+          "Sec-Fetch-User": "?1"
+        }
+      },
+      "response": {
+        "headers": {
+          "date": "Sat, 19 Sep 2026 08:00:39 GMT",
+          "content-type": "text/html; charset=UTF-8",
+          "server": "cloudflare",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "vary": "accept-encoding",
+          "cache-control": "private, no-store",
+          "cross-origin-resource-policy": "cross-origin",
+          "origin-agent-cluster": "?1",
+          "referrer-policy": "no-referrer",
+          "strict-transport-security": "max-age=15552000; includeSubDomains",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-download-options": "noopen",
+          "x-permitted-cross-domain-policies": "none",
+          "x-xss-protection": "0",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=FMzeW6LbcdHL2VuqEzuEfpOva%2BNqMO3E%2FZ3GtfWMEbAyyfUOIOBtTlzvE6QKtFACR0kH95LWH%2Fs3NFi4EWJm%2FSubykFn%2BRrT35RMwyP1ZeRZz7nWgkPFmY0oFw%3D%3D\"}]}",
+          "cf-cache-status": "DYNAMIC",
+          "server-timing": "cfEdge;dur=7,cfOrigin;dur=368",
+          "content-encoding": "zstd",
+          "cf-ray": "a3d70ed41eb13f82-SIN",
+          "alt-svc": "h3=\":443\"; ma=86400"
+        }
+      },
+      "timing": {
+        "duration": 8680.3720703125
+      }
+    },
+    {
+      "id": "1881809143:27944.154",
+      "method": "POST",
+      "url": "https://www.google-analytics.com/mp/collect?measurement_id=G-03XW3FWG7L&api_secret=Px06eCtvQLS0hVSB2MPj_g",
+      "status": 0,
+      "type": "fetch",
+      "request": {
+        "query": {
+          "measurement_id": "G-03XW3FWG7L",
+          "api_secret": "********"
+        },
+        "headers": {
+          "Content-Type": "text/plain;charset=UTF-8",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        },
+        "body": {
+          "client_id": "aeykbr1757208266921rmgsswg",
+          "events": [
+            {
+              "name": "page_view",
+              "params": {
+                "session_id": "w74uqdzofqvbk0jz2jm4k",
+                "engagement_time_msec": 100,
+                "page_title": "unmasking-a-threesome_480p",
+                "page_location": "https://vixeo.io/e/EQkJKzs7LwIf"
+              }
+            }
+          ]
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132903.1472
+      }
+    },
+    {
+      "id": "1881809143:27944.156",
+      "method": "GET",
+      "url": "https://plausible.vidsonic.net/js/pa-yhh0if-nWETP9156pzgXy.js",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132917.816
+      }
+    },
+    {
+      "id": "1881809143:4130",
+      "method": "GET",
+      "url": "https://plausible.vidsonic.net/js/pa-yhh0if-nWETP9156pzgXy.js",
+      "status": 0,
+      "type": "js",
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": 0.4541015625
+      }
+    },
+    {
+      "id": "1881809143:27944.157",
+      "method": "GET",
+      "url": "https://al5sm.com/tag.min.js",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132901.31
+      }
+    },
+    {
+      "id": "1881809143:27944.158",
+      "method": "GET",
+      "url": "https://www.betteradsystem.com/ljquery.stickyNavbar.min.css",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132901.991
+      }
+    },
+    {
+      "id": "1881809143:27944.161",
+      "method": "GET",
+      "url": "https://plausible.vidsonic.net/js/pa-yhh0if-nWETP9156pzgXy.js",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132912.1938
+      }
+    },
+    {
+      "id": "1881809143:27944.164",
+      "method": "GET",
+      "url": "https://cdn.tsyndicate.com/sdk/v1/p.js",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132912.5342
+      }
+    },
+    {
+      "id": "1881809143:27944.165",
+      "method": "GET",
+      "url": "https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132912.489
+      }
+    },
+    {
+      "id": "1881809143:4131",
+      "method": "GET",
+      "url": "https://plausible.vidsonic.net/js/pa-yhh0if-nWETP9156pzgXy.js",
+      "status": 0,
+      "type": "js",
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": 0.55517578125
+      }
+    },
+    {
+      "id": "1881809143:27944.166",
+      "method": "GET",
+      "url": "https://d2kk0o3fr7ed01.cloudfront.net/Nyg/zis.min.js",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132917.0679
+      }
+    },
+    {
+      "id": "1881809143:27944.168",
+      "method": "GET",
+      "url": "https://adexchangerapid.com/ad/czcf.php?cz=12083062&atv=87.0&chu=%22Chromium%22%3Bv%3D152%2C%20%22Not%3FA_Brand%22%3Bv%3D24%2C%20%22Google%20Chrome%22%3Bv%3D152&chmob=%3F0&chp=Windows&chpv=19.0.0&chuafv=152.0.7977.65",
+      "status": 0,
+      "type": "fetch",
+      "request": {
+        "query": {
+          "cz": "12083062",
+          "atv": "87.0",
+          "chu": "\"Chromium\";v=152, \"Not?A_Brand\";v=24, \"Google Chrome\";v=152",
+          "chmob": "?0",
+          "chp": "Windows",
+          "chpv": "19.0.0",
+          "chuafv": "152.0.7977.65"
+        },
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132879.7432
+      }
+    },
+    {
+      "id": "1881809143:4132",
+      "method": "GET",
+      "url": "https://o.bwreq22gl721ocbxnmi8rqg2468binmn.cfd/kUb2HBCHCe36tT7LVRiOVwt4y/qEvkJ",
+      "status": 200,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-ch-ua-mobile": "?0",
+          "Sec-Fetch-Storage-Access": "none"
+        }
+      },
+      "response": {
+        "headers": {
+          "server": "nginx",
+          "date": "Sat, 19 Sep 2026 08:00:47 GMT",
+          "content-type": "text/javascript;charset=UTF-8",
+          "accept-ch": "sec-ch-ua-platform-version,sec-ch-ua-model,sec-ch-ua-full-version,sec-ch-ua-full-version-list",
+          "cache-control": "no-cache, no-store, must-revalidate",
+          "pragma": "no-cache",
+          "expires": "0",
+          "content-encoding": "gzip",
+          "vary": "Accept-Encoding",
+          "strict-transport-security": "max-age=1",
+          "x-content-type-options": "nosniff"
+        }
+      },
+      "error": "net::ERR_ABORTED",
+      "timing": {
+        "duration": 43368.688232421875
+      }
+    },
+    {
+      "id": "1881809143:27944.170",
+      "method": "GET",
+      "url": "https://o.bwreq22gl721ocbxnmi8rqg2468binmn.cfd/kUb2HBCHCe36tT7LVRiOVwt4y/qEvkJ",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          ":authority": "o.bwreq22gl721ocbxnmi8rqg2468binmn.cfd",
+          ":method": "GET",
+          ":path": "/kUb2HBCHCe36tT7LVRiOVwt4y/qEvkJ",
+          ":scheme": "https",
+          "sec-fetch-storage-access": "none"
+        }
+      },
+      "response": {
+        "headers": {
+          "accept-ch": "sec-ch-ua-platform-version,sec-ch-ua-model,sec-ch-ua-full-version,sec-ch-ua-full-version-list",
+          "cache-control": "no-cache, no-store, must-revalidate",
+          "content-encoding": "gzip",
+          "content-type": "text/javascript;charset=UTF-8",
+          "date": "Sat, 19 Sep 2026 08:00:47 GMT",
+          "expires": "0",
+          "pragma": "no-cache",
+          "server": "nginx",
+          "set-cookie": "••••••••",
+          "strict-transport-security": "max-age=1",
+          "vary": "Accept-Encoding",
+          "x-content-type-options": "nosniff"
+        }
+      },
+      "timing": {
+        "duration": null
+      }
+    },
+    {
+      "id": "1881809143:27944.172",
+      "method": "GET",
+      "url": "https://www.uwterphco.com/bjquery.stickyNavbar.min.css",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132868.142
+      }
+    },
+    {
+      "id": "1881809143:27944.173",
+      "method": "GET",
+      "url": "https://ngzfjgphsrxhv.online/0bc2cb?VcfN18EQozrrxCKKjNK2gkmZ=Y2hwdj0xOS4wLjAmY2htb2I9JTNGMCZjej0xMjA4MzA2MiZjaHVhZnY9MTUyLjAuNzk3Ny42NSZhdHY9ODcuMCZjaHA9V2luZG93cyZmbXQ9YXRnJmNodT0lMjJDaHJvbWl1bSUyMiUzQnYlM0QxNTIlMkMlMjAlMjJOb3QlM0ZBX0JyYW5kJTIyJTNCdiUzRDI0JTJDJTIwJTIyR29vZ2xlJTIwQ2hyb21lJTIyJTNCdiUzRDE1MiZzYWRibD0y",
+      "status": 204,
+      "type": "fetch",
+      "request": {
+        "query": {
+          "VcfN18EQozrrxCKKjNK2gkmZ": "Y2hwdj0xOS4wLjAmY2htb2I9JTNGMCZjej0xMjA4MzA2MiZjaHVhZnY9MTUyLjAuNzk3Ny42NSZhdHY9ODcuMCZjaHA9V2luZG93cyZmbXQ9YXRnJmNodT0lMjJDaHJvbWl1bSUyMiUzQnYlM0QxNTIlMkMlMjAlMjJOb3QlM0ZBX0JyYW5kJTIyJTNCdiUzRDI0JTJDJTIwJTIyR29vZ2xlJTIwQ2hyb21lJTIyJTNCdiUzRDE1MiZzYWRibD0y"
+        },
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          ":authority": "ngzfjgphsrxhv.online",
+          ":method": "GET",
+          ":path": "/0bc2cb?VcfN18EQozrrxCKKjNK2gkmZ=Y2hwdj0xOS4wLjAmY2htb2I9JTNGMCZjej0xMjA4MzA2MiZjaHVhZnY9MTUyLjAuNzk3Ny42NSZhdHY9ODcuMCZjaHA9V2luZG93cyZmbXQ9YXRnJmNodT0lMjJDaHJvbWl1bSUyMiUzQnYlM0QxNTIlMkMlMjAlMjJOb3QlM0ZBX0JyYW5kJTIyJTNCdiUzRDI0JTJDJTIwJTIyR29vZ2xlJTIwQ2hyb21lJTIyJTNCdiUzRDE1MiZzYWRibD0y",
+          ":scheme": "https",
+          "priority": "u=1, i"
+        }
+      },
+      "response": {
+        "headers": {
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "cf-cache-status": "DYNAMIC",
+          "cf-ray": "a3d70f0a8e4e2739-SIN",
+          "date": "Sat, 19 Sep 2026 08:00:48 GMT",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=GOZ82rthRdxmxnfxBksW%2FsBZp3dckGdUcF6GEVDKlPYQLOBKSWAnCYD1kJujQ%2BQFir8oOZT%2B2%2BwaAUohSEDilG1U7nShUugDus%2BWpcmtbQZUhoZ4UuV1xk9ORYCATrwOdJNIM3fwfQ%3D%3D\"}]}",
+          "server": "cloudflare",
+          "via": "2.3 tomcat"
+        }
+      },
+      "error": "net::ERR_ABORTED",
+      "timing": {
+        "duration": -1789602132483.986
+      }
+    },
+    {
+      "id": "1881809143:4134",
+      "method": "GET",
+      "url": "https://ngzfjgphsrxhv.online/0bc2cb?VcfN18EQozrrxCKKjNK2gkmZ=Y2hwdj0xOS4wLjAmY2htb2I9JTNGMCZjej0xMjA4MzA2MiZjaHVhZnY9MTUyLjAuNzk3Ny42NSZhdHY9ODcuMCZjaHA9V2luZG93cyZmbXQ9YXRnJmNodT0lMjJDaHJvbWl1bSUyMiUzQnYlM0QxNTIlMkMlMjAlMjJOb3QlM0ZBX0JyYW5kJTIyJTNCdiUzRDI0JTJDJTIwJTIyR29vZ2xlJTIwQ2hyb21lJTIyJTNCdiUzRDE1MiZzYWRibD0y",
+      "status": 204,
+      "type": "xhr",
+      "request": {
+        "query": {
+          "VcfN18EQozrrxCKKjNK2gkmZ": "Y2hwdj0xOS4wLjAmY2htb2I9JTNGMCZjej0xMjA4MzA2MiZjaHVhZnY9MTUyLjAuNzk3Ny42NSZhdHY9ODcuMCZjaHA9V2luZG93cyZmbXQ9YXRnJmNodT0lMjJDaHJvbWl1bSUyMiUzQnYlM0QxNTIlMkMlMjAlMjJOb3QlM0ZBX0JyYW5kJTIyJTNCdiUzRDI0JTJDJTIwJTIyR29vZ2xlJTIwQ2hyb21lJTIyJTNCdiUzRDE1MiZzYWRibD0y"
+        },
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-ch-ua-mobile": "?0"
+        }
+      },
+      "response": {
+        "headers": {
+          "date": "Sat, 19 Sep 2026 08:00:48 GMT",
+          "server": "cloudflare",
+          "via": "2.3 tomcat",
+          "cf-cache-status": "DYNAMIC",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=GOZ82rthRdxmxnfxBksW%2FsBZp3dckGdUcF6GEVDKlPYQLOBKSWAnCYD1kJujQ%2BQFir8oOZT%2B2%2BwaAUohSEDilG1U7nShUugDus%2BWpcmtbQZUhoZ4UuV1xk9ORYCATrwOdJNIM3fwfQ%3D%3D\"}]}",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "cf-ray": "a3d70f0a8e4e2739-SIN",
+          "alt-svc": "h3=\":443\"; ma=86400"
+        }
+      },
+      "timing": {
+        "duration": 432.5009765625
+      }
+    },
+    {
+      "id": "1881809143:27944.174",
+      "method": "GET",
+      "url": "https://www.zutdhkwkm.com/G/nis.min.js",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132905.109
+      }
+    },
+    {
+      "id": "1881809143:043C2C49175192444317786EC60D6550",
+      "method": "GET",
+      "url": "blob:https://vixeo.io/6030f60b-0ce4-47ca-8fe5-d362e4c38853",
+      "status": 0,
+      "type": "js",
+      "timing": {
+        "duration": null
+      }
+    },
+    {
+      "id": "1881809143:27944.176",
+      "method": "POST",
+      "url": "https://usrpubtrk.com/ut/hb.php?cb=0.615871185038487&v=1",
+      "status": 0,
+      "type": "ping",
+      "request": {
+        "query": {
+          "cb": "0.615871185038487",
+          "v": "1"
+        },
+        "headers": {
+          "Content-Type": "text/plain; charset=utf-8",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132919.408
+      }
+    },
+    {
+      "id": "1881809143:6F57C2312A393C0F410B13A68808991A",
+      "method": "GET",
+      "url": "https://hipodi.com/r/v2?u=bv&s1=&s2=&rti=true&d=https%3A%2F%2Fvixeo.io%2Fe%2FEQkJKzs7LwIf",
+      "status": 200,
+      "type": "document",
+      "request": {
+        "query": {
+          "u": "bv",
+          "s1": "",
+          "s2": "",
+          "rti": "true",
+          "d": "https://vixeo.io/e/EQkJKzs7LwIf"
+        },
+        "headers": {
+          "upgrade-insecure-requests": "1",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          ":authority": "hipodi.com",
+          ":method": "GET",
+          ":path": "/r/v2?u=bv&s1=&s2=&rti=true&d=https%3A%2F%2Fvixeo.io%2Fe%2FEQkJKzs7LwIf",
+          ":scheme": "https",
+          "priority": "u=0, i",
+          "sec-fetch-storage-access": "none"
+        }
+      },
+      "response": {
+        "headers": {
+          "accept-ch": "sec-ch-ua, sec-ch-ua-mobile, sec-ch-ua-platform, sec-ch-ua-platform-version, sec-ch-ua-arch, sec-ch-ua-bitness, sec-ch-ua-wow64, sec-ch-ua-model, sec-ch-ua-full-version, sec-ch-ua-full-version-list, sec-ch-ua-form-factor, sec-ch-dpr, sec-ch-viewport-width, sec-ch-viewport-height, sec-ch-width, sec-ch-device-memory, sec-ch-rtt, sec-ch-downlink, sec-ch-ect, sec-ch-save-data, sec-ch-prefers-color-scheme, sec-ch-prefers-reduced-motion, sec-ch-prefers-reduced-transparency, sec-ch-ua-form-factors",
+          "content-encoding": "gzip",
+          "content-type": "text/html; charset=UTF-8",
+          "date": "Sat, 19 Sep 2026 08:01:01 GMT",
+          "permissions-policy": "ch-ua=(self), ch-ua-platform=(self), ch-ua-mobile=(self), ch-ua-full-version=(self), ch-ua-full-version-list=(self), ch-ua-platform-version=(self), ch-ua-arch=(self), ch-ua-bitness=(self), ch-ua-wow64=(self), ch-ua-model=(self), ch-save-data=(self), ch-width=(self), ch-viewport-width=(self), ch-viewport-height=(self), ch-dpr=(self), ch-device-memory=(self), ch-rtt=(self), ch-downlink=(self), ch-ect=(self), ch-prefers-color-scheme=(self), ch-prefers-reduced-motion=(self), ch-prefers-reduced-transparency=(self), ch-ua-form-factors=(self)",
+          "referrer-policy": "no-referrer",
+          "server": "nginx",
+          "vary": "Accept-Encoding"
+        }
+      },
+      "timing": {
+        "duration": null
+      }
+    },
+    {
+      "id": "1881809143:4141",
+      "method": "GET",
+      "url": "https://hipodi.com/r/v2?u=bv&s1=&s2=&rti=true&d=https%3A%2F%2Fvixeo.io%2Fe%2FEQkJKzs7LwIf",
+      "status": 200,
+      "type": "document",
+      "request": {
+        "query": {
+          "u": "bv",
+          "s1": "",
+          "s2": "",
+          "rti": "true",
+          "d": "https://vixeo.io/e/EQkJKzs7LwIf"
+        },
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Upgrade-Insecure-Requests": "1",
+          "Sec-Fetch-Storage-Access": "none"
+        }
+      },
+      "response": {
+        "headers": {
+          "server": "nginx",
+          "date": "Sat, 19 Sep 2026 08:01:01 GMT",
+          "content-type": "text/html; charset=UTF-8",
+          "vary": "Accept-Encoding",
+          "referrer-policy": "no-referrer",
+          "permissions-policy": "ch-ua=(self), ch-ua-platform=(self), ch-ua-mobile=(self), ch-ua-full-version=(self), ch-ua-full-version-list=(self), ch-ua-platform-version=(self), ch-ua-arch=(self), ch-ua-bitness=(self), ch-ua-wow64=(self), ch-ua-model=(self), ch-save-data=(self), ch-width=(self), ch-viewport-width=(self), ch-viewport-height=(self), ch-dpr=(self), ch-device-memory=(self), ch-rtt=(self), ch-downlink=(self), ch-ect=(self), ch-prefers-color-scheme=(self), ch-prefers-reduced-motion=(self), ch-prefers-reduced-transparency=(self), ch-ua-form-factors=(self)",
+          "accept-ch": "sec-ch-ua, sec-ch-ua-mobile, sec-ch-ua-platform, sec-ch-ua-platform-version, sec-ch-ua-arch, sec-ch-ua-bitness, sec-ch-ua-wow64, sec-ch-ua-model, sec-ch-ua-full-version, sec-ch-ua-full-version-list, sec-ch-ua-form-factor, sec-ch-dpr, sec-ch-viewport-width, sec-ch-viewport-height, sec-ch-width, sec-ch-device-memory, sec-ch-rtt, sec-ch-downlink, sec-ch-ect, sec-ch-save-data, sec-ch-prefers-color-scheme, sec-ch-prefers-reduced-motion, sec-ch-prefers-reduced-transparency, sec-ch-ua-form-factors",
+          "content-encoding": "gzip"
+        }
+      },
+      "timing": {
+        "duration": 1243.928955078125
+      }
+    },
+    {
+      "id": "1881809143:4143",
+      "method": "POST",
+      "url": "https://hipodi.com/r/v2_validator",
+      "status": 200,
+      "type": "xhr",
+      "request": {
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Content-Type": "application/json",
+          "sec-ch-ua-mobile": "?0",
+          "Sec-Fetch-Storage-Access": "none"
+        },
+        "body": {
+          "params": {
+            "cid": "692f0c477db49c43fc30868b56f6b019",
+            "clientContext": [
+              "00000002",
+              true,
+              "c:16px Arial;m,s:12px Segoe UI;f:16px Times New Roman;sf:119;ss:147;su:134;ca:136;em:129",
+              true,
+              "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x000046A6) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+              "Google Inc. (Intel)",
+              "WebKit WebGL",
+              "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+              "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)",
+              16,
+              1700,
+              956,
+              1688,
+              738,
+              113,
+              "4g",
+              0.8,
+              150,
+              false,
+              "Windows",
+              "19.0.0",
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+              32,
+              -330,
+              "Asia/Calcutta",
+              true,
+              false,
+              "en-US,en,bn",
+              1688,
+              738,
+              "",
+              "000001100000",
+              0,
+              "",
+              "desktop",
+              {
+                "secChUa": "\"Chromium\";v=\"152\", \"Not?A_Brand\";v=\"24\", \"Google Chrome\";v=\"152\"",
+                "secChUaMobile": "?0",
+                "secChUaPlatform": "\"Windows\"",
+                "secChUaPlatformVersion": "\"19.0.0\"",
+                "secChUaArch": "\"x86\"",
+                "secChUaBitness": "\"64\"",
+                "secChUaFullVersion": "\"152.0.7977.65\"",
+                "secChUaFullVersionList": "\"Chromium\";v=\"152.0.7977.65\", \"Not?A_Brand\";v=\"24.0.0.0\", \"Google Chrome\";v=\"152.0.7977.65\"",
+                "secChUaWow64": "",
+                "secChUaModel": "",
+                "secChUaPrefersReducedMotion": "?1",
+                "secChUaPrefersColorScheme": "dark",
+                "secChUaPrefersContrast": "?0"
+              }
+            ]
+          }
+        }
+      },
+      "response": {
+        "headers": {
+          "server": "nginx",
+          "date": "Sat, 19 Sep 2026 08:01:01 GMT",
+          "content-type": "application/json; charset=UTF-8",
+          "vary": "Accept-Encoding",
+          "content-encoding": "gzip"
+        }
+      },
+      "timing": {
+        "duration": 230.724853515625
+      }
+    },
+    {
+      "id": "1881809143:4144",
+      "method": "GET",
+      "url": "https://vixeo.io/e/EQkJKzs7LwIf",
+      "status": 0,
+      "type": "document",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Upgrade-Insecure-Requests": "1"
+        }
+      },
+      "error": "net::ERR_ABORTED",
+      "timing": {
+        "duration": 10376.302001953125
+      }
+    },
+    {
+      "id": "1881809143:4145",
+      "method": "GET",
+      "url": "https://vixeo.io/thumbnails/EQkJKzs7LwIf/thumbnails.m3u8",
+      "status": 200,
+      "type": "xhr",
+      "request": {
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-ch-ua-mobile": "?0"
+        }
+      },
+      "response": {
+        "headers": {
+          "server": "cloudflare",
+          "date": "Sat, 19 Sep 2026 08:01:14 GMT",
+          "content-type": "application/vnd.apple.mpegurl",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "priority": "u=1,i",
+          "vary": "Origin",
+          "cache-control": "public, max-age=3600, stale-while-revalidate=86400",
+          "cross-origin-resource-policy": "cross-origin",
+          "origin-agent-cluster": "?1",
+          "referrer-policy": "no-referrer",
+          "strict-transport-security": "max-age=15552000; includeSubDomains",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-download-options": "noopen",
+          "x-permitted-cross-domain-policies": "none",
+          "x-xss-protection": "0",
+          "cf-cache-status": "DYNAMIC",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=tRCIpjnzdOorRYAx3mOfJrQ4mJzi2qkFO%2FX3JzP78WnmIJD%2Bahn2CIFWmfxQCaKM9632O7lO9NRotUvtTW1jiScZ2%2BNMrJOFtIwntm45DwOt3RFo4V7dOn7uYA%3D%3D\"}]}",
+          "content-encoding": "zstd",
+          "cf-ray": "a3d70faf39389c14-SIN",
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "server-timing": "cfExtPri"
+        }
+      },
+      "timing": {
+        "duration": 884.77392578125
+      }
+    },
+    {
+      "id": "1881809143:27944.184",
+      "method": "GET",
+      "url": "https://vixeo.io/thumbnails/EQkJKzs7LwIf/thumbnails.m3u8",
+      "status": 200,
+      "type": "fetch",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          ":authority": "vixeo.io",
+          ":method": "GET",
+          ":path": "/thumbnails/EQkJKzs7LwIf/thumbnails.m3u8",
+          ":scheme": "https",
+          "priority": "u=1, i"
+        }
+      },
+      "response": {
+        "headers": {
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "cache-control": "public, max-age=3600, stale-while-revalidate=86400",
+          "cf-cache-status": "DYNAMIC",
+          "cf-ray": "a3d70faf39389c14-SIN",
+          "content-encoding": "zstd",
+          "content-type": "application/vnd.apple.mpegurl",
+          "cross-origin-resource-policy": "cross-origin",
+          "date": "Sat, 19 Sep 2026 08:01:14 GMT",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "origin-agent-cluster": "?1",
+          "priority": "u=1,i",
+          "referrer-policy": "no-referrer",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=tRCIpjnzdOorRYAx3mOfJrQ4mJzi2qkFO%2FX3JzP78WnmIJD%2Bahn2CIFWmfxQCaKM9632O7lO9NRotUvtTW1jiScZ2%2BNMrJOFtIwntm45DwOt3RFo4V7dOn7uYA%3D%3D\"}]}",
+          "server": "cloudflare",
+          "server-timing": "cfExtPri",
+          "strict-transport-security": "max-age=15552000; includeSubDomains",
+          "vary": "Origin",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-download-options": "noopen",
+          "x-permitted-cross-domain-policies": "none",
+          "x-xss-protection": "0"
+        },
+        "bodyExcluded": true,
+        "bodyExcludedReason": "binary-resource"
+      },
+      "timing": {
+        "duration": -1789602132035.1882
+      }
+    },
+    {
+      "id": "1881809143:27944.185",
+      "method": "GET",
+      "url": "https://sfy-01-fr.vidsonic.net/secure/132/EQkJKzs7LwIf/video.mp4/index.m3u8?server_id=2&expires=1789808439&file_id=EQkJKzs7LwIf&md5=ccd8f954bf8736c56f0ac0e0bacb5213",
+      "status": 0,
+      "type": "fetch",
+      "request": {
+        "query": {
+          "server_id": "2",
+          "expires": "1789808439",
+          "file_id": "EQkJKzs7LwIf",
+          "md5": "ccd8f954bf8736c56f0ac0e0bacb5213"
+        },
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_SSL_PROTOCOL_ERROR",
+      "timing": {
+        "duration": -1789602132363.042
+      }
+    },
+    {
+      "id": "1881809143:4146",
+      "method": "GET",
+      "url": "https://sfy-01-fr.vidsonic.net/secure/132/EQkJKzs7LwIf/video.mp4/index.m3u8?server_id=2&expires=1789808439&file_id=EQkJKzs7LwIf&md5=ccd8f954bf8736c56f0ac0e0bacb5213",
+      "status": 0,
+      "type": "xhr",
+      "request": {
+        "query": {
+          "server_id": "2",
+          "expires": "1789808439",
+          "file_id": "EQkJKzs7LwIf",
+          "md5": "ccd8f954bf8736c56f0ac0e0bacb5213"
+        },
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-ch-ua-mobile": "?0"
+        }
+      },
+      "error": "net::ERR_SSL_PROTOCOL_ERROR",
+      "timing": {
+        "duration": 551.973876953125
+      }
+    },
+    {
+      "id": "1881809143:27944.186",
+      "method": "GET",
+      "url": "https://vixeo.io/thumbnails/EQkJKzs7LwIf/thumbnails.m3u8",
+      "status": 200,
+      "type": "fetch",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "response": {
+        "headers": {
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "cache-control": "public, max-age=3600, stale-while-revalidate=86400",
+          "cf-cache-status": "DYNAMIC",
+          "cf-ray": "a3d70faf39389c14-SIN",
+          "content-encoding": "zstd",
+          "content-type": "application/vnd.apple.mpegurl",
+          "cross-origin-resource-policy": "cross-origin",
+          "date": "Sat, 19 Sep 2026 08:01:14 GMT",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "origin-agent-cluster": "?1",
+          "priority": "u=1,i",
+          "referrer-policy": "no-referrer",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=tRCIpjnzdOorRYAx3mOfJrQ4mJzi2qkFO%2FX3JzP78WnmIJD%2Bahn2CIFWmfxQCaKM9632O7lO9NRotUvtTW1jiScZ2%2BNMrJOFtIwntm45DwOt3RFo4V7dOn7uYA%3D%3D\"}]}",
+          "server": "cloudflare",
+          "server-timing": "cfExtPri",
+          "vary": "Origin",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-download-options": "noopen",
+          "x-permitted-cross-domain-policies": "none",
+          "x-xss-protection": "0"
+        },
+        "bodyExcluded": true,
+        "bodyExcludedReason": "binary-resource"
+      },
+      "timing": {
+        "duration": -1789602132914.733
+      }
+    },
+    {
+      "id": "1881809143:4147",
+      "method": "GET",
+      "url": "https://vixeo.io/thumbnails/EQkJKzs7LwIf/thumbnails.m3u8",
+      "status": 200,
+      "type": "xhr",
+      "request": {
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-ch-ua-mobile": "?0"
+        }
+      },
+      "response": {
+        "headers": {
+          "server": "cloudflare",
+          "date": "Sat, 19 Sep 2026 08:01:14 GMT",
+          "content-type": "application/vnd.apple.mpegurl",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "priority": "u=1,i",
+          "vary": "Origin",
+          "cache-control": "public, max-age=3600, stale-while-revalidate=86400",
+          "cross-origin-resource-policy": "cross-origin",
+          "origin-agent-cluster": "?1",
+          "referrer-policy": "no-referrer",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-download-options": "noopen",
+          "x-permitted-cross-domain-policies": "none",
+          "x-xss-protection": "0",
+          "cf-cache-status": "DYNAMIC",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=tRCIpjnzdOorRYAx3mOfJrQ4mJzi2qkFO%2FX3JzP78WnmIJD%2Bahn2CIFWmfxQCaKM9632O7lO9NRotUvtTW1jiScZ2%2BNMrJOFtIwntm45DwOt3RFo4V7dOn7uYA%3D%3D\"}]}",
+          "content-encoding": "zstd",
+          "cf-ray": "a3d70faf39389c14-SIN",
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "server-timing": "cfExtPri"
+        }
+      },
+      "timing": {
+        "duration": 5.0830078125
+      }
+    },
+    {
+      "id": "1881809143:27944.187",
+      "method": "GET",
+      "url": "https://sfy-01-fr.vidsonic.net/secure/132/EQkJKzs7LwIf/video.mp4/index.m3u8?server_id=2&expires=1789808439&file_id=EQkJKzs7LwIf&md5=ccd8f954bf8736c56f0ac0e0bacb5213",
+      "status": 0,
+      "type": "fetch",
+      "request": {
+        "query": {
+          "server_id": "2",
+          "expires": "1789808439",
+          "file_id": "EQkJKzs7LwIf",
+          "md5": "ccd8f954bf8736c56f0ac0e0bacb5213"
+        },
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_SSL_PROTOCOL_ERROR",
+      "timing": {
+        "duration": -1789602132484.2812
+      }
+    },
+    {
+      "id": "1881809143:4152",
+      "method": "GET",
+      "url": "https://sfy-01-fr.vidsonic.net/secure/132/EQkJKzs7LwIf/video.mp4/index.m3u8?server_id=2&expires=1789808439&file_id=EQkJKzs7LwIf&md5=ccd8f954bf8736c56f0ac0e0bacb5213",
+      "status": 0,
+      "type": "xhr",
+      "request": {
+        "query": {
+          "server_id": "2",
+          "expires": "1789808439",
+          "file_id": "EQkJKzs7LwIf",
+          "md5": "ccd8f954bf8736c56f0ac0e0bacb5213"
+        },
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-ch-ua-mobile": "?0"
+        }
+      },
+      "error": "net::ERR_SSL_PROTOCOL_ERROR",
+      "timing": {
+        "duration": 431.68798828125
+      }
+    },
+    {
+      "id": "1881809143:40AE455469FE9E42F48A1F71460F66D5",
+      "method": "GET",
+      "url": "https://vixeo.io/e/EQkJKzs7LwIf",
+      "status": 200,
+      "type": "document",
+      "request": {
+        "headers": {
+          "upgrade-insecure-requests": "1",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          ":authority": "vixeo.io",
+          ":method": "GET",
+          ":path": "/e/EQkJKzs7LwIf",
+          ":scheme": "https",
+          "cache-control": "max-age=0",
+          "cookie": "••••••••",
+          "priority": "u=0, i",
+          "sec-fetch-user": "?1"
+        }
+      },
+      "response": {
+        "headers": {
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "cache-control": "private, no-store",
+          "cf-cache-status": "DYNAMIC",
+          "cf-ray": "a3d71014e8123f82-SIN",
+          "content-encoding": "zstd",
+          "content-type": "text/html; charset=UTF-8",
+          "cross-origin-resource-policy": "cross-origin",
+          "date": "Sat, 19 Sep 2026 08:01:30 GMT",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "origin-agent-cluster": "?1",
+          "referrer-policy": "no-referrer",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=6PijRNjRLKKaU3xxS8yeL1jOmv4GUiZBDoXbR6rsbHcVlPdHdsxpyJu1fQszNa8%2BR%2FvHfwgHsosRBS90BfTpjfLYio1CNRN1YbyI5iJXbJ%2FhagmMF%2BO2YyqH2g%3D%3D\"}]}",
+          "server": "cloudflare",
+          "server-timing": "cfCacheStatus;desc=\"DYNAMIC\"\ncfEdge;dur=11,cfOrigin;dur=312",
+          "strict-transport-security": "max-age=15552000; includeSubDomains",
+          "vary": "Origin\naccept-encoding",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-download-options": "noopen",
+          "x-permitted-cross-domain-policies": "none",
+          "x-xss-protection": "0"
+        },
+        "bodyExcluded": true,
+        "bodyExcludedReason": "size-limit"
+      },
+      "timing": {
+        "duration": -1789602120000.484
+      }
+    },
+    {
+      "id": "1881809143:27944.188",
+      "method": "POST",
+      "url": "https://usrpubtrk.com/ut/hb.php?cb=0.13137493986795867&v=1",
+      "status": 0,
+      "type": "ping",
+      "request": {
+        "query": {
+          "cb": "0.13137493986795867",
+          "v": "1"
+        },
+        "headers": {
+          "Content-Type": "text/plain; charset=utf-8",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132861.698
+      }
+    },
+    {
+      "id": "1881809143:4153",
+      "method": "GET",
+      "url": "https://vixeo.io/e/EQkJKzs7LwIf",
+      "status": 200,
+      "type": "document",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          "Upgrade-Insecure-Requests": "1",
+          "Sec-Fetch-User": "?1"
+        }
+      },
+      "response": {
+        "headers": {
+          "date": "Sat, 19 Sep 2026 08:01:30 GMT",
+          "content-type": "text/html; charset=UTF-8",
+          "server": "cloudflare",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "vary": "accept-encoding",
+          "cache-control": "private, no-store",
+          "cross-origin-resource-policy": "cross-origin",
+          "origin-agent-cluster": "?1",
+          "referrer-policy": "no-referrer",
+          "strict-transport-security": "max-age=15552000; includeSubDomains",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-download-options": "noopen",
+          "x-permitted-cross-domain-policies": "none",
+          "x-xss-protection": "0",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=6PijRNjRLKKaU3xxS8yeL1jOmv4GUiZBDoXbR6rsbHcVlPdHdsxpyJu1fQszNa8%2BR%2FvHfwgHsosRBS90BfTpjfLYio1CNRN1YbyI5iJXbJ%2FhagmMF%2BO2YyqH2g%3D%3D\"}]}",
+          "cf-cache-status": "DYNAMIC",
+          "server-timing": "cfEdge;dur=11,cfOrigin;dur=312",
+          "content-encoding": "zstd",
+          "cf-ray": "a3d71014e8123f82-SIN",
+          "alt-svc": "h3=\":443\"; ma=86400"
+        }
+      },
+      "timing": {
+        "duration": 12910.23486328125
+      }
+    },
+    {
+      "id": "1881809143:27944.192",
+      "method": "POST",
+      "url": "https://www.google-analytics.com/mp/collect?measurement_id=G-03XW3FWG7L&api_secret=Px06eCtvQLS0hVSB2MPj_g",
+      "status": 0,
+      "type": "fetch",
+      "request": {
+        "query": {
+          "measurement_id": "G-03XW3FWG7L",
+          "api_secret": "********"
+        },
+        "headers": {
+          "Content-Type": "text/plain;charset=UTF-8",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        },
+        "body": {
+          "client_id": "aeykbr1757208266921rmgsswg",
+          "events": [
+            {
+              "name": "page_view",
+              "params": {
+                "session_id": "w74uqdzofqvbk0jz2jm4k",
+                "engagement_time_msec": 100,
+                "page_title": "unmasking-a-threesome_480p",
+                "page_location": "https://vixeo.io/e/EQkJKzs7LwIf"
+              }
+            }
+          ]
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132910.203
+      }
+    },
+    {
+      "id": "1881809143:27944.193",
+      "method": "GET",
+      "url": "https://plausible.vidsonic.net/js/pa-yhh0if-nWETP9156pzgXy.js",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132904.711
+      }
+    },
+    {
+      "id": "1881809143:4155",
+      "method": "GET",
+      "url": "https://plausible.vidsonic.net/js/pa-yhh0if-nWETP9156pzgXy.js",
+      "status": 0,
+      "type": "js",
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": 0.72509765625
+      }
+    },
+    {
+      "id": "1881809143:27944.195",
+      "method": "GET",
+      "url": "https://al5sm.com/tag.min.js",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132900.595
+      }
+    },
+    {
+      "id": "1881809143:27944.196",
+      "method": "GET",
+      "url": "https://www.betteradsystem.com/ljquery.stickyNavbar.min.css",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132901.0051
+      }
+    },
+    {
+      "id": "1881809143:27944.199",
+      "method": "GET",
+      "url": "https://plausible.vidsonic.net/js/pa-yhh0if-nWETP9156pzgXy.js",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132889.301
+      }
+    },
+    {
+      "id": "1881809143:27944.202",
+      "method": "GET",
+      "url": "https://cdn.tsyndicate.com/sdk/v1/p.js",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132889.8672
+      }
+    },
+    {
+      "id": "1881809143:27944.203",
+      "method": "GET",
+      "url": "https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132889.7761
+      }
+    },
+    {
+      "id": "1881809143:27944.204",
+      "method": "GET",
+      "url": "https://d2kk0o3fr7ed01.cloudfront.net/Nyg/zis.min.js",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132890.3337
+      }
+    },
+    {
+      "id": "1881809143:4156",
+      "method": "GET",
+      "url": "https://plausible.vidsonic.net/js/pa-yhh0if-nWETP9156pzgXy.js",
+      "status": 0,
+      "type": "js",
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": 0.571044921875
+      }
+    },
+    {
+      "id": "1881809143:27944.206",
+      "method": "GET",
+      "url": "https://adexchangerapid.com/ad/czcf.php?cz=12083062&atv=87.0&chu=%22Chromium%22%3Bv%3D152%2C%20%22Not%3FA_Brand%22%3Bv%3D24%2C%20%22Google%20Chrome%22%3Bv%3D152&chmob=%3F0&chp=Windows&chpv=19.0.0&chuafv=152.0.7977.65",
+      "status": 0,
+      "type": "fetch",
+      "request": {
+        "query": {
+          "cz": "12083062",
+          "atv": "87.0",
+          "chu": "\"Chromium\";v=152, \"Not?A_Brand\";v=24, \"Google Chrome\";v=152",
+          "chmob": "?0",
+          "chp": "Windows",
+          "chpv": "19.0.0",
+          "chuafv": "152.0.7977.65"
+        },
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132863.583
+      }
+    },
+    {
+      "id": "1881809143:27944.208",
+      "method": "GET",
+      "url": "https://www.uwterphco.com/bjquery.stickyNavbar.min.css",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132863.211
+      }
+    },
+    {
+      "id": "1881809143:27944.209",
+      "method": "GET",
+      "url": "https://o.bwreq22gl721ocbxnmi8rqg2468binmn.cfd/k1vb6V1Z81YnRCxr6ZxEqv/qEvkJ",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          ":authority": "o.bwreq22gl721ocbxnmi8rqg2468binmn.cfd",
+          ":method": "GET",
+          ":path": "/k1vb6V1Z81YnRCxr6ZxEqv/qEvkJ",
+          ":scheme": "https",
+          "sec-fetch-storage-access": "none"
+        }
+      },
+      "response": {
+        "headers": {
+          "accept-ch": "sec-ch-ua-platform-version,sec-ch-ua-model,sec-ch-ua-full-version,sec-ch-ua-full-version-list",
+          "cache-control": "no-cache, no-store, must-revalidate",
+          "content-encoding": "gzip",
+          "content-type": "text/javascript;charset=UTF-8",
+          "date": "Sat, 19 Sep 2026 08:01:45 GMT",
+          "expires": "0",
+          "pragma": "no-cache",
+          "server": "nginx",
+          "set-cookie": "••••••••",
+          "strict-transport-security": "max-age=1",
+          "vary": "Accept-Encoding",
+          "x-content-type-options": "nosniff"
+        }
+      },
+      "timing": {
+        "duration": null
+      }
+    },
+    {
+      "id": "1881809143:4157",
+      "method": "GET",
+      "url": "https://o.bwreq22gl721ocbxnmi8rqg2468binmn.cfd/k1vb6V1Z81YnRCxr6ZxEqv/qEvkJ",
+      "status": 200,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-ch-ua-mobile": "?0",
+          "Sec-Fetch-Storage-Access": "none"
+        }
+      },
+      "response": {
+        "headers": {
+          "server": "nginx",
+          "date": "Sat, 19 Sep 2026 08:01:45 GMT",
+          "content-type": "text/javascript;charset=UTF-8",
+          "accept-ch": "sec-ch-ua-platform-version,sec-ch-ua-model,sec-ch-ua-full-version,sec-ch-ua-full-version-list",
+          "cache-control": "no-cache, no-store, must-revalidate",
+          "pragma": "no-cache",
+          "expires": "0",
+          "content-encoding": "gzip",
+          "vary": "Accept-Encoding",
+          "strict-transport-security": "max-age=1",
+          "x-content-type-options": "nosniff"
+        }
+      },
+      "timing": {
+        "duration": null
+      }
+    },
+    {
+      "id": "1881809143:9736221C55E7BE04D18F6A88E52AB45A",
+      "method": "GET",
+      "url": "blob:https://vixeo.io/e47fe211-9df2-4a0e-8c23-4d45ad964447",
+      "status": 0,
+      "type": "js",
+      "timing": {
+        "duration": null
+      }
+    },
+    {
+      "id": "1881809143:27944.211",
+      "method": "GET",
+      "url": "https://ngzfjgphsrxhv.online/25ebch4b119a3?RM2y0OrWjiO8qoQOm8NkYs8K=Y2hwdj0xOS4wLjAmc2FkYmw9MiZhdHY9ODcuMCZjaHVhZnY9MTUyLjAuNzk3Ny42NSZjej0xMjA4MzA2MiZjaHA9V2luZG93cyZmbXQ9YXRnJmNodT0lMjJDaHJvbWl1bSUyMiUzQnYlM0QxNTIlMkMlMjAlMjJOb3QlM0ZBX0JyYW5kJTIyJTNCdiUzRDI0JTJDJTIwJTIyR29vZ2xlJTIwQ2hyb21lJTIyJTNCdiUzRDE1MiZjaG1vYj0lM0Yw",
+      "status": 204,
+      "type": "fetch",
+      "request": {
+        "query": {
+          "RM2y0OrWjiO8qoQOm8NkYs8K": "Y2hwdj0xOS4wLjAmc2FkYmw9MiZhdHY9ODcuMCZjaHVhZnY9MTUyLjAuNzk3Ny42NSZjej0xMjA4MzA2MiZjaHA9V2luZG93cyZmbXQ9YXRnJmNodT0lMjJDaHJvbWl1bSUyMiUzQnYlM0QxNTIlMkMlMjAlMjJOb3QlM0ZBX0JyYW5kJTIyJTNCdiUzRDI0JTJDJTIwJTIyR29vZ2xlJTIwQ2hyb21lJTIyJTNCdiUzRDE1MiZjaG1vYj0lM0Yw"
+        },
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          ":authority": "ngzfjgphsrxhv.online",
+          ":method": "GET",
+          ":path": "/25ebch4b119a3?RM2y0OrWjiO8qoQOm8NkYs8K=Y2hwdj0xOS4wLjAmc2FkYmw9MiZhdHY9ODcuMCZjaHVhZnY9MTUyLjAuNzk3Ny42NSZjej0xMjA4MzA2MiZjaHA9V2luZG93cyZmbXQ9YXRnJmNodT0lMjJDaHJvbWl1bSUyMiUzQnYlM0QxNTIlMkMlMjAlMjJOb3QlM0ZBX0JyYW5kJTIyJTNCdiUzRDI0JTJDJTIwJTIyR29vZ2xlJTIwQ2hyb21lJTIyJTNCdiUzRDE1MiZjaG1vYj0lM0Yw",
+          ":scheme": "https",
+          "priority": "u=1, i"
+        }
+      },
+      "response": {
+        "headers": {
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "cf-cache-status": "DYNAMIC",
+          "cf-ray": "a3d710663bb52739-SIN",
+          "date": "Sat, 19 Sep 2026 08:01:43 GMT",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=97LYuidFlpWUjPhbTvdbOUFO0vyC9dWF6pFswGpEq2uaxa%2FKBVfgeFMJiZmKWRwMWMB%2FRpHu%2B5TtrhLPKe%2B8nnCf2jktl8njHKb5zmjyhAmeI5Z0gAEWtybRji%2BCH%2Fan6vZFAm0IzA%3D%3D\"}]}",
+          "server": "cloudflare",
+          "via": "2.3 tomcat"
+        }
+      },
+      "error": "net::ERR_ABORTED",
+      "timing": {
+        "duration": -1789602132403.3398
+      }
+    },
+    {
+      "id": "1881809143:4158",
+      "method": "GET",
+      "url": "https://ngzfjgphsrxhv.online/25ebch4b119a3?RM2y0OrWjiO8qoQOm8NkYs8K=Y2hwdj0xOS4wLjAmc2FkYmw9MiZhdHY9ODcuMCZjaHVhZnY9MTUyLjAuNzk3Ny42NSZjej0xMjA4MzA2MiZjaHA9V2luZG93cyZmbXQ9YXRnJmNodT0lMjJDaHJvbWl1bSUyMiUzQnYlM0QxNTIlMkMlMjAlMjJOb3QlM0ZBX0JyYW5kJTIyJTNCdiUzRDI0JTJDJTIwJTIyR29vZ2xlJTIwQ2hyb21lJTIyJTNCdiUzRDE1MiZjaG1vYj0lM0Yw",
+      "status": 204,
+      "type": "xhr",
+      "request": {
+        "query": {
+          "RM2y0OrWjiO8qoQOm8NkYs8K": "Y2hwdj0xOS4wLjAmc2FkYmw9MiZhdHY9ODcuMCZjaHVhZnY9MTUyLjAuNzk3Ny42NSZjej0xMjA4MzA2MiZjaHA9V2luZG93cyZmbXQ9YXRnJmNodT0lMjJDaHJvbWl1bSUyMiUzQnYlM0QxNTIlMkMlMjAlMjJOb3QlM0ZBX0JyYW5kJTIyJTNCdiUzRDI0JTJDJTIwJTIyR29vZ2xlJTIwQ2hyb21lJTIyJTNCdiUzRDE1MiZjaG1vYj0lM0Yw"
+        },
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-ch-ua-mobile": "?0"
+        }
+      },
+      "response": {
+        "headers": {
+          "date": "Sat, 19 Sep 2026 08:01:43 GMT",
+          "server": "cloudflare",
+          "via": "2.3 tomcat",
+          "cf-cache-status": "DYNAMIC",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=97LYuidFlpWUjPhbTvdbOUFO0vyC9dWF6pFswGpEq2uaxa%2FKBVfgeFMJiZmKWRwMWMB%2FRpHu%2B5TtrhLPKe%2B8nnCf2jktl8njHKb5zmjyhAmeI5Z0gAEWtybRji%2BCH%2Fan6vZFAm0IzA%3D%3D\"}]}",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "cf-ray": "a3d710663bb52739-SIN",
+          "alt-svc": "h3=\":443\"; ma=86400"
+        }
+      },
+      "timing": {
+        "duration": 510.802978515625
+      }
+    },
+    {
+      "id": "1881809143:27944.212",
+      "method": "GET",
+      "url": "https://www.zutdhkwkm.com/G/nis.min.js",
+      "status": 0,
+      "type": "js",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132911.619
+      }
+    },
+    {
+      "id": "1881809143:27944.214",
+      "method": "POST",
+      "url": "https://usrpubtrk.com/ut/hb.php?cb=0.0902412796985661&v=1",
+      "status": 0,
+      "type": "ping",
+      "request": {
+        "query": {
+          "cb": "0.0902412796985661",
+          "v": "1"
+        },
+        "headers": {
+          "Content-Type": "text/plain; charset=utf-8",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_BLOCKED_BY_CLIENT",
+      "timing": {
+        "duration": -1789602132914.1838
+      }
+    },
+    {
+      "id": "1881809143:27944.221",
+      "method": "GET",
+      "url": "https://cdn.shopimgs.com/gw?name=supercopy-v3&uid=96f3e17e995a424382fa5b5fb7dc1990",
+      "status": 200,
+      "type": "fetch",
+      "request": {
+        "query": {
+          "name": "supercopy-v3",
+          "uid": "96f3e17e995a424382fa5b5fb7dc1990"
+        },
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "response": {
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8",
+          "Date": "Sat, 19 Sep 2026 08:01:43 GMT",
+          "Server": "nginx/1.24.0 (Ubuntu)",
+          "Vary": "Origin",
+          "x-content-type-options": "nosniff",
+          "x-download-options": "noopen",
+          "x-readtime": "0",
+          "x-xss-protection": "1; mode=block"
+        },
+        "body": {
+          "data": {
+            "id": "108858100157",
+            "k": "34819661",
+            "s": "664e105d937a7530868cc700257822bd",
+            "p": [
+              "26632943",
+              "457000242",
+              "108858100157"
+            ]
+          }
+        }
+      },
+      "timing": {
+        "duration": -1789602132466.7139
+      }
+    },
+    {
+      "id": "1881809143:4165",
+      "method": "GET",
+      "url": "https://cdn.shopimgs.com/gw?name=supercopy-v3&uid=96f3e17e995a424382fa5b5fb7dc1990",
+      "status": 200,
+      "type": "xhr",
+      "request": {
+        "query": {
+          "name": "supercopy-v3",
+          "uid": "96f3e17e995a424382fa5b5fb7dc1990"
+        },
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-ch-ua-mobile": "?0"
+        }
+      },
+      "response": {
+        "headers": {
+          "Server": "nginx/1.24.0 (Ubuntu)",
+          "Date": "Sat, 19 Sep 2026 08:01:43 GMT",
+          "Content-Type": "application/json; charset=utf-8",
+          "Vary": "Origin",
+          "x-xss-protection": "1; mode=block",
+          "x-content-type-options": "nosniff",
+          "x-download-options": "noopen",
+          "x-readtime": "0"
+        }
+      },
+      "timing": {
+        "duration": 450.64794921875
+      }
+    },
+    {
+      "id": "1881809143:4166",
+      "method": "GET",
+      "url": "https://vixeo.io/thumbnails/EQkJKzs7LwIf/thumbnails.m3u8",
+      "status": 200,
+      "type": "xhr",
+      "request": {
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-ch-ua-mobile": "?0"
+        }
+      },
+      "response": {
+        "headers": {
+          "server": "cloudflare",
+          "date": "Sat, 19 Sep 2026 08:01:14 GMT",
+          "content-type": "application/vnd.apple.mpegurl",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "priority": "u=1,i",
+          "vary": "Origin",
+          "cache-control": "public, max-age=3600, stale-while-revalidate=86400",
+          "cross-origin-resource-policy": "cross-origin",
+          "origin-agent-cluster": "?1",
+          "referrer-policy": "no-referrer",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-download-options": "noopen",
+          "x-permitted-cross-domain-policies": "none",
+          "x-xss-protection": "0",
+          "cf-cache-status": "DYNAMIC",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=tRCIpjnzdOorRYAx3mOfJrQ4mJzi2qkFO%2FX3JzP78WnmIJD%2Bahn2CIFWmfxQCaKM9632O7lO9NRotUvtTW1jiScZ2%2BNMrJOFtIwntm45DwOt3RFo4V7dOn7uYA%3D%3D\"}]}",
+          "content-encoding": "zstd",
+          "cf-ray": "a3d70faf39389c14-SIN",
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "server-timing": "cfExtPri"
+        }
+      },
+      "timing": {
+        "duration": 12.203857421875
+      }
+    },
+    {
+      "id": "1881809143:27944.222",
+      "method": "GET",
+      "url": "https://vixeo.io/thumbnails/EQkJKzs7LwIf/thumbnails.m3u8",
+      "status": 200,
+      "type": "fetch",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "response": {
+        "headers": {
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "cache-control": "public, max-age=3600, stale-while-revalidate=86400",
+          "cf-cache-status": "DYNAMIC",
+          "cf-ray": "a3d70faf39389c14-SIN",
+          "content-encoding": "zstd",
+          "content-type": "application/vnd.apple.mpegurl",
+          "cross-origin-resource-policy": "cross-origin",
+          "date": "Sat, 19 Sep 2026 08:01:14 GMT",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "origin-agent-cluster": "?1",
+          "priority": "u=1,i",
+          "referrer-policy": "no-referrer",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=tRCIpjnzdOorRYAx3mOfJrQ4mJzi2qkFO%2FX3JzP78WnmIJD%2Bahn2CIFWmfxQCaKM9632O7lO9NRotUvtTW1jiScZ2%2BNMrJOFtIwntm45DwOt3RFo4V7dOn7uYA%3D%3D\"}]}",
+          "server": "cloudflare",
+          "server-timing": "cfExtPri",
+          "vary": "Origin",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-download-options": "noopen",
+          "x-permitted-cross-domain-policies": "none",
+          "x-xss-protection": "0"
+        },
+        "bodyExcluded": true,
+        "bodyExcludedReason": "binary-resource"
+      },
+      "timing": {
+        "duration": -1789602132909.968
+      }
+    },
+    {
+      "id": "1881809143:27944.223",
+      "method": "GET",
+      "url": "https://sfy-01-fr.vidsonic.net/secure/132/EQkJKzs7LwIf/video.mp4/index.m3u8?server_id=2&expires=1789808490&file_id=EQkJKzs7LwIf&md5=756263ec344ce272095818a46b40493b",
+      "status": 0,
+      "type": "fetch",
+      "request": {
+        "query": {
+          "server_id": "2",
+          "expires": "1789808490",
+          "file_id": "EQkJKzs7LwIf",
+          "md5": "756263ec344ce272095818a46b40493b"
+        },
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_SSL_PROTOCOL_ERROR",
+      "timing": {
+        "duration": -1789602132475.533
+      }
+    },
+    {
+      "id": "1881809143:4167",
+      "method": "GET",
+      "url": "https://sfy-01-fr.vidsonic.net/secure/132/EQkJKzs7LwIf/video.mp4/index.m3u8?server_id=2&expires=1789808490&file_id=EQkJKzs7LwIf&md5=756263ec344ce272095818a46b40493b",
+      "status": 0,
+      "type": "xhr",
+      "request": {
+        "query": {
+          "server_id": "2",
+          "expires": "1789808490",
+          "file_id": "EQkJKzs7LwIf",
+          "md5": "756263ec344ce272095818a46b40493b"
+        },
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-ch-ua-mobile": "?0"
+        }
+      },
+      "error": "net::ERR_SSL_PROTOCOL_ERROR",
+      "timing": {
+        "duration": 438.14794921875
+      }
+    },
+    {
+      "id": "1881809143:27944.224",
+      "method": "GET",
+      "url": "https://vixeo.io/thumbnails/EQkJKzs7LwIf/thumbnails.m3u8",
+      "status": 200,
+      "type": "fetch",
+      "request": {
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "response": {
+        "headers": {
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "cache-control": "public, max-age=3600, stale-while-revalidate=86400",
+          "cf-cache-status": "DYNAMIC",
+          "cf-ray": "a3d70faf39389c14-SIN",
+          "content-encoding": "zstd",
+          "content-type": "application/vnd.apple.mpegurl",
+          "cross-origin-resource-policy": "cross-origin",
+          "date": "Sat, 19 Sep 2026 08:01:14 GMT",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "origin-agent-cluster": "?1",
+          "priority": "u=1,i",
+          "referrer-policy": "no-referrer",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=tRCIpjnzdOorRYAx3mOfJrQ4mJzi2qkFO%2FX3JzP78WnmIJD%2Bahn2CIFWmfxQCaKM9632O7lO9NRotUvtTW1jiScZ2%2BNMrJOFtIwntm45DwOt3RFo4V7dOn7uYA%3D%3D\"}]}",
+          "server": "cloudflare",
+          "server-timing": "cfExtPri",
+          "vary": "Origin",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-download-options": "noopen",
+          "x-permitted-cross-domain-policies": "none",
+          "x-xss-protection": "0"
+        },
+        "bodyExcluded": true,
+        "bodyExcludedReason": "binary-resource"
+      },
+      "timing": {
+        "duration": -1789602132914.2131
+      }
+    },
+    {
+      "id": "1881809143:4168",
+      "method": "GET",
+      "url": "https://vixeo.io/thumbnails/EQkJKzs7LwIf/thumbnails.m3u8",
+      "status": 200,
+      "type": "xhr",
+      "request": {
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-ch-ua-mobile": "?0"
+        }
+      },
+      "response": {
+        "headers": {
+          "server": "cloudflare",
+          "date": "Sat, 19 Sep 2026 08:01:14 GMT",
+          "content-type": "application/vnd.apple.mpegurl",
+          "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+          "priority": "u=1,i",
+          "vary": "Origin",
+          "cache-control": "public, max-age=3600, stale-while-revalidate=86400",
+          "cross-origin-resource-policy": "cross-origin",
+          "origin-agent-cluster": "?1",
+          "referrer-policy": "no-referrer",
+          "x-content-type-options": "nosniff",
+          "x-dns-prefetch-control": "off",
+          "x-download-options": "noopen",
+          "x-permitted-cross-domain-policies": "none",
+          "x-xss-protection": "0",
+          "cf-cache-status": "DYNAMIC",
+          "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=tRCIpjnzdOorRYAx3mOfJrQ4mJzi2qkFO%2FX3JzP78WnmIJD%2Bahn2CIFWmfxQCaKM9632O7lO9NRotUvtTW1jiScZ2%2BNMrJOFtIwntm45DwOt3RFo4V7dOn7uYA%3D%3D\"}]}",
+          "content-encoding": "zstd",
+          "cf-ray": "a3d70faf39389c14-SIN",
+          "alt-svc": "h3=\":443\"; ma=86400",
+          "server-timing": "cfExtPri"
+        }
+      },
+      "timing": {
+        "duration": 5.91796875
+      }
+    },
+    {
+      "id": "1881809143:27944.225",
+      "method": "GET",
+      "url": "https://sfy-01-fr.vidsonic.net/secure/132/EQkJKzs7LwIf/video.mp4/index.m3u8?server_id=2&expires=1789808490&file_id=EQkJKzs7LwIf&md5=756263ec344ce272095818a46b40493b",
+      "status": 0,
+      "type": "fetch",
+      "request": {
+        "query": {
+          "server_id": "2",
+          "expires": "1789808490",
+          "file_id": "EQkJKzs7LwIf",
+          "md5": "756263ec344ce272095818a46b40493b"
+        },
+        "headers": {
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\""
+        }
+      },
+      "error": "net::ERR_SSL_PROTOCOL_ERROR",
+      "timing": {
+        "duration": -1789602132410.0608
+      }
+    },
+    {
+      "id": "1881809143:4169",
+      "method": "GET",
+      "url": "https://sfy-01-fr.vidsonic.net/secure/132/EQkJKzs7LwIf/video.mp4/index.m3u8?server_id=2&expires=1789808490&file_id=EQkJKzs7LwIf&md5=756263ec344ce272095818a46b40493b",
+      "status": 0,
+      "type": "xhr",
+      "request": {
+        "query": {
+          "server_id": "2",
+          "expires": "1789808490",
+          "file_id": "EQkJKzs7LwIf",
+          "md5": "756263ec344ce272095818a46b40493b"
+        },
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-ch-ua-mobile": "?0"
+        }
+      },
+      "error": "net::ERR_SSL_PROTOCOL_ERROR",
+      "timing": {
+        "duration": 506.802978515625
+      }
+    }
+  ]
+}
