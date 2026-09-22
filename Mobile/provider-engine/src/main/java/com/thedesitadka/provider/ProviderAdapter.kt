@@ -10,6 +10,7 @@ import com.thedesitadka.core.model.VideoItem
 interface ProviderAdapter {
 
     val providerInfo: ProviderInfo
+    val categoryNavPath: String? get() = null
 
     fun hasCapability(capability: ProviderCapability): Boolean {
         return providerInfo.capabilities.contains(capability)
@@ -26,4 +27,6 @@ interface ProviderAdapter {
     suspend fun getPlayableMedia(detailUrl: String): Result<List<MediaSource>>
 
     suspend fun getRelatedContent(detailUrl: String): Result<List<VideoItem>>
+    suspend fun getCategoryFeed(categoryUrl: String, page: Int = 1): Result<FeedPage> = getHomeFeed(page)
 }
+

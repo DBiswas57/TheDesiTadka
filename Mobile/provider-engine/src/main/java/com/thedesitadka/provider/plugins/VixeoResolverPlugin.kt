@@ -58,6 +58,12 @@ class VixeoResolverPlugin : HostResolverPlugin {
         }
     }
 
+
+    override fun resolveFromHtml(html: String, embedUrl: String, parentUrl: String?): Result<MediaSource>? {
+        return parseVixeoHtml(html, normalizeEmbedUrl(embedUrl))
+    }
+
+
     /**
      * Parses the Vixeo HTML page and resolves the media stream.
      * Accessible for direct offline testing.

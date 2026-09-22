@@ -72,7 +72,7 @@ fun HomeSourceSelectionScreen(
     onCompleted: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val allProviders = remember { providerEngine.getActiveProviders() }
+    val allProviders = remember { providerEngine.getActiveProviders().sortedBy { it.name.lowercase() } }
     var selectedProviderIds by remember {
         mutableStateOf(allProviders.map { it.id }.toSet())
     }

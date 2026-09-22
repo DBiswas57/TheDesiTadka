@@ -22,17 +22,19 @@ class PreferenceStore(private val context: Context) {
         val REMOTE_CONFIG_URL = stringPreferencesKey("remote_config_url")
         val HOME_SELECTION_COMPLETED = booleanPreferencesKey("home_selection_completed")
         val SELECTED_HOME_PROVIDERS = stringSetPreferencesKey("selected_home_providers")
+        val INITIAL_STORAGE_PROMPT_DONE = booleanPreferencesKey("initial_storage_prompt_done")
 
         const val DEFAULT_CONFIG_URL = "https://raw.githubusercontent.com/DBiswas57/TheDesiTadka/main/config-tools/signed-manifest.json"
     }
 
     val themeModeFlow: Flow<String> = context.dataStore.data.map { it[THEME_MODE] ?: "dark" }
-    val wifiOnlyFlow: Flow<Boolean> = context.dataStore.data.map { it[WIFI_ONLY_DOWNLOADS] ?: true }
+    val wifiOnlyFlow: Flow<Boolean> = context.dataStore.data.map { it[WIFI_ONLY_DOWNLOADS] ?: false }
     val telemetryFlow: Flow<Boolean> = context.dataStore.data.map { it[TELEMETRY_ENABLED] ?: false }
     val qualityFlow: Flow<String> = context.dataStore.data.map { it[DEFAULT_QUALITY] ?: "auto" }
     val remoteConfigUrlFlow: Flow<String> = context.dataStore.data.map { it[REMOTE_CONFIG_URL] ?: DEFAULT_CONFIG_URL }
     val homeSelectionCompletedFlow: Flow<Boolean> = context.dataStore.data.map { it[HOME_SELECTION_COMPLETED] ?: false }
     val selectedHomeProvidersFlow: Flow<Set<String>> = context.dataStore.data.map { it[SELECTED_HOME_PROVIDERS] ?: emptySet() }
+    val initialStoragePromptDoneFlow: Flow<Boolean> = context.dataStore.data.map { it[INITIAL_STORAGE_PROMPT_DONE] ?: false }
 
     suspend fun setThemeMode(mode: String) {
         context.dataStore.edit { it[THEME_MODE] = mode }
@@ -64,6 +66,14 @@ class PreferenceStore(private val context: Context) {
         context.dataStore.edit {
             it[SELECTED_HOME_PROVIDERS] = providerIds
             it[HOME_SELECTION_COMPLETED] = true
+        }
+    }
+
+    suspend fun isInitialStoragePromptDone(): Boolean = initialStoragePromptDoneFlow.first()
+
+    suspend fun setInitialStoragePromptDone(done: Boolean = true) {
+        context.dataStore.edit {
+            it[INITIAL_STORAGE_PROMPT_DONE] = done
         }
     }
 

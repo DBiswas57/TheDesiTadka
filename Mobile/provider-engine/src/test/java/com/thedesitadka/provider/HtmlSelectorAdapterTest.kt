@@ -494,8 +494,8 @@ class HtmlSelectorAdapterTest {
     fun testAagMaalSingleVideoContentDetection() {
         val config = ProviderConfig(
             id = "aagmaal",
-            familyId = "aagmaal_family",
-            domains = listOf("https://aagmaal.date", "https://aagmaal.com"),
+            familyId = "aagmaal_date_family",
+            domains = listOf("https://aagmaal.date", "https://aagmaal.run"),
             validationMarker = "aagmaal",
             name = "AagMaal",
             enabled = true,
@@ -604,6 +604,167 @@ class HtmlSelectorAdapterTest {
             "https://tpead.net/get_video?id=oW8dZGlxXwtJ10J&expires=1789701418&token=test&stream=1",
             streamtapeSources[0].url
         )
+    }
+
+    @Test
+    fun testAagMaalDateWorkflow() {
+        val config = ProviderConfig(
+            id = "aagmaal",
+            familyId = "aagmaal_date_family",
+            domains = listOf("https://aagmaal.date", "https://aagmaal.run"),
+            validationMarker = "aagmaal",
+            name = "AagMaal",
+            enabled = true,
+            baseUrl = "https://aagmaal.date",
+            adapter = "html_selector",
+            navigation = NavigationConfig(
+                home = "/?filter=latest",
+                page = "/page/{page}/?filter=latest",
+                categories = "/categories/"
+            ),
+            selectors = SelectorConfig(
+                item = ".thumb-block, article.post, div.post",
+                title = ".title a, h2.entry-title a, a[title]",
+                thumbnail = "img",
+                thumbnailAttr = "data-src",
+                detailUrl = ".title a, h2.entry-title a, a",
+                duration = ".duration"
+            )
+        )
+        val adapter = HtmlSelectorAdapter(config)
+
+        // 1. Pagination building
+        assertEquals(
+            "https://aagmaal.date/page/2/?filter=latest",
+            adapter.buildPagedUrl("https://aagmaal.date/?filter=latest", 2)
+        )
+        assertEquals(
+            "https://aagmaal.date/page/3/?filter=latest",
+            adapter.buildPagedUrl("https://aagmaal.date/page/2/?filter=latest", 3)
+        )
+        assertEquals(
+            "https://aagmaal.date/category/hot-hindi-web-series/page/2/",
+            adapter.buildPagedUrl("https://aagmaal.date/category/hot-hindi-web-series/", 2)
+        )
+
+        // 2. Listing parsing with thumb-block
+        val sampleHtml = """
+            <!DOCTYPE html>
+            <html>
+            <body>
+                <div class="featured-carousel">
+                    <div class="thumb-block">
+                        <div class="title"><a href="https://aagmaal.date/slider-video/">Slider Video</a></div>
+                    </div>
+                </div>
+                <div class="thumb-block">
+                    <a href="https://aagmaal.date/kamine-2026/">
+                        <img data-src="https://aagimg.cc/thumb1.jpg" alt="Kamine Part 1 Hot Video" />
+                    </a>
+                    <div class="title"><a href="https://aagmaal.date/kamine-2026/">Kamine Part 1 Hot Video</a></div>
+                    <span class="duration">15:20</span>
+                </div>
+                <div class="thumb-block">
+                    <a href="https://aagmaal.date/bhabhi-devar/">
+                        <img data-src="https://aagimg.cc/thumb2.jpg" alt="Bhabhi Devar Romance" />
+                    </a>
+                    <div class="title"><a href="https://aagmaal.date/bhabhi-devar/">Bhabhi Devar Romance</a></div>
+                    <span class="duration">22:10</span>
+                </div>
+                <div class="pagination">
+                    <a class="next" href="https://aagmaal.date/page/2/?filter=latest">Next &raquo;</a>
+                </div>
+            </body>
+            </html>
+        """.trimIndent()
+
+        val parsed = adapter.parseListingHtml(sampleHtml, 1).getOrThrow()
+        // Slider item should be excluded, leaving 2 items
+        assertEquals(2, parsed.items.size)
+        assertEquals("Kamine Part 1 Hot Video", parsed.items[0].title)
+        assertEquals("https://aagmaal.date/kamine-2026/", parsed.items[0].detailUrl)
+        assertEquals(920L, parsed.items[0].durationSeconds)
+        assertTrue(parsed.hasNextPage)
+    }
+
+    @Test
+    fun testAagMaalComWorkflow() {
+        val config = ProviderConfig(
+            id = "aagmaal_com",
+            familyId = "aagmaal_com_family",
+            domains = listOf("https://aagmaal.com", "http://aagmaal.bz"),
+            validationMarker = "aagmaal",
+            name = "AagMaal.com",
+            enabled = true,
+            baseUrl = "https://aagmaal.com",
+            adapter = "html_selector",
+            navigation = NavigationConfig(
+                home = "/",
+                page = "/page/{page}/",
+                categories = "/ott/"
+            ),
+            selectors = SelectorConfig(
+                item = ".vp-card",
+                title = "h2 a, .title a, a[title]",
+                thumbnail = "img",
+                thumbnailAttr = "data-src",
+                detailUrl = "h2 a, .title a, a",
+                duration = ".vp-dur, .duration"
+            )
+        )
+        val adapter = HtmlSelectorAdapter(config)
+
+        // 1. Pagination building
+        assertEquals(
+            "https://aagmaal.com/page/2/",
+            adapter.buildPagedUrl("https://aagmaal.com/", 2)
+        )
+        assertEquals(
+            "https://aagmaal.com/page/3/",
+            adapter.buildPagedUrl("https://aagmaal.com/page/2/", 3)
+        )
+        assertEquals(
+            "https://aagmaal.com/ott/page/2/",
+            adapter.buildPagedUrl("https://aagmaal.com/ott/", 2)
+        )
+
+        // 2. Listing parsing with vp-card and vp-bar exclusions
+        val sampleHtml = """
+            <!DOCTYPE html>
+            <html>
+            <body>
+                <div class="vp-home-bar">
+                    <a href="https://aagmaal.com/">Home</a>
+                    <a href="https://aagmaal.com/ott/">OTT</a>
+                </div>
+                <div class="vp-card">
+                    <a href="https://aagmaal.com/desi-bhabhi-leak/">
+                        <img data-src="https://aagmaal.com/thumb_desi.jpg" alt="Desi Bhabhi Viral Video 2026" />
+                    </a>
+                    <h2><a href="https://aagmaal.com/desi-bhabhi-leak/">Desi Bhabhi Viral Video 2026</a></h2>
+                    <span class="vp-dur">12:45</span>
+                </div>
+                <div class="vp-card">
+                    <a href="https://aagmaal.com/kavita-bhabhi-s1/">
+                        <img data-src="https://aagmaal.com/thumb_kavita.jpg" alt="Kavita Bhabhi Season 1 Episode 1" />
+                    </a>
+                    <h2><a href="https://aagmaal.com/kavita-bhabhi-s1/">Kavita Bhabhi Season 1 Episode 1</a></h2>
+                    <span class="vp-dur">28:10</span>
+                </div>
+                <div class="vp-pagi-bar">
+                    <a class="current" href="#">1</a>
+                    <a class="next" href="https://aagmaal.com/page/2/">Next</a>
+                </div>
+            </body>
+            </html>
+        """.trimIndent()
+
+        val parsed = adapter.parseListingHtml(sampleHtml, 1).getOrThrow()
+        assertEquals(2, parsed.items.size)
+        assertEquals("Desi Bhabhi Viral Video 2026", parsed.items[0].title)
+        assertEquals("https://aagmaal.com/desi-bhabhi-leak/", parsed.items[0].detailUrl)
+        assertEquals(765L, parsed.items[0].durationSeconds)
+        assertTrue(parsed.hasNextPage)
     }
 
     @Test

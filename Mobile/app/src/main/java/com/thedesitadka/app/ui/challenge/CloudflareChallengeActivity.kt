@@ -137,10 +137,18 @@ fun ChallengeScreen(
                     title?.contains("Attention Required", ignoreCase = true) == true ||
                     title?.contains("Cloudflare", ignoreCase = true) == true ||
                     title?.contains("Security Challenge", ignoreCase = true) == true ||
-                    title?.contains("Verifying", ignoreCase = true) == true
+                    title?.contains("Verifying", ignoreCase = true) == true ||
+                    title?.contains("Parental Control", ignoreCase = true) == true
 
-            if (hasClearance && !isChallengeTitle && !url.contains("/cdn-cgi/challenge-platform")) {
-                StreamHubLogger.i("CloudflareChallenge", "cf_clearance cookie verified for $url! Title: $title")
+            val isSxyprnResolved = url.contains("sxyprn.com") && !isChallengeTitle && !url.contains("/cdn-cgi/") && 
+                    hasClearance && (title?.contains("SexyPorn", ignoreCase = true) == true || cookies.contains("aavvcc"))
+
+            if ((hasClearance || isSxyprnResolved) && !isChallengeTitle && !url.contains("/cdn-cgi/challenge-platform")) {
+                if (url.contains("sxyprn.com")) {
+                    cookieManager.setCookie("https://sxyprn.com", "aavvcc=1; path=/; domain=.sxyprn.com")
+                    NetworkClient.setSessionCookie("sxyprn.com", "aavvcc", "1")
+                }
+                StreamHubLogger.i("CloudflareChallenge", "Security clearance verified for $url! Title: $title")
                 true
             } else {
                 false
@@ -182,7 +190,7 @@ fun ChallengeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                windowInsets = WindowInsets(0.dp),
+                windowInsets = TopAppBarDefaults.windowInsets,
                 title = {
                     Column {
                         Text(
@@ -303,7 +311,7 @@ fun ChallengeScreen(
                             databaseEnabled = true
                             loadWithOverviewMode = true
                             useWideViewPort = true
-                            userAgentString = NetworkClient.DEFAULT_USER_AGENT
+                            userAgentString = if (targetUrl.contains("sxyprn.com") || targetUrl.contains("hqporner")) NetworkClient.DESKTOP_USER_AGENT else NetworkClient.DEFAULT_USER_AGENT
                         }
 
                         val cookieManager = CookieManager.getInstance()
@@ -330,6 +338,40 @@ fun ChallengeScreen(
                             override fun onPageFinished(view: WebView?, url: String?) {
                                 isVerifying = false
                                 if (url != null) {
+                                    if (url.contains("sxyprn.com")) {
+                                        val autoConsentJs = """
+                                            (function() {
+                                                try {
+                                                    document.cookie = "aavvcc=1; path=/; max-age=31536000; domain=.sxyprn.com";
+                                                    var d = document.getElementById('avb_d');
+                                                    var m = document.getElementById('avb_m');
+                                                    var y = document.getElementById('avb_y');
+                                                    var c1 = document.getElementById('cb_ageconf');
+                                                    var c2 = document.getElementById('cb_cookconf');
+                                                    if (d) { d.value = '15'; d.dispatchEvent(new Event('input', { bubbles: true })); }
+                                                    if (m) { m.value = '05'; m.dispatchEvent(new Event('input', { bubbles: true })); }
+                                                    if (y) { y.value = '1995'; y.dispatchEvent(new Event('input', { bubbles: true })); }
+                                                    if (c1) { c1.checked = true; c1.dispatchEvent(new Event('change', { bubbles: true })); }
+                                                    if (c2) { c2.checked = true; c2.dispatchEvent(new Event('change', { bubbles: true })); }
+                                                    var btn = document.getElementById('ageVerifYes');
+                                                    if (btn) {
+                                                        btn.disabled = false;
+                                                        btn.click();
+                                                    }
+                                                    var cover = document.getElementById('ageverify-cover');
+                                                    if (cover) {
+                                                        cover.style.display = 'none';
+                                                        cover.remove();
+                                                    }
+                                                    var imgs = document.querySelectorAll('.blur');
+                                                    for (var i = 0; i < imgs.length; i++) {
+                                                        imgs[i].classList.remove('blur');
+                                                    }
+                                                } catch(e) {}
+                                            })();
+                                        """.trimIndent()
+                                        view?.evaluateJavascript(autoConsentJs, null)
+                                    }
                                     cookieManager.flush()
                                     if (checkClearance(url, view?.title)) {
                                         handleSuccess()
@@ -339,6 +381,10 @@ fun ChallengeScreen(
                         }
 
                         webViewRef = this
+                        if (targetUrl.contains("sxyprn.com")) {
+                            cookieManager.setCookie("https://sxyprn.com", "aavvcc=1; path=/; domain=.sxyprn.com")
+                            NetworkClient.setSessionCookie("sxyprn.com", "aavvcc", "1")
+                        }
                         loadUrl(targetUrl)
                     }
                 }

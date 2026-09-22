@@ -49,10 +49,15 @@ data class MediaSource(
     val expiresAt: Long? = null,
     val streamUrl: String = url,
     val canPlay: Boolean = true,
-    val canDownload: Boolean = (type == MediaSourceType.PROGRESSIVE_MP4),
-    val downloadType: DownloadType = if (type == MediaSourceType.PROGRESSIVE_MP4) DownloadType.DIRECT_HTTP else DownloadType.UNSUPPORTED,
-    val downloadUrl: String? = if (type == MediaSourceType.PROGRESSIVE_MP4) url else null,
-    val fileExtension: String = if (type == MediaSourceType.HLS) "m3u8" else "mp4",
-    val sizeBytes: Long? = null
+    val canDownload: Boolean = (type == MediaSourceType.PROGRESSIVE_MP4 || type == MediaSourceType.HLS),
+    val downloadType: DownloadType = when (type) {
+        MediaSourceType.PROGRESSIVE_MP4 -> DownloadType.DIRECT_HTTP
+        MediaSourceType.HLS -> DownloadType.HLS_OFFLINE
+        else -> DownloadType.UNSUPPORTED
+    },
+    val downloadUrl: String? = if (type == MediaSourceType.PROGRESSIVE_MP4 || type == MediaSourceType.HLS) url else null,
+    val fileExtension: String = "mp4",
+    val sizeBytes: Long? = null,
+    val metadata: Map<String, String> = emptyMap()
 )
 

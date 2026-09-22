@@ -1,5 +1,6 @@
 package com.thedesitadka.app.download
 
+import android.app.Notification
 import android.app.NotificationManager
 import android.content.ContentValues
 import android.content.Context
@@ -30,6 +31,9 @@ import java.io.IOException
 import java.io.RandomAccessFile
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 class DownloadWorker(
     private val context: Context,
@@ -43,11 +47,23 @@ class DownloadWorker(
         const val KEY_PROVIDER_ID = "provider_id"
         const val KEY_IS_PAUSED = "is_paused"
         const val KEY_WIFI_ONLY = "wifi_only"
+        const val KEY_MIME_TYPE = "mime_type"
+        const val KEY_IS_HLS = "is_hls"
         const val BUFFER_SIZE = 65536 // 64 KB buffer for high-speed streaming I/O
         const val MAX_RETRIES = 3
     }
 
     private val downloadDao = AppDatabase.getInstance(context).downloadDao()
+
+    override suspend fun getForegroundInfo(): ForegroundInfo {
+        val downloadId = inputData.getString(KEY_DOWNLOAD_ID) ?: ""
+        val title = inputData.getString(KEY_TITLE) ?: "Media Download"
+        val notifId = DownloadNotificationManager.getNotificationId(downloadId)
+        val initialNotif = DownloadNotificationManager.buildDownloadingNotification(
+            context, title, 0, 0L, 0L, downloadId
+        )
+        return DownloadNotificationManager.createForegroundInfo(context, initialNotif, notifId)
+    }
 
     override suspend fun doWork(): Result {
         val downloadId = inputData.getString(KEY_DOWNLOAD_ID) ?: return Result.failure()
@@ -55,6 +71,8 @@ class DownloadWorker(
         val title = inputData.getString(KEY_TITLE) ?: "Media Download"
         val providerId = inputData.getString(KEY_PROVIDER_ID) ?: ""
         val isWifiOnly = inputData.getBoolean(KEY_WIFI_ONLY, false)
+        val mimeType = inputData.getString(KEY_MIME_TYPE) ?: ""
+        val isHlsExplicit = inputData.getBoolean(KEY_IS_HLS, false)
 
         StreamHubLogger.log(
             StreamHubLogger.Category.DOWNLOAD,
@@ -94,11 +112,12 @@ class DownloadWorker(
         }
 
         // Initialize notification & promotion to foreground service safely
+        val notifId = DownloadNotificationManager.getNotificationId(downloadId)
+        val initialNotif = DownloadNotificationManager.buildDownloadingNotification(context, title, 0, 0L, 0L, downloadId)
         safeSetForeground(
-            DownloadNotificationManager.createForegroundInfo(
-                context,
-                DownloadNotificationManager.buildDownloadingNotification(context, title, 0, 0L, 0L, downloadId)
-            )
+            DownloadNotificationManager.createForegroundInfo(context, initialNotif, notifId),
+            notifId,
+            initialNotif
         )
 
         val record = downloadDao.getDownload(downloadId)
@@ -182,6 +201,20 @@ class DownloadWorker(
             // Inject Referer based on provider or URL host
             val urlLower = mediaUrl.lowercase()
             val referer = when {
+                urlLower.contains("twimg.com") -> ""
+                urlLower.contains("pornhouse.me") || urlLower.contains("cdn.pornhouse.me") || providerId == "pornhouse" -> "https://pornhouse.me/"
+                urlLower.contains("pornhd4k.net") || urlLower.contains("cdnamz.me") || providerId == "pornhd4k" -> "https://pornhd4k.net/"
+                urlLower.contains("pornmz.com") || providerId == "pornmz" -> "https://pornmz.com/"
+                urlLower.contains("pornstars.tube") || providerId == "pornstars_tube" -> "https://pornstars.tube/"
+                urlLower.contains("sxyprn.com") || urlLower.contains("trafficdeposit.com") || urlLower.contains("bxcdn.net") || urlLower.contains("bkcdn.net") || providerId == "sxyprn" -> "https://sxyprn.com/"
+                urlLower.contains("max.porn") || providerId == "max" -> "https://max.porn/"
+                urlLower.contains("ok.porn") || providerId == "ok_porn" -> "https://ok.porn/"
+                urlLower.contains("ok.xxx") || providerId == "ok_xxx" -> "https://ok.xxx/"
+                urlLower.contains("perfectgirls.xxx") || providerId == "perfectgirls" -> "https://www.perfectgirls.xxx/"
+                urlLower.contains("pornhat.com") || providerId == "pornhat" -> "https://www.pornhat.com/"
+                urlLower.contains("netfapx.com") || urlLower.contains("videos.netfapx.com") || providerId == "netfapx" -> "https://netfapx.com/"
+                urlLower.contains("porn4days.pw") || urlLower.contains("iceyfile.net") || providerId == "porn4days" -> "https://porn4days.pw/"
+                urlLower.contains("bigcdn.cc") || urlLower.contains("mydaddy.cc") || urlLower.contains("hqporner") || providerId == "hqporner" -> "https://hqporner.com/"
                 urlLower.contains("ixiporn") || providerId == "ixiporn" -> "https://ixiporn.live/"
                 urlLower.contains("wowuncut") || providerId == "wowuncut" -> "https://wowuncut.com/"
                 urlLower.contains("antarvasna") || providerId == "antarvasnabf" -> "https://antarvasnabf.com/"
@@ -191,9 +224,10 @@ class DownloadWorker(
                 urlLower.contains("tube279.com") || urlLower.contains("siesta583") -> "https://tube279.com/"
                 urlLower.contains("tnmr.org") || urlLower.contains("lulucdn") || urlLower.contains("lulustream") || urlLower.contains("luluvdo") -> "https://luluvdo.com/"
                 urlLower.contains("tpead.net") || urlLower.contains("streamtape.com") || urlLower.contains("tapecontent.net") -> "https://streamtape.com/"
-                urlLower.contains("mydown.biz") || urlLower.contains("masahub") || providerId == "masahub2" -> "https://masahub2.com/"
+                urlLower.contains("mydown.biz") || urlLower.contains("masahub") || providerId == "masahub2" || providerId == "lalamasa" || urlLower.contains("lalamasa") -> if (providerId == "lalamasa" || urlLower.contains("lalamasa")) "https://lalamasa.mobi/" else "https://masahub2.com/"
+                urlLower.contains("streamoupload") || providerId == "watchoerotic" || providerId?.startsWith("prmovies") == true -> "https://streamoupload.xyz/"
                 urlLower.contains("pvtcdn.com") || urlLower.contains("masa49") || providerId == "masa49" -> "https://www.masa49.nl/"
-                urlLower.contains("kamababa") || providerId == "kamababa1" -> "https://www.kamababa1.com/"
+                urlLower.contains("kamababa") || providerId == "kamababa1" -> "https://www.mykamababa.com/"
                 urlLower.contains("fry99") || providerId == "fry99" -> "https://fry99.cc/"
                 urlLower.contains("hitmaal") || providerId == "hitmaal" -> "https://hitmaal.io/"
                 urlLower.contains("fsiblog") || providerId == "fsiblogxx" -> "https://fsiblogxx.com/"
@@ -204,20 +238,60 @@ class DownloadWorker(
                 urlLower.contains("chiggywiggy") || providerId == "chiggywiggy" -> "https://chiggywiggy.com/"
                 urlLower.contains("desibabe") || providerId == "desibabe" || urlLower.contains("downloaddirect") -> "https://desibabe.to/"
                 urlLower.contains("desigirlxx") || providerId == "desigirlxx" || urlLower.contains("playmate.to") -> "https://desigirlxx.beer/"
-                urlLower.contains("desimaals") || providerId == "desimaals" -> "https://www.desimaals.fun/"
                 urlLower.contains("desivideo") || providerId == "desivideo" -> "https://desivideo.net/"
+                urlLower.contains("definebabe.com") || providerId == "definebabe" -> "https://www.definebabe.com/"
+                urlLower.contains("3movs.com") || providerId == "three_movs" -> "https://www.3movs.com/"
+                urlLower.contains("txxx.com") || urlLower.contains("txxx.tube") || providerId == "txxx" -> "https://txxx.com/"
+                urlLower.contains("upornia.com") || providerId == "upornia" -> "https://upornia.com/"
+                urlLower.contains("hdzog.com") || providerId == "hdzog" -> "https://hdzog.com/"
+                urlLower.contains("hello.porn") || urlLower.contains("privatehost.com") || providerId == "hello" -> "https://hello.porn/"
+                urlLower.contains("movienerds") || providerId == "movienerds" -> "https://movienerds.site/"
+                urlLower.contains("cineapse") || providerId == "cineapse" -> "https://cineapse.net/"
                 else -> "https://${android.net.Uri.parse(mediaUrl).host ?: "example.com"}/"
             }
-            requestBuilder.header("Referer", referer)
+            if (referer.isNotBlank()) {
+                requestBuilder.header("Referer", referer)
+            }
 
             // Inject Cookies if available
-            try {
-                val cookies = CookieManager.getInstance().getCookie(mediaUrl)
-                if (!cookies.isNullOrBlank()) {
-                    requestBuilder.header("Cookie", cookies)
-                }
-            } catch (e: Exception) {
-                // Non-fatal
+            val cookies = try { CookieManager.getInstance().getCookie(mediaUrl) } catch (e: Exception) { null }
+            if (!cookies.isNullOrBlank()) {
+                requestBuilder.header("Cookie", cookies)
+            }
+
+            // Multi-layered HLS pre-flight detection
+            val isKnownHls = isHlsExplicit ||
+                    mimeType.contains("mpegurl", ignoreCase = true) ||
+                    record.mimeType.contains("mpegurl", ignoreCase = true) ||
+                    urlLower.contains(".m3u8") ||
+                    urlLower.contains("/hls/") ||
+                    providerId in listOf("hello", "max", "ok_porn", "ok_xxx", "perfectgirls", "pornhat") ||
+                    urlLower.contains("hello.porn") ||
+                    urlLower.contains("max.porn") ||
+                    urlLower.contains("ok.porn") ||
+                    urlLower.contains("ok.xxx") ||
+                    urlLower.contains("perfectgirls.xxx") ||
+                    urlLower.contains("pornhat.com") ||
+                    urlLower.contains("privatehost.com")
+
+            if (isKnownHls) {
+                return downloadHlsStream(
+                    downloadId = downloadId,
+                    mediaUrl = mediaUrl,
+                    title = title,
+                    providerId = providerId,
+                    referer = referer,
+                    cookies = cookies,
+                    isDirectFileMode = isDirectFileMode,
+                    directPartFile = directPartFile,
+                    directFinalFile = directFinalFile,
+                    directRaf = directRaf,
+                    mediaStoreStream = mediaStoreStream,
+                    mediaStoreUri = mediaStoreUri,
+                    mediaStorePfd = mediaStorePfd,
+                    destinationDisplayPath = destinationDisplayPath,
+                    currentRecord = currentRecord
+                )
             }
 
             // HTTP Range request for resuming partial downloads in direct mode
@@ -236,6 +310,42 @@ class DownloadWorker(
 
             NetworkClient.okHttpClient.newCall(request).execute().use { response ->
                 val responseCode = response.code
+                val effectiveUrl = response.request.url.toString()
+                val contentType = response.header("Content-Type", "")?.lowercase() ?: ""
+
+                // Dynamic Response Stream Sniffing:
+                // If the response is an HLS playlist (MIME type, redirected URL, or #EXTM3U peek)
+                val peekBytes = try { response.peekBody(512).string().trimStart() } catch (e: Exception) { "" }
+                val isDynamicHls = contentType.contains("mpegurl") ||
+                        contentType.contains("x-mpegurl") ||
+                        effectiveUrl.contains(".m3u8", ignoreCase = true) ||
+                        effectiveUrl.contains("/hls/", ignoreCase = true) ||
+                        peekBytes.startsWith("#EXTM3U") ||
+                        peekBytes.startsWith("#EXT-X-")
+
+                if (isDynamicHls) {
+                    StreamHubLogger.i(
+                        "DownloadWorker",
+                        "Dynamic HLS stream detected for ID $downloadId: $mediaUrl (effective: $effectiveUrl, Content-Type: $contentType). Routing to HLS segment downloader..."
+                    )
+                    return downloadHlsStream(
+                        downloadId = downloadId,
+                        mediaUrl = effectiveUrl,
+                        title = title,
+                        providerId = providerId,
+                        referer = referer,
+                        cookies = cookies,
+                        isDirectFileMode = isDirectFileMode,
+                        directPartFile = directPartFile,
+                        directFinalFile = directFinalFile,
+                        directRaf = directRaf,
+                        mediaStoreStream = mediaStoreStream,
+                        mediaStoreUri = mediaStoreUri,
+                        mediaStorePfd = mediaStorePfd,
+                        destinationDisplayPath = destinationDisplayPath,
+                        currentRecord = currentRecord
+                    )
+                }
 
                 StreamHubLogger.log(
                     StreamHubLogger.Category.DOWNLOAD,
@@ -383,13 +493,17 @@ class DownloadWorker(
                                 etaSeconds = etaSeconds
                             )
                             downloadDao.updateDownload(currentRecord)
+                            val progressNotif = DownloadNotificationManager.buildDownloadingNotification(
+                                context, title, progress, currentSpeed, etaSeconds, downloadId
+                            )
                             safeSetForeground(
                                 DownloadNotificationManager.createForegroundInfo(
                                     context,
-                                    DownloadNotificationManager.buildDownloadingNotification(
-                                        context, title, progress, currentSpeed, etaSeconds, downloadId
-                                    )
-                                )
+                                    progressNotif,
+                                    notifId
+                                ),
+                                notifId,
+                                progressNotif
                             )
                         }
                     }
@@ -514,34 +628,52 @@ class DownloadWorker(
                     speedBytesPerSec = 0L
                 )
             )
-            postFailedNotification(record.title, errorMessage)
+            postFailedNotification(record.title, errorMessage, record.id)
             return Result.failure()
         }
     }
 
-    private suspend fun safeSetForeground(info: ForegroundInfo) {
+    private suspend fun safeSetForeground(
+        info: ForegroundInfo,
+        notificationId: Int = DownloadNotificationManager.NOTIFICATION_ID,
+        notification: Notification? = null
+    ) {
         try {
             setForeground(info)
         } catch (e: Exception) {
             StreamHubLogger.w("DownloadWorker", "Could not set foreground service: ${e.message}")
+        }
+        if (notification != null) {
+            try {
+                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+                notificationManager?.notify(notificationId, notification)
+            } catch (e: Exception) {
+                StreamHubLogger.w("DownloadWorker", "Could not update direct notification: ${e.message}")
+            }
         }
     }
 
     private fun postCompletedNotification(title: String, downloadId: String) {
         try {
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+            notificationManager?.cancel(DownloadNotificationManager.getNotificationId(downloadId))
             val notification = DownloadNotificationManager.buildCompletedNotification(context, title, downloadId)
-            notificationManager?.notify(downloadId.hashCode(), notification)
+            val compId = DownloadNotificationManager.getCompletedNotificationId(downloadId)
+            notificationManager?.notify(compId, notification)
         } catch (e: Exception) {
             StreamHubLogger.w("DownloadWorker", "Could not post completion notification: ${e.message}")
         }
     }
 
-    private fun postFailedNotification(title: String, error: String?) {
+    private fun postFailedNotification(title: String, error: String?, downloadId: String = "") {
         try {
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
-            val notification = DownloadNotificationManager.buildFailedNotification(context, title, error)
-            notificationManager?.notify(title.hashCode(), notification)
+            if (downloadId.isNotBlank()) {
+                notificationManager?.cancel(DownloadNotificationManager.getNotificationId(downloadId))
+            }
+            val notification = DownloadNotificationManager.buildFailedNotification(context, title, error, downloadId)
+            val notifId = if (downloadId.isNotBlank()) DownloadNotificationManager.getCompletedNotificationId(downloadId) else title.hashCode()
+            notificationManager?.notify(notifId, notification)
         } catch (e: Exception) {
             StreamHubLogger.w("DownloadWorker", "Could not post failure notification: ${e.message}")
         }
@@ -558,5 +690,352 @@ class DownloadWorker(
         } catch (e: Exception) {
             false
         }
+    }
+
+    private suspend fun downloadHlsStream(
+        downloadId: String,
+        mediaUrl: String,
+        title: String,
+        providerId: String,
+        referer: String,
+        cookies: String?,
+        isDirectFileMode: Boolean,
+        directPartFile: File,
+        directFinalFile: File,
+        directRaf: RandomAccessFile?,
+        mediaStoreStream: FileOutputStream?,
+        mediaStoreUri: Uri?,
+        mediaStorePfd: ParcelFileDescriptor?,
+        destinationDisplayPath: String,
+        currentRecord: DownloadRecordEntity
+    ): Result {
+        StreamHubLogger.i("DownloadWorker", "Starting HLS stream download for ID $downloadId: $mediaUrl")
+        var activeRecord = currentRecord
+        val notifId = DownloadNotificationManager.getNotificationId(downloadId)
+        try {
+            fun resolveHlsUrl(baseUrl: String, rel: String): String {
+                val trimmed = rel.trim()
+                if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed
+                return try {
+                    java.net.URI(baseUrl).resolve(trimmed).toString()
+                } catch (e: Exception) {
+                    if (baseUrl.endsWith("/")) "$baseUrl$trimmed" else "$baseUrl/$trimmed"
+                }
+            }
+
+            // If direct RAF was opened, ensure starting cleanly from offset 0 for segment assembly
+            try { directRaf?.setLength(0L) } catch (e: Exception) {}
+
+            val playlistRequest = Request.Builder()
+                .url(mediaUrl)
+                .header("User-Agent", NetworkClient.DEFAULT_USER_AGENT)
+                .apply { if (referer.isNotBlank()) header("Referer", referer) }
+                .apply { if (!cookies.isNullOrBlank()) header("Cookie", cookies) }
+                .build()
+
+            var effectivePlaylistUrl = mediaUrl
+            val playlistContent = NetworkClient.okHttpClient.newCall(playlistRequest).execute().use { resp ->
+                if (!resp.isSuccessful) {
+                    throw IOException("HTTP ${resp.code} while loading HLS playlist from $mediaUrl")
+                }
+                effectivePlaylistUrl = resp.request.url.toString()
+                resp.body?.string() ?: ""
+            }
+
+            if (playlistContent.isBlank()) {
+                return handleRetryableError(activeRecord, "Failed to load HLS playlist content")
+            }
+
+            var targetMediaPlaylistUrl = effectivePlaylistUrl
+            var mediaPlaylistContent = playlistContent
+
+            // Master playlist multi-variant resolution: pick highest bandwidth stream
+            if (playlistContent.contains("#EXT-X-STREAM-INF")) {
+                val lines = playlistContent.lines()
+                var bestVariantUrl: String? = null
+                var maxBandwidth = -1L
+
+                for (i in lines.indices) {
+                    val line = lines[i].trim()
+                    if (line.startsWith("#EXT-X-STREAM-INF")) {
+                        val bandwidthMatch = Regex("""BANDWIDTH=(\d+)""").find(line)
+                        val bandwidth = bandwidthMatch?.groupValues?.get(1)?.toLongOrNull() ?: 0L
+
+                        for (j in (i + 1) until lines.size) {
+                            val nextLine = lines[j].trim()
+                            if (nextLine.isNotBlank() && !nextLine.startsWith("#")) {
+                                if (bandwidth >= maxBandwidth || bestVariantUrl == null) {
+                                    maxBandwidth = bandwidth
+                                    bestVariantUrl = resolveHlsUrl(effectivePlaylistUrl, nextLine)
+                                }
+                                break
+                            }
+                        }
+                    }
+                }
+
+                if (bestVariantUrl != null) {
+                    StreamHubLogger.i("DownloadWorker", "Selected HLS variant stream: $bestVariantUrl (bandwidth: $maxBandwidth)")
+                    val variantRequest = Request.Builder()
+                        .url(bestVariantUrl)
+                        .header("User-Agent", NetworkClient.DEFAULT_USER_AGENT)
+                        .apply { if (referer.isNotBlank()) header("Referer", referer) }
+                        .apply { if (!cookies.isNullOrBlank()) header("Cookie", cookies) }
+                        .build()
+
+                    mediaPlaylistContent = NetworkClient.okHttpClient.newCall(variantRequest).execute().use { resp ->
+                        if (!resp.isSuccessful) {
+                            throw IOException("HTTP ${resp.code} loading variant playlist $bestVariantUrl")
+                        }
+                        targetMediaPlaylistUrl = resp.request.url.toString()
+                        resp.body?.string() ?: ""
+                    }
+                }
+            }
+
+            val mediaLines = mediaPlaylistContent.lines()
+            val segmentUrls = mutableListOf<String>()
+            var keyUrl: String? = null
+            var keyBytes: ByteArray? = null
+            var explicitIvBytes: ByteArray? = null
+            var mediaSequence = 0L
+
+            for (line in mediaLines) {
+                val trimmed = line.trim()
+                if (trimmed.startsWith("#EXT-X-MEDIA-SEQUENCE:")) {
+                    mediaSequence = trimmed.substringAfter(":").toLongOrNull() ?: 0L
+                } else if (trimmed.startsWith("#EXT-X-KEY:")) {
+                    val method = Regex("""METHOD=([A-Z0-9-]+)""").find(trimmed)?.groupValues?.get(1)
+                    if (method == "AES-128") {
+                        val uriMatch = Regex("""URI="([^"]+)"""").find(trimmed)
+                        if (uriMatch != null) {
+                            keyUrl = resolveHlsUrl(targetMediaPlaylistUrl, uriMatch.groupValues[1])
+                            val ivMatch = Regex("""IV=0x([0-9a-fA-F]+)""").find(trimmed)
+                            if (ivMatch != null) {
+                                val ivHex = ivMatch.groupValues[1]
+                                explicitIvBytes = hexStringToByteArray(ivHex)
+                            }
+                        }
+                    }
+                } else if (trimmed.startsWith("#EXT-X-MAP:")) {
+                    val uriMatch = Regex("""URI="([^"]+)"""").find(trimmed)
+                    if (uriMatch != null) {
+                        val initSegUrl = resolveHlsUrl(targetMediaPlaylistUrl, uriMatch.groupValues[1])
+                        segmentUrls.add(initSegUrl)
+                    }
+                } else if (trimmed.isNotBlank() && !trimmed.startsWith("#")) {
+                    segmentUrls.add(resolveHlsUrl(targetMediaPlaylistUrl, trimmed))
+                }
+            }
+
+            if (segmentUrls.isEmpty()) {
+                StreamHubLogger.e("DownloadWorker", "No video segments found in HLS playlist")
+                return handleRetryableError(activeRecord, "No video segments found in HLS playlist")
+            }
+
+            if (!keyUrl.isNullOrBlank()) {
+                try {
+                    val keyRequest = Request.Builder()
+                        .url(keyUrl)
+                        .header("User-Agent", NetworkClient.DEFAULT_USER_AGENT)
+                        .apply { if (referer.isNotBlank()) header("Referer", referer) }
+                        .apply { if (!cookies.isNullOrBlank()) header("Cookie", cookies) }
+                        .build()
+                    keyBytes = NetworkClient.okHttpClient.newCall(keyRequest).execute().use { resp ->
+                        if (resp.isSuccessful) resp.body?.bytes() else null
+                    }
+                    StreamHubLogger.i("DownloadWorker", "Loaded AES key for HLS stream ($keyUrl, ${keyBytes?.size} bytes)")
+                } catch (e: Exception) {
+                    StreamHubLogger.w("DownloadWorker", "Failed to load AES key ($keyUrl): ${e.message}")
+                }
+            }
+
+            StreamHubLogger.i("DownloadWorker", "HLS stream contains ${segmentUrls.size} segments (encrypted=${keyBytes != null})")
+
+            val totalSegments = segmentUrls.size
+            var downloadedBytes = 0L
+            val startTime = System.currentTimeMillis()
+            var lastProgressTime = 0L
+
+            for ((index, segUrl) in segmentUrls.withIndex()) {
+                if (isStopped) {
+                    StreamHubLogger.i("DownloadWorker", "DownloadWorker stopped during HLS download (at segment $index/$totalSegments)")
+                    try { directRaf?.close() } catch (e: Exception) {}
+                    try { mediaStoreStream?.close() } catch (e: Exception) {}
+                    try { mediaStorePfd?.close() } catch (e: Exception) {}
+                    return Result.retry()
+                }
+
+                var segData: ByteArray? = null
+                var lastErr: Exception? = null
+                for (attempt in 1..3) {
+                    try {
+                        val segRequest = Request.Builder()
+                            .url(segUrl)
+                            .header("User-Agent", NetworkClient.DEFAULT_USER_AGENT)
+                            .apply { if (referer.isNotBlank()) header("Referer", referer) }
+                            .apply { if (!cookies.isNullOrBlank()) header("Cookie", cookies) }
+                            .build()
+
+                        segData = NetworkClient.okHttpClient.newCall(segRequest).execute().use { resp ->
+                            if (!resp.isSuccessful) {
+                                throw IOException("HTTP ${resp.code} while downloading HLS segment $index")
+                            }
+                            resp.body?.bytes() ?: ByteArray(0)
+                        }
+                        break
+                    } catch (e: Exception) {
+                        lastErr = e
+                        if (attempt < 3) {
+                            kotlinx.coroutines.delay(400L * attempt)
+                        }
+                    }
+                }
+
+                if (segData == null) {
+                    throw lastErr ?: IOException("Failed to download segment $index after 3 attempts")
+                }
+
+                val outputBytes = if (keyBytes != null && segData.isNotEmpty()) {
+                    try {
+                        val seq = mediaSequence + index
+                        val iv = explicitIvBytes ?: sequenceToIv(seq)
+                        val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
+                        val keySpec = SecretKeySpec(keyBytes, "AES")
+                        val ivSpec = IvParameterSpec(iv)
+                        cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec)
+                        cipher.doFinal(segData)
+                    } catch (e: Exception) {
+                        StreamHubLogger.w("DownloadWorker", "Decryption warning on segment $index: ${e.message}")
+                        segData
+                    }
+                } else {
+                    segData
+                }
+
+                if (isDirectFileMode && directRaf != null) {
+                    directRaf.write(outputBytes)
+                } else if (mediaStoreStream != null) {
+                    mediaStoreStream.write(outputBytes)
+                    mediaStoreStream.flush()
+                }
+
+                downloadedBytes += outputBytes.size
+
+                val now = System.currentTimeMillis()
+                if (now - lastProgressTime >= 1000L || index == segmentUrls.lastIndex) {
+                    lastProgressTime = now
+                    val progressPercent = (((index + 1).toDouble() / totalSegments) * 100).toInt().coerceIn(0, 100)
+                    val elapsedSeconds = (now - startTime) / 1000.0
+                    val speed = if (elapsedSeconds > 0) (downloadedBytes / elapsedSeconds).toLong() else 0L
+                    val estimatedTotal = if (index > 0) (downloadedBytes * totalSegments) / (index + 1) else downloadedBytes
+                    val remainingSegments = totalSegments - (index + 1)
+                    val etaSeconds = if (index > 0 && speed > 0) ((downloadedBytes / (index + 1)) * remainingSegments) / speed else 0L
+
+                    activeRecord = activeRecord.copy(
+                        status = DownloadStatus.DOWNLOADING,
+                        downloadedBytes = downloadedBytes,
+                        totalBytes = estimatedTotal,
+                        progress = progressPercent,
+                        speedBytesPerSec = speed,
+                        etaSeconds = etaSeconds
+                    )
+                    downloadDao.updateDownload(activeRecord)
+
+                    setProgress(
+                        workDataOf(
+                            "progress" to progressPercent,
+                            "speed" to speed,
+                            "eta" to etaSeconds
+                        )
+                    )
+
+                    val hlsNotif = DownloadNotificationManager.buildDownloadingNotification(
+                        context, title, progressPercent, speed, etaSeconds, downloadId
+                    )
+                    safeSetForeground(
+                        DownloadNotificationManager.createForegroundInfo(
+                            context,
+                            hlsNotif,
+                            notifId
+                        ),
+                        notifId,
+                        hlsNotif
+                    )
+                }
+            }
+
+            try { directRaf?.close() } catch (e: Exception) {}
+            try { mediaStoreStream?.close() } catch (e: Exception) {}
+            try { mediaStorePfd?.close() } catch (e: Exception) {}
+
+            if (isDirectFileMode) {
+                if (directPartFile.exists()) {
+                    if (directFinalFile.exists()) directFinalFile.delete()
+                    val renamed = directPartFile.renameTo(directFinalFile)
+                    if (!renamed) {
+                        directPartFile.copyTo(directFinalFile, overwrite = true)
+                        directPartFile.delete()
+                    }
+                }
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && mediaStoreUri != null) {
+                val completeValues = ContentValues().apply {
+                    put(MediaStore.Video.Media.IS_PENDING, 0)
+                }
+                context.contentResolver.update(mediaStoreUri, completeValues, null, null)
+            }
+
+            try {
+                MediaScannerConnection.scanFile(
+                    context,
+                    arrayOf(destinationDisplayPath),
+                    arrayOf("video/mp4"),
+                    null
+                )
+            } catch (e: Exception) {}
+
+            val finalRecord = activeRecord.copy(
+                status = DownloadStatus.COMPLETED,
+                progress = 100,
+                downloadedBytes = downloadedBytes,
+                totalBytes = downloadedBytes,
+                speedBytesPerSec = 0L,
+                localFilePath = destinationDisplayPath,
+                completedAt = System.currentTimeMillis()
+            )
+            downloadDao.updateDownload(finalRecord)
+            postCompletedNotification(title, downloadId)
+            StreamHubLogger.i("DownloadWorker", "HLS download successfully completed: $destinationDisplayPath (${downloadedBytes} bytes)")
+            return Result.success()
+
+        } catch (e: Exception) {
+            try { directRaf?.close() } catch (ignore: Exception) {}
+            try { mediaStoreStream?.close() } catch (ignore: Exception) {}
+            try { mediaStorePfd?.close() } catch (ignore: Exception) {}
+            StreamHubLogger.e("DownloadWorker", "HLS download error for $downloadId: ${e.message}")
+            return handleRetryableError(activeRecord, "HLS download error: ${e.message}")
+        }
+    }
+
+    private fun sequenceToIv(seq: Long): ByteArray {
+        val iv = ByteArray(16)
+        var s = seq
+        for (i in 15 downTo 8) {
+            iv[i] = (s and 0xFF).toByte()
+            s = s shr 8
+        }
+        return iv
+    }
+
+    private fun hexStringToByteArray(hexStr: String): ByteArray {
+        val clean = hexStr.removePrefix("0x").removePrefix("0X")
+        val len = clean.length
+        val data = ByteArray(len / 2)
+        var i = 0
+        while (i < len) {
+            data[i / 2] = ((Character.digit(clean[i], 16) shl 4) + Character.digit(clean[i + 1], 16)).toByte()
+            i += 2
+        }
+        return data
     }
 }

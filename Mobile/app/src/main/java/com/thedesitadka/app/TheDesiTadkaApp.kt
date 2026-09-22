@@ -19,6 +19,15 @@ class TheDesiTadkaApp : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
+        StreamHubLogger.logDelegate = { priority, tag, msg, tr ->
+            try {
+                if (tr != null) {
+                    android.util.Log.println(priority, "TheDesiTadka/$tag", "$msg\n${android.util.Log.getStackTraceString(tr)}")
+                } else {
+                    android.util.Log.println(priority, "TheDesiTadka/$tag", msg)
+                }
+            } catch (_: Exception) {}
+        }
         StreamHubLogger.i("TheDesiTadkaApp", "StreamHub initializing...")
 
         // Bridge Android WebView CookieManager to NetworkClient for Cloudflare/CAPTCHA clearance cookies
@@ -77,6 +86,10 @@ class TheDesiTadkaApp : Application(), ImageLoaderFactory {
                     host.contains("kamababa") -> "https://www.mykamababa.com/"
                     host.contains("fry99") -> "https://fry99.cc/"
                     host.contains("masahub") -> "https://masahub2.com/"
+                    host.contains("lalamasa") -> "https://lalamasa.mobi/"
+                    host.contains("watchoerotic") -> "https://watchoerotic.com/"
+                    host.contains("prmovies") -> "https://prmovies.com/"
+                    host.contains("aagmaal.com") -> "https://aagmaal.com/"
                     host.contains("aagmaal") || host.contains("aagimg") -> "https://aagmaal.date/"
                     host.contains("fsiblog") -> "https://www.fsiblogxx.com/"
                     host.contains("webxseries") -> "https://webxseries.hot/"

@@ -15,24 +15,59 @@ import com.thedesitadka.core.security.StreamHubLogger
 
 object DownloadNotificationManager {
 
-    const val CHANNEL_ID = "thedesitadka_downloads"
+    const val CHANNEL_ID = "thedesitadka_active_downloads"
+    const val CHANNEL_COMPLETED_ID = "thedesitadka_completed_downloads"
     const val NOTIFICATION_ID = 9001
+
+    fun getNotificationId(downloadId: String): Int {
+        return if (downloadId.isNotBlank()) {
+            (downloadId.hashCode() and 0x7FFFFFFF) % 50000 + 10000
+        } else {
+            NOTIFICATION_ID
+        }
+    }
+
+    fun getCompletedNotificationId(downloadId: String): Int {
+        return if (downloadId.isNotBlank()) {
+            (downloadId.hashCode() and 0x7FFFFFFF) % 50000 + 60000
+        } else {
+            NOTIFICATION_ID + 100
+        }
+    }
 
     fun ensureNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
-                val existing = notificationManager?.getNotificationChannel(CHANNEL_ID)
-                if (existing == null) {
+                // Delete legacy low-importance channel to avoid stale silent grouping
+                try { notificationManager?.deleteNotificationChannel("thedesitadka_downloads") } catch (ignore: Exception) {}
+
+                val activeChannel = notificationManager?.getNotificationChannel(CHANNEL_ID)
+                if (activeChannel == null) {
                     val channel = NotificationChannel(
                         CHANNEL_ID,
-                        "TheDesiTadka Downloads",
-                        NotificationManager.IMPORTANCE_LOW
+                        "Active Downloads",
+                        NotificationManager.IMPORTANCE_DEFAULT
                     ).apply {
-                        description = "Active media downloads progress and management"
-                        setShowBadge(false)
+                        description = "Shows live download progress and speed in the notification bar"
+                        setShowBadge(true)
+                        setSound(null, null)
+                        enableVibration(false)
                     }
                     notificationManager?.createNotificationChannel(channel)
+                }
+
+                val completedChannel = notificationManager?.getNotificationChannel(CHANNEL_COMPLETED_ID)
+                if (completedChannel == null) {
+                    val compChannel = NotificationChannel(
+                        CHANNEL_COMPLETED_ID,
+                        "Completed Downloads",
+                        NotificationManager.IMPORTANCE_HIGH
+                    ).apply {
+                        description = "Alerts when media downloads finish successfully"
+                        setShowBadge(true)
+                    }
+                    notificationManager?.createNotificationChannel(compChannel)
                 }
             } catch (e: Exception) {
                 StreamHubLogger.w("DownloadNotificationManager", "Could not create notification channel: ${e.message}")
@@ -46,12 +81,13 @@ object DownloadNotificationManager {
      */
     fun createForegroundInfo(
         context: Context,
-        notification: Notification
+        notification: Notification,
+        notificationId: Int = NOTIFICATION_ID
     ): ForegroundInfo {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ForegroundInfo(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            ForegroundInfo(notificationId, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
         } else {
-            ForegroundInfo(NOTIFICATION_ID, notification)
+            ForegroundInfo(notificationId, notification)
         }
     }
 
@@ -81,20 +117,24 @@ object DownloadNotificationManager {
         val openAppIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
+        val notifId = getNotificationId(downloadId)
         val contentPendingIntent = PendingIntent.getActivity(
             context,
-            NOTIFICATION_ID,
+            notifId,
             openAppIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle(title)
-            .setContentText(if (subtitle.isNotBlank()) "$progress% ($subtitle)" else "$progress%")
+            .setContentText(if (subtitle.isNotBlank()) "$progress% ($subtitle)" else "$progress% - Downloading...")
+            .setSubText(if (progress in 0..100) "$progress%" else "Downloading")
             .setSmallIcon(android.R.drawable.stat_sys_download)
             .setContentIntent(contentPendingIntent)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
+            .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
         if (progress in 0..100) {
             builder.setProgress(100, progress, false)
@@ -115,35 +155,39 @@ object DownloadNotificationManager {
         val openAppIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
+        val compNotifId = getCompletedNotificationId(downloadId)
         val contentPendingIntent = PendingIntent.getActivity(
             context,
-            NOTIFICATION_ID,
+            compNotifId,
             openAppIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        return NotificationCompat.Builder(context, CHANNEL_ID)
+        return NotificationCompat.Builder(context, CHANNEL_COMPLETED_ID)
             .setContentTitle("Download Completed")
             .setContentText(title)
             .setSmallIcon(android.R.drawable.stat_sys_download_done)
             .setContentIntent(contentPendingIntent)
             .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
     }
 
     fun buildFailedNotification(
         context: Context,
         title: String,
-        errorMessage: String?
+        errorMessage: String?,
+        downloadId: String = ""
     ): Notification {
         ensureNotificationChannel(context)
 
         val openAppIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
+        val notifId = if (downloadId.isNotBlank()) getCompletedNotificationId(downloadId) else NOTIFICATION_ID + 50
         val contentPendingIntent = PendingIntent.getActivity(
             context,
-            NOTIFICATION_ID,
+            notifId,
             openAppIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )

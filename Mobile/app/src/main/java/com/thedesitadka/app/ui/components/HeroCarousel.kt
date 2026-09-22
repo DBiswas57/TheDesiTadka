@@ -18,9 +18,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -57,7 +54,7 @@ fun HeroCarousel(
             state = pagerState,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(230.dp)
+                .height(200.dp)
         ) { page ->
             val featuredItem = items[page]
             Card(
@@ -139,23 +136,7 @@ fun HeroCarousel(
                             overflow = TextOverflow.Ellipsis
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
 
-                        Button(
-                            onClick = { onWatchClick(featuredItem) },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                            shape = RoundedCornerShape(6.dp),
-                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = null,
-                                tint = Color.Black,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(text = "Watch Now", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                        }
                     }
                 }
             }

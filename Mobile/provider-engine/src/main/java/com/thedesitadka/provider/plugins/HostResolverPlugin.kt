@@ -14,4 +14,7 @@ interface HostResolverPlugin {
     fun canHandle(url: String): Boolean
 
     suspend fun resolve(embedUrl: String, parentUrl: String? = null): Result<MediaSource>
+
+    fun resolveFromHtml(html: String, embedUrl: String, parentUrl: String? = null): Result<MediaSource>? = null
 }
+

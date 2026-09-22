@@ -8,15 +8,23 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.BackHandler
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.thedesitadka.app.download.StoragePermissionHelper
+import com.thedesitadka.app.download.NotificationPermissionHelper
 import com.thedesitadka.app.storage.PreferenceStore
 import com.thedesitadka.core.security.StreamHubLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,16 +36,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.WifiOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -75,14 +87,18 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.thedesitadka.app.navigation.Screen
 import com.thedesitadka.app.security.AndroidApkIntegrityChecker
+import com.thedesitadka.app.ui.screens.CategoryContentScreen
+import com.thedesitadka.app.ui.screens.CategoryListScreen
 import com.thedesitadka.app.ui.screens.DetailsScreen
 import com.thedesitadka.app.ui.screens.DiagnosticsScreen
 import com.thedesitadka.app.ui.screens.DownloadsScreen
 import com.thedesitadka.app.ui.screens.HomeScreen
 import com.thedesitadka.app.ui.screens.HomeSourceSelectionScreen
 import com.thedesitadka.app.ui.screens.PlayerScreen
+import com.thedesitadka.app.ui.screens.PrmoviesFilterScreen
 import com.thedesitadka.app.ui.screens.ProviderScreen
 import com.thedesitadka.app.ui.screens.SearchScreen
+import com.thedesitadka.core.model.isCategoryUrl
 import com.thedesitadka.app.ui.screens.SettingsScreen
 import com.thedesitadka.app.ui.theme.TheDesiTadkaTheme
 import com.thedesitadka.app.update.AppUpdateManager
@@ -136,7 +152,26 @@ private fun UpdateGateScreen(container: AppContainer) {
     var isDownloading by remember { mutableStateOf(false) }
     var downloadProgress by remember { mutableFloatStateOf(0f) }
     var downloadError by remember { mutableStateOf<String?>(null) }
+    var installMessage by remember { mutableStateOf<String?>(null) }
+    var downloadedApkFile by remember { mutableStateOf<java.io.File?>(null) }
+    var hasInstallPermission by remember { mutableStateOf(AppUpdateManager.canRequestPackageInstalls(context)) }
     var retryTrigger by remember { mutableIntStateOf(0) }
+
+    val activity = context as? ComponentActivity
+    androidx.compose.runtime.DisposableEffect(activity) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                hasInstallPermission = AppUpdateManager.canRequestPackageInstalls(context)
+                pendingUpdate?.let { info ->
+                    downloadedApkFile = AppUpdateManager.getDownloadedUpdateFile(context, info.latestVersionName)
+                }
+            }
+        }
+        activity?.lifecycle?.addObserver(observer)
+        onDispose {
+            activity?.lifecycle?.removeObserver(observer)
+        }
+    }
 
     // Block back button when gate is not passed — prevent exiting gate
     BackHandler(enabled = gateState != GateState.PASSED) {
@@ -188,6 +223,8 @@ private fun UpdateGateScreen(container: AppContainer) {
             if (info.isUpdateAvailable) {
                 // Mandatory update required — block until installed
                 pendingUpdate = info
+                downloadedApkFile = AppUpdateManager.getDownloadedUpdateFile(context, info.latestVersionName)
+                hasInstallPermission = AppUpdateManager.canRequestPackageInstalls(context)
                 blockReason = "A mandatory update (v${info.latestVersionName}) must be installed to continue using TheDesiTadka.\n\nYour current version (v${info.currentVersionName}) is no longer supported."
                 gateState = GateState.BLOCKED
             } else {
@@ -329,6 +366,16 @@ private fun UpdateGateScreen(container: AppContainer) {
                             )
                         }
 
+                        // Installation status message
+                        installMessage?.let { msg ->
+                            Text(
+                                text = msg,
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.primary,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+
                         // Download error
                         downloadError?.let { err ->
                             Text(
@@ -343,42 +390,114 @@ private fun UpdateGateScreen(container: AppContainer) {
 
                         // Action buttons — ONLY update or retry, NEVER "Later" or "Skip"
                         if (pendingUpdate != null && !isDownloading) {
-                            Button(
-                                onClick = {
-                                    val info = pendingUpdate ?: return@Button
-                                    coroutineScope.launch {
-                                        isDownloading = true
-                                        downloadProgress = 0f
-                                        downloadError = null
-                                        val downloadResult = AppUpdateManager.downloadAndVerifyUpdate(
-                                            context = context,
-                                            updateInfo = info,
-                                            onProgress = { p -> downloadProgress = p }
-                                        )
-                                        isDownloading = false
-                                        downloadResult.onSuccess { apkFile ->
-                                            AppUpdateManager.launchInstallIntent(context, apkFile)
-                                        }.onFailure { err ->
-                                            downloadError = "Verification failed: ${err.message}"
-                                        }
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.SystemUpdate,
-                                    contentDescription = null,
-                                    tint = Color.Black,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
+                            val info = pendingUpdate!!
+                            val isReadyToInstall = downloadedApkFile != null && downloadedApkFile!!.exists()
+
+                            if (isReadyToInstall && !hasInstallPermission) {
+                                Button(
+                                    onClick = {
+                                        AppUpdateManager.openUnknownAppSourcesSettings(context)
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Settings,
+                                        contentDescription = null,
+                                        tint = Color.Black,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        "Grant Permission to Install",
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                                 Text(
-                                    "Download & Install Update",
-                                    color = Color.Black,
-                                    fontWeight = FontWeight.Bold
+                                    text = "Tap above to allow app installs from this source, then return here to install.",
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center
                                 )
+                            } else if (isReadyToInstall) {
+                                Button(
+                                    onClick = {
+                                        downloadError = null
+                                        val launched = AppUpdateManager.launchInstallIntent(context, downloadedApkFile!!)
+                                        if (launched) {
+                                            installMessage = "Package installer launched. Please follow on-screen prompts to complete installation."
+                                        } else {
+                                            downloadError = "Failed to launch package installer. Please check app permissions."
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.SystemUpdate,
+                                        contentDescription = null,
+                                        tint = Color.Black,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        "Install Update Package",
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            } else {
+                                Button(
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            isDownloading = true
+                                            downloadProgress = 0f
+                                            downloadError = null
+                                            installMessage = null
+                                            val downloadResult = AppUpdateManager.downloadAndVerifyUpdate(
+                                                context = context,
+                                                updateInfo = info,
+                                                onProgress = { p -> downloadProgress = p }
+                                            )
+                                            isDownloading = false
+                                            downloadResult.onSuccess { apkFile ->
+                                                downloadedApkFile = apkFile
+                                                hasInstallPermission = AppUpdateManager.canRequestPackageInstalls(context)
+                                                if (hasInstallPermission) {
+                                                    val launched = AppUpdateManager.launchInstallIntent(context, apkFile)
+                                                    if (launched) {
+                                                        installMessage = "Package installer launched. Please follow on-screen prompts to complete installation."
+                                                    } else {
+                                                        downloadError = "Failed to launch package installer. Tap 'Install Update Package' below to retry."
+                                                    }
+                                                } else {
+                                                    AppUpdateManager.openUnknownAppSourcesSettings(context)
+                                                }
+                                            }.onFailure { err ->
+                                                downloadError = "Verification failed: ${err.message}"
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.SystemUpdate,
+                                        contentDescription = null,
+                                        tint = Color.Black,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        "Download & Install Update",
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
 
@@ -449,6 +568,137 @@ private fun AppNavigationContent(container: AppContainer) {
         return
     }
 
+    val isInitialStoragePromptDone by container.preferenceStore.initialStoragePromptDoneFlow.collectAsState(initial = true)
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var showInitialStorageDialog by remember { mutableStateOf(false) }
+    var showNotificationDialog by remember { mutableStateOf(false) }
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        StreamHubLogger.i("MainActivity", "Notification permission result: $isGranted")
+    }
+
+    val storagePermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        // Returned from storage settings
+    }
+
+    val legacyStoragePermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) {
+        // Returned from runtime permission dialog
+    }
+
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            !NotificationPermissionHelper.hasNotificationPermission(context)
+        ) {
+            showNotificationDialog = true
+        }
+    }
+
+    LaunchedEffect(isInitialStoragePromptDone) {
+        if (!isInitialStoragePromptDone && !StoragePermissionHelper.hasFullStorageAccess(context)) {
+            showInitialStorageDialog = true
+        }
+    }
+
+    if (showNotificationDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showNotificationDialog = false
+            },
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(imageVector = Icons.Default.Notifications, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Download Notifications", fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            },
+            text = {
+                Text(
+                    "To show active download progress, speed, and completion status directly in your notification bar and status bar, TheDesiTadka requires notification permission.\n\nPlease enable notifications so you can monitor your downloads in real time.",
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showNotificationDialog = false
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("Allow Notifications", color = Color.Black, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showNotificationDialog = false
+                    }
+                ) {
+                    Text("Not Now")
+                }
+            }
+        )
+    }
+
+    if (showInitialStorageDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showInitialStorageDialog = false
+                coroutineScope.launch { container.preferenceStore.setInitialStoragePromptDone(true) }
+            },
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(imageVector = Icons.Default.Folder, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Storage Permission", fontWeight = FontWeight.Bold, color = Color.White)
+                }
+            },
+            text = {
+                Text(
+                    "TheDesiTadka requires storage access to download and save media directly to your device storage for offline playback.\n\nWould you like to grant permission now?",
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showInitialStorageDialog = false
+                        coroutineScope.launch { container.preferenceStore.setInitialStoragePromptDone(true) }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            storagePermissionLauncher.launch(StoragePermissionHelper.createFullStorageAccessIntent(context))
+                        } else {
+                            legacyStoragePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("Grant Access", color = Color.Black, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showInitialStorageDialog = false
+                        coroutineScope.launch { container.preferenceStore.setInitialStoragePromptDone(true) }
+                    }
+                ) {
+                    Text("Not Now")
+                }
+            }
+        )
+    }
+
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -468,40 +718,78 @@ private fun AppNavigationContent(container: AppContainer) {
         contentWindowInsets = WindowInsets(0.dp),
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    tonalElevation = 8.dp
+                val navItems = listOf(
+                    Triple(Screen.Home.route, "Home", Icons.Default.Home),
+                    Triple(Screen.Search.route, "Search", Icons.Default.Search),
+                    Triple(Screen.Downloads.route, "Downloads", Icons.Default.Download),
+                    Triple(Screen.Settings.route, "Settings", Icons.Default.Settings)
+                )
+                // Custom floating-island bottom nav
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    val navItems = listOf(
-                        Triple(Screen.Home.route, "Home", Icons.Default.Home),
-                        Triple(Screen.Search.route, "Search", Icons.Default.Search),
-                        Triple(Screen.Downloads.route, "Downloads", Icons.Default.Download),
-                        Triple(Screen.Settings.route, "Settings", Icons.Default.Settings)
-                    )
-
-                    navItems.forEach { (route, label, icon) ->
-                        val selected = currentRoute == route
-                        NavigationBarItem(
-                            selected = selected,
-                            onClick = {
-                                navController.navigate(route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(22.dp))
+                            .background(Color(0xFF1A1A2E))
+                            .padding(vertical = 6.dp, horizontal = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        navItems.forEach { (route, label, icon) ->
+                            val selected = currentRoute == route
+                            val accentColor = MaterialTheme.colorScheme.primary
+                            val unselectedColor = Color(0xFF6B7280)
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(
+                                        if (selected) accentColor.copy(alpha = 0.12f)
+                                        else Color.Transparent
+                                    )
+                                    .clickable {
+                                        navController.navigate(route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(
+                                            if (selected) accentColor
+                                            else Color.Transparent
+                                        )
+                                        .padding(horizontal = 16.dp, vertical = 5.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = icon,
+                                        contentDescription = label,
+                                        tint = if (selected) Color.Black else unselectedColor,
+                                        modifier = Modifier.size(20.dp)
+                                    )
                                 }
-                            },
-                            icon = { Icon(imageVector = icon, contentDescription = label) },
-                            label = { Text(label, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = Color.Black,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                indicatorColor = MaterialTheme.colorScheme.primary,
-                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        )
+                                Spacer(modifier = Modifier.height(3.dp))
+                                Text(
+                                    text = label,
+                                    fontSize = 10.sp,
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (selected) accentColor else unselectedColor
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -526,8 +814,16 @@ private fun AppNavigationContent(container: AppContainer) {
                     preferenceStore = container.preferenceStore,
                     monetizationManager = container.monetizationManager,
                     onVideoClick = { video ->
-                        activeVideoItem = video
-                        navController.navigate(Screen.Details.route)
+                        if (video.isCategory || isCategoryUrl(video.detailUrl)) {
+                            if (video.detailUrl.endsWith("/categories/") || video.detailUrl.endsWith("/categories") || video.title.equals("All Categories", ignoreCase = true)) {
+                                navController.navigate(Screen.CategoryList.createRoute(video.providerId))
+                            } else {
+                                navController.navigate(Screen.CategoryContent.createRoute(video.providerId, video.title, video.detailUrl))
+                            }
+                        } else {
+                            activeVideoItem = video
+                            navController.navigate(Screen.Details.route)
+                        }
                     },
                     onProviderClick = { providerId ->
                         navController.navigate(Screen.Provider.createRoute(providerId))
@@ -547,19 +843,124 @@ private fun AppNavigationContent(container: AppContainer) {
                     providerId = providerId,
                     providerEngine = container.providerEngine,
                     onVideoClick = { video ->
-                        activeVideoItem = video
-                        navController.navigate(Screen.Details.route)
+                        try {
+                            if (video.isCategory || isCategoryUrl(video.detailUrl)) {
+                                if (video.detailUrl.endsWith("/categories/") || video.detailUrl.endsWith("/categories") || video.title.equals("All Categories", ignoreCase = true)) {
+                                    navController.navigate(Screen.CategoryList.createRoute(providerId))
+                                } else {
+                                    navController.navigate(Screen.CategoryContent.createRoute(providerId, video.title, video.detailUrl))
+                                }
+                            } else {
+                                activeVideoItem = video
+                                navController.navigate(Screen.Details.route)
+                            }
+                        } catch (e: Throwable) {
+                            android.widget.Toast.makeText(context, "Unable to open item", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    onAllCategoriesClick = {
+                        try {
+                            navController.navigate(Screen.CategoryList.createRoute(providerId))
+                        } catch (e: Throwable) {
+                            android.widget.Toast.makeText(context, "No categories found", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    onCategoryItemClick = { title, url ->
+                        try {
+                            navController.navigate(Screen.CategoryContent.createRoute(providerId, title, url))
+                        } catch (e: Throwable) {
+                            android.widget.Toast.makeText(context, "Unable to open category", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    onFilterClick = {
+                        navController.navigate(Screen.Filter.createRoute(providerId))
                     },
                     onBackClick = { navController.popBackStack() }
                 )
             }
 
+            composable(Screen.Filter.route) { backStackEntry ->
+                val providerId = backStackEntry.arguments?.getString("providerId") ?: "prmovies_church"
+                PrmoviesFilterScreen(
+                    providerId = providerId,
+                    providerEngine = container.providerEngine,
+                    onApplyFilter = { title, url ->
+                        try {
+                            navController.navigate(Screen.CategoryContent.createRoute(providerId, title, url))
+                        } catch (e: Throwable) {
+                            android.widget.Toast.makeText(context, "Unable to open filtered content", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.CategoryList.route) { backStackEntry ->
+                val providerId = backStackEntry.arguments?.getString("providerId") ?: ""
+                CategoryListScreen(
+                    providerId = providerId,
+                    providerEngine = container.providerEngine,
+                    onCategoryClick = { title, url ->
+                        try {
+                            navController.navigate(Screen.CategoryContent.createRoute(providerId, title, url))
+                        } catch (e: Throwable) {
+                            android.widget.Toast.makeText(context, "Unable to open category", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.CategoryContent.route) { backStackEntry ->
+                val providerId = backStackEntry.arguments?.getString("providerId") ?: ""
+                val rawTitle = backStackEntry.arguments?.getString("title") ?: "Category"
+                val categoryTitle = try {
+                    java.net.URLDecoder.decode(rawTitle, "UTF-8")
+                } catch (_: Exception) {
+                    rawTitle
+                }
+                val rawUrl = backStackEntry.arguments?.getString("url") ?: ""
+                val categoryUrl = try {
+                    java.net.URLDecoder.decode(rawUrl, "UTF-8")
+                } catch (_: Exception) {
+                    rawUrl
+                }
+                CategoryContentScreen(
+                    providerId = providerId,
+                    categoryTitle = categoryTitle,
+                    categoryUrl = categoryUrl,
+                    providerEngine = container.providerEngine,
+                    onVideoClick = { video ->
+                        try {
+                            if (video.isCategory || isCategoryUrl(video.detailUrl)) {
+                                if (video.detailUrl.endsWith("/categories/") || video.detailUrl.endsWith("/categories") || video.title.equals("All Categories", ignoreCase = true)) {
+                                    navController.navigate(Screen.CategoryList.createRoute(providerId))
+                                } else {
+                                    navController.navigate(Screen.CategoryContent.createRoute(providerId, video.title, video.detailUrl))
+                                }
+                            } else {
+                                activeVideoItem = video
+                                navController.navigate(Screen.Details.route)
+                            }
+                        } catch (e: Throwable) {
+                            android.widget.Toast.makeText(context, "Unable to open video", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+
+
             composable(Screen.Search.route) {
                 SearchScreen(
                     providerEngine = container.providerEngine,
                     onVideoClick = { video ->
-                        activeVideoItem = video
-                        navController.navigate(Screen.Details.route)
+                        if (video.isCategory || isCategoryUrl(video.detailUrl)) {
+                            navController.navigate(Screen.CategoryContent.createRoute(video.providerId, video.title, video.detailUrl))
+                        } else {
+                            activeVideoItem = video
+                            navController.navigate(Screen.Details.route)
+                        }
                     },
                     onBackClick = { navController.popBackStack() }
                 )

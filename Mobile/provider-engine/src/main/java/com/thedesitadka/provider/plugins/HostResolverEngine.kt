@@ -18,6 +18,10 @@ object HostResolverEngine {
     init {
         // Register default built-in host plugins
         registerPlugin(VixeoResolverPlugin())
+        registerPlugin(FirestreamResolverPlugin())
+        registerPlugin(LuluvdoResolverPlugin())
+        registerPlugin(MydaddyResolverPlugin())
+        registerPlugin(StreamouploadResolverPlugin())
     }
 
     fun registerPlugin(plugin: HostResolverPlugin) {
@@ -51,18 +55,27 @@ object HostResolverEngine {
         val candidates = mutableListOf<String>()
 
         // 1. Scan iframes
-        val iframes = doc.select("iframe[src]")
+        val iframes = doc.select("iframe[src], iframe[data-src], iframe[data-lazy-src]")
         for (iframe in iframes) {
-            val src = iframe.attr("src").trim()
-            if (src.isNotBlank() && canHandle(src) && !candidates.contains(src)) {
-                candidates.add(src)
+            val possibleSources = listOf(
+                iframe.attr("src").trim(),
+                iframe.attr("data-lazy-src").trim(),
+                iframe.attr("data-src").trim()
+            )
+            for (raw in possibleSources) {
+                var src = raw
+                if (src.startsWith("//")) src = "https:$src"
+                if (src.isNotBlank() && src != "about:blank" && !src.startsWith("about:") && canHandle(src) && !candidates.contains(src)) {
+                    candidates.add(src)
+                }
             }
         }
 
         // 2. Scan meta video/embed tags
         val metaEmbeds = doc.select("meta[property='og:video'], meta[name='twitter:player'], meta[itemprop*='embedURL'], meta[itemprop*='embedUrl']")
         for (m in metaEmbeds) {
-            val content = m.attr("content").trim()
+            var content = m.attr("content").trim()
+            if (content.startsWith("//")) content = "https:$content"
             if (content.isNotBlank() && canHandle(content) && !candidates.contains(content)) {
                 candidates.add(content)
             }
@@ -71,7 +84,8 @@ object HostResolverEngine {
         // 3. Scan external host links
         val links = doc.select("a[href]")
         for (a in links) {
-            val href = a.attr("href").trim()
+            var href = a.attr("href").trim()
+            if (href.startsWith("//")) href = "https:$href"
             if (href.isNotBlank() && canHandle(href) && !candidates.contains(href)) {
                 candidates.add(href)
             }

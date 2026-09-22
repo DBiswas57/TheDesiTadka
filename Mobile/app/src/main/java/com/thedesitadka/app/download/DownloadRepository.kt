@@ -6,6 +6,7 @@ import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.thedesitadka.app.storage.AppDatabase
@@ -51,35 +52,10 @@ class DownloadRepository(
             val adapter = providerEngine.getAdapter(videoItem.providerId)
                 ?: return@withContext Result.failure(StreamHubError.ProviderUnavailable(videoItem.providerId, "Provider not found"))
 
-            // Check if provider permits media download OR media source exposes explicit download capability
-            val isDownloadAuthorized = adapter.hasCapability(ProviderCapability.DOWNLOAD) ||
-                    mediaSource.canDownload ||
-                    mediaSource.downloadType != DownloadType.UNSUPPORTED
-
-            if (!isDownloadAuthorized) {
-                StreamHubLogger.w("DownloadRepository", "Rejected download: Provider '${videoItem.providerId}' does not permit downloads")
-                return@withContext Result.failure(
-                    StreamHubError.SecurityError(
-                        "UNAUTHORIZED_DOWNLOAD",
-                        "Media from '${videoItem.providerId}' is not authorized for offline download"
-                    )
-                )
-            }
-
             val rawDownloadUrl = mediaSource.downloadUrl ?: mediaSource.url
             if (rawDownloadUrl.isBlank()) {
                 return@withContext Result.failure(
                     StreamHubError.DownloadError(message = "No valid download URL available for this content")
-                )
-            }
-
-            // HLS (.m3u8) and DASH (.mpd) cannot be saved as single progressive MP4 files
-            if (rawDownloadUrl.contains(".m3u8", ignoreCase = true) ||
-                rawDownloadUrl.contains(".mpd", ignoreCase = true) ||
-                mediaSource.type == MediaSourceType.HLS ||
-                mediaSource.type == MediaSourceType.DASH) {
-                return@withContext Result.failure(
-                    StreamHubError.DownloadError(message = "Streaming protocol (${mediaSource.type}) does not support direct file download")
                 )
             }
 
@@ -105,12 +81,21 @@ class DownloadRepository(
                 status = DownloadStatus.QUEUED
             )
             downloadDao.insertDownload(record)
-            val effectiveWifiOnly = wifiOnly ?: preferenceStore?.isWifiOnly() ?: true
-            startWorker(downloadId, rawDownloadUrl, videoItem.title, videoItem.providerId, effectiveWifiOnly)
+            val effectiveWifiOnly = wifiOnly ?: preferenceStore?.isWifiOnly() ?: false
+            val isHls = mediaSource.type == MediaSourceType.HLS || mediaSource.mimeType.contains("mpegurl", ignoreCase = true)
+            startWorker(
+                downloadId = downloadId,
+                mediaUrl = rawDownloadUrl,
+                title = videoItem.title,
+                providerId = videoItem.providerId,
+                wifiOnly = effectiveWifiOnly,
+                mimeType = mediaSource.mimeType,
+                isHls = isHls
+            )
             StreamHubLogger.log(
                 StreamHubLogger.Category.DOWNLOAD,
                 "INFO",
-                "DOWNLOAD_ENQUEUED: id=$downloadId, title='${videoItem.title}'"
+                "DOWNLOAD_ENQUEUED: id=$downloadId, title='${videoItem.title}', isHls=$isHls"
             )
             Result.success(downloadId)
         } catch (e: Exception) {
@@ -125,14 +110,16 @@ class DownloadRepository(
         title: String,
         providerId: String,
         wifiOnly: Boolean = false,
-        isPaused: Boolean = false
+        isPaused: Boolean = false,
+        mimeType: String = "video/mp4",
+        isHls: Boolean = false
     ) {
         try {
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(if (wifiOnly) NetworkType.UNMETERED else NetworkType.CONNECTED)
                 .build()
 
-            val workRequest = OneTimeWorkRequestBuilder<DownloadWorker>()
+            val workRequestBuilder = OneTimeWorkRequestBuilder<DownloadWorker>()
                 .setConstraints(constraints)
                 .setInputData(
                     workDataOf(
@@ -141,11 +128,20 @@ class DownloadRepository(
                         DownloadWorker.KEY_TITLE to title,
                         DownloadWorker.KEY_PROVIDER_ID to providerId,
                         DownloadWorker.KEY_WIFI_ONLY to wifiOnly,
-                        DownloadWorker.KEY_IS_PAUSED to isPaused
+                        DownloadWorker.KEY_IS_PAUSED to isPaused,
+                        DownloadWorker.KEY_MIME_TYPE to mimeType,
+                        DownloadWorker.KEY_IS_HLS to isHls
                     )
                 )
                 .addTag("download_${downloadId}")
-                .build()
+
+            try {
+                workRequestBuilder.setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            } catch (e: Exception) {
+                StreamHubLogger.w("DownloadRepository", "Could not set expedited policy: ${e.message}")
+            }
+
+            val workRequest = workRequestBuilder.build()
 
             workManager.enqueueUniqueWork(
                 "download_${downloadId}",
@@ -173,8 +169,17 @@ class DownloadRepository(
         try {
             val existing = downloadDao.getDownload(downloadId) ?: return@withContext
             downloadDao.updateDownload(existing.copy(status = DownloadStatus.QUEUED, error = null))
-            val effectiveWifiOnly = preferenceStore?.isWifiOnly() ?: true
-            startWorker(existing.id, existing.mediaUrl, existing.title, existing.providerId, effectiveWifiOnly)
+            val effectiveWifiOnly = preferenceStore?.isWifiOnly() ?: false
+            val isHls = existing.mimeType.contains("mpegurl", ignoreCase = true)
+            startWorker(
+                downloadId = existing.id,
+                mediaUrl = existing.mediaUrl,
+                title = existing.title,
+                providerId = existing.providerId,
+                wifiOnly = effectiveWifiOnly,
+                mimeType = existing.mimeType,
+                isHls = isHls
+            )
         } catch (e: Exception) {
             StreamHubLogger.e("DownloadRepository", "Could not resume download $downloadId: ${e.message}")
         }
@@ -190,8 +195,17 @@ class DownloadRepository(
                     retryCount = existing.retryCount + 1
                 )
             )
-            val effectiveWifiOnly = preferenceStore?.isWifiOnly() ?: true
-            startWorker(existing.id, existing.mediaUrl, existing.title, existing.providerId, effectiveWifiOnly)
+            val effectiveWifiOnly = preferenceStore?.isWifiOnly() ?: false
+            val isHls = existing.mimeType.contains("mpegurl", ignoreCase = true)
+            startWorker(
+                downloadId = existing.id,
+                mediaUrl = existing.mediaUrl,
+                title = existing.title,
+                providerId = existing.providerId,
+                wifiOnly = effectiveWifiOnly,
+                mimeType = existing.mimeType,
+                isHls = isHls
+            )
         } catch (e: Exception) {
             StreamHubLogger.e("DownloadRepository", "Could not retry download $downloadId: ${e.message}")
         }

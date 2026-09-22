@@ -26,6 +26,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -63,11 +67,18 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.runtime.saveable.rememberSaveable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.ui.platform.LocalContext
@@ -81,8 +92,12 @@ import com.thedesitadka.core.model.Category
 import com.thedesitadka.core.model.ProviderCapability
 import com.thedesitadka.core.model.ProviderConfig
 import com.thedesitadka.core.model.VideoItem
+import com.thedesitadka.core.model.isCategoryUrl
 import com.thedesitadka.provider.ProviderEngine
 import kotlinx.coroutines.launch
+
+import com.thedesitadka.app.storage.NavigationStateStore
+import com.thedesitadka.app.storage.SavedListState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -90,12 +105,16 @@ fun ProviderScreen(
     providerId: String,
     providerEngine: ProviderEngine,
     onVideoClick: (VideoItem) -> Unit,
+    onAllCategoriesClick: () -> Unit = {},
+    onCategoryItemClick: (title: String, url: String) -> Unit = { _, _ -> },
+    onFilterClick: () -> Unit = {},
     onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val adapter = remember { providerEngine.getAdapter(providerId) }
     val info = remember { adapter?.providerInfo }
+    val cacheKey = remember(providerId) { "provider:$providerId" }
 
     var reloadTrigger by remember { mutableIntStateOf(0) }
 
@@ -107,60 +126,143 @@ fun ProviderScreen(
         }
     }
 
-    var feedItems = remember { mutableStateListOf<VideoItem>() }
-    var categories = remember { mutableStateListOf<Category>() }
-    var selectedCategory by remember { mutableStateOf<Category?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    var currentPage by remember { mutableIntStateOf(1) }
-    var hasNextPage by remember { mutableStateOf(true) }
+    val cachedState = remember(cacheKey) { NavigationStateStore.get(cacheKey) }
 
-    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var feedItems = remember {
+        mutableStateListOf<VideoItem>().apply {
+            if (cachedState != null && cachedState.items.isNotEmpty()) {
+                addAll(cachedState.items)
+            }
+        }
+    }
+    var categories = remember {
+        mutableStateListOf<Category>().apply {
+            if (cachedState != null && cachedState.categories.isNotEmpty()) {
+                addAll(cachedState.categories)
+            }
+        }
+    }
+    var selectedCategory by remember { mutableStateOf<Category?>(cachedState?.selectedCategory) }
+    var isLoading by remember { mutableStateOf(cachedState == null || cachedState.items.isEmpty()) }
+    var isLoadingMore by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var currentPage by remember { mutableIntStateOf(cachedState?.currentPage ?: 1) }
+    var hasNextPage by remember { mutableStateOf(cachedState?.hasNextPage ?: true) }
+
+    var searchQuery by rememberSaveable { mutableStateOf(cachedState?.searchQuery ?: "") }
     var isSearchExpanded by rememberSaveable { mutableStateOf(false) }
     var searchJob by remember { mutableStateOf<Job?>(null) }
 
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    LaunchedEffect(isSearchExpanded) {
+        if (isSearchExpanded) {
+            delay(150)
+            try {
+                focusRequester.requestFocus()
+                keyboardController?.show()
+            } catch (_: Exception) {}
+        }
+    }
+
+    val gridState = rememberLazyGridState()
+
+    // Restore scroll position from cache on enter
+    LaunchedEffect(cacheKey) {
+        if (cachedState != null && (cachedState.firstVisibleItemIndex > 0 || cachedState.firstVisibleItemScrollOffset > 0)) {
+            gridState.scrollToItem(cachedState.firstVisibleItemIndex, cachedState.firstVisibleItemScrollOffset)
+        }
+    }
+
+    // Continuously persist scroll position
+    LaunchedEffect(gridState, cacheKey) {
+        snapshotFlow { Pair(gridState.firstVisibleItemIndex, gridState.firstVisibleItemScrollOffset) }
+            .collect { (idx, offset) ->
+                NavigationStateStore.updateScroll(cacheKey, idx, offset)
+            }
+    }
+
     fun loadContent(page: Int, reset: Boolean = false) {
+        if (!reset && (isLoading || isLoadingMore)) return
+        if (!reset && feedItems.isEmpty()) return
         if (reset) {
             isLoading = true
-            feedItems.clear()
+            isLoadingMore = false
             currentPage = 1
+        } else {
+            isLoadingMore = true
         }
         errorMessage = null
         coroutineScope.launch {
             val result = if (searchQuery.isNotBlank()) {
                 adapter?.search(searchQuery.trim(), page) ?: providerEngine.search(searchQuery.trim(), providerId, page)
             } else if (selectedCategory != null) {
-                adapter?.search(selectedCategory!!.name, page) ?: providerEngine.getHomeFeed(providerId, page)
+                if (selectedCategory!!.url.isNotBlank()) {
+                    providerEngine.getCategoryFeed(providerId, selectedCategory!!.url, page)
+                } else {
+                    adapter?.search(selectedCategory!!.name, page) ?: providerEngine.getHomeFeed(providerId, page)
+                }
             } else {
                 providerEngine.getHomeFeed(providerId, page)
             }
             result.onSuccess { feedPage ->
                 if (reset) feedItems.clear()
-                feedItems.addAll(feedPage.items)
-                hasNextPage = feedPage.hasNextPage
+                val validItems = feedPage.items.filter { it.title.isNotBlank() && it.detailUrl.isNotBlank() }
+                val existingUrls = feedItems.map { it.detailUrl }.toSet()
+                val uniqueNewItems = validItems.filter { it.detailUrl !in existingUrls }
+                feedItems.addAll(uniqueNewItems)
+                hasNextPage = feedPage.hasNextPage && uniqueNewItems.isNotEmpty()
                 currentPage = page
                 isLoading = false
+                isLoadingMore = false
+                NavigationStateStore.updateItems(
+                    key = cacheKey,
+                    items = feedItems.toList(),
+                    page = page,
+                    hasNext = hasNextPage,
+                    categories = categories.toList(),
+                    selectedCategory = selectedCategory,
+                    searchQuery = searchQuery
+                )
             }.onFailure { err ->
-                errorMessage = err.message ?: "Failed to load content"
+                if (reset) {
+                    errorMessage = err.message ?: "Failed to load content"
+                }
                 isLoading = false
+                isLoadingMore = false
             }
         }
     }
 
     LaunchedEffect(providerId) {
-        loadContent(1, reset = true)
-        adapter?.let { adp ->
-            if (adp.hasCapability(ProviderCapability.CATEGORY)) {
-                adp.getCategories().onSuccess { cats ->
-                    categories.clear()
-                    categories.addAll(cats)
+        val existing = NavigationStateStore.get(cacheKey)
+        if (existing == null || existing.items.isEmpty()) {
+            loadContent(1, reset = true)
+        }
+        if (categories.isEmpty()) {
+            adapter?.let { adp ->
+                if (adp.hasCapability(ProviderCapability.CATEGORY)) {
+                    adp.getCategories().onSuccess { cats ->
+                        categories.clear()
+                        categories.addAll(cats)
+                        NavigationStateStore.updateItems(
+                            key = cacheKey,
+                            items = feedItems.toList(),
+                            page = currentPage,
+                            hasNext = hasNextPage,
+                            categories = cats,
+                            selectedCategory = selectedCategory,
+                            searchQuery = searchQuery
+                        )
+                    }
                 }
             }
         }
     }
 
     LaunchedEffect(selectedCategory) {
-        if (searchQuery.isBlank()) {
+        if (searchQuery.isBlank() && feedItems.isEmpty()) {
             loadContent(1, reset = true)
         }
     }
@@ -169,7 +271,7 @@ fun ProviderScreen(
         if (searchQuery.isNotBlank()) {
             searchJob?.cancel()
             searchJob = coroutineScope.launch {
-                delay(300)
+                delay(400)
                 loadContent(1, reset = true)
             }
         } else if (isSearchExpanded) {
@@ -180,21 +282,23 @@ fun ProviderScreen(
     // Re-load after Cloudflare challenge is solved
     LaunchedEffect(reloadTrigger) {
         if (reloadTrigger > 0) {
+            NavigationStateStore.clear(cacheKey)
             loadContent(1, reset = true)
         }
     }
 
-    val gridState = rememberLazyGridState()
     LaunchedEffect(gridState) {
         snapshotFlow { gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
             .collect { lastIndex ->
-                if (lastIndex != null && lastIndex >= feedItems.size - 4 && !isLoading && hasNextPage) {
+                if (feedItems.isNotEmpty() && lastIndex != null && lastIndex >= feedItems.size - 4 && !isLoading && !isLoadingMore && hasNextPage) {
                     loadContent(currentPage + 1, reset = false)
                 }
             }
     }
 
+
     BackHandler(enabled = isSearchExpanded || searchQuery.isNotBlank()) {
+        keyboardController?.hide()
         searchQuery = ""
         isSearchExpanded = false
         loadContent(1, reset = true)
@@ -204,17 +308,37 @@ fun ProviderScreen(
         topBar = {
             if (isSearchExpanded) {
                 TopAppBar(
-                    windowInsets = WindowInsets(0.dp),
+                    windowInsets = TopAppBarDefaults.windowInsets,
                     title = {
                         OutlinedTextField(
                             value = searchQuery,
                             onValueChange = { searchQuery = it },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(52.dp),
+                                .height(52.dp)
+                                .focusRequester(focusRequester),
                             placeholder = { Text("Search ${info?.name ?: providerId}...", fontSize = 14.sp) },
                             singleLine = true,
                             shape = RoundedCornerShape(8.dp),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(
+                                onSearch = {
+                                    keyboardController?.hide()
+                                    if (searchQuery.isNotBlank()) {
+                                        loadContent(1, reset = true)
+                                    }
+                                }
+                            ),
+                            trailingIcon = {
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = {
+                                        searchQuery = ""
+                                        loadContent(1, reset = true)
+                                    }) {
+                                        Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear", tint = Color.White)
+                                    }
+                                }
+                            },
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                                 unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -227,6 +351,7 @@ fun ProviderScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = {
+                            keyboardController?.hide()
                             searchQuery = ""
                             isSearchExpanded = false
                             loadContent(1, reset = true)
@@ -235,20 +360,20 @@ fun ProviderScreen(
                         }
                     },
                     actions = {
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = {
-                                searchQuery = ""
+                        IconButton(onClick = {
+                            keyboardController?.hide()
+                            if (searchQuery.isNotBlank()) {
                                 loadContent(1, reset = true)
-                            }) {
-                                Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear", tint = Color.White)
                             }
+                        }) {
+                            Icon(imageVector = Icons.Default.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.primary)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
                 )
             } else {
                 TopAppBar(
-                    windowInsets = WindowInsets(0.dp),
+                    windowInsets = TopAppBarDefaults.windowInsets,
                     title = { Text(info?.name ?: "Provider", fontWeight = FontWeight.Bold, color = Color.White) },
                     navigationIcon = {
                         IconButton(onClick = onBackClick) {
@@ -256,8 +381,43 @@ fun ProviderScreen(
                         }
                     },
                     actions = {
+                        IconButton(onClick = {
+                            try {
+                                val hasCategoryCap = adapter?.hasCapability(ProviderCapability.CATEGORY) == true
+                                val catNav = adapter?.categoryNavPath?.trim()
+                                if (categories.isNotEmpty() || hasCategoryCap || !catNav.isNullOrBlank()) {
+                                    onAllCategoriesClick()
+                                } else {
+                                    android.widget.Toast.makeText(context, "No categories found", android.widget.Toast.LENGTH_SHORT).show()
+                                }
+                            } catch (e: Throwable) {
+                                android.widget.Toast.makeText(context, "No categories found", android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        }) {
+                            Icon(imageVector = Icons.Default.GridView, contentDescription = "All Categories", tint = Color.White)
+                        }
+                        if (providerId.startsWith("prmovies")) {
+                            IconButton(onClick = onFilterClick) {
+                                Icon(imageVector = Icons.Default.FilterList, contentDescription = "Advanced Filter", tint = MaterialTheme.colorScheme.primary)
+                            }
+                        }
                         IconButton(onClick = { isSearchExpanded = true }) {
                             Icon(imageVector = Icons.Default.Search, contentDescription = "Search provider", tint = Color.White)
+                        }
+                        IconButton(onClick = {
+                            val targetUrl = info?.baseUrl ?: "https://brazzpw.xyz/"
+                            val intent = CloudflareChallengeActivity.createIntent(
+                                context,
+                                targetUrl,
+                                info?.name ?: providerId
+                            )
+                            challengeLauncher.launch(intent)
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Security,
+                                contentDescription = "Verify Security Clearance",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
@@ -331,19 +491,35 @@ fun ProviderScreen(
                 }
             }
 
-            // Categories Filter Bar
+            // Categories Filter Bar (only show when provider has categories available)
             if (categories.isNotEmpty()) {
+                val hasAlphabetJump = categories.any { it.name.trim().length == 1 && it.name.trim()[0].isLetter() }
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                             .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
+                        if (hasAlphabetJump) {
+                            Text(
+                                text = "Quick jump:",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(end = 4.dp)
+                            )
+                        }
                         FilterChip(
                             selected = selectedCategory == null,
-                            onClick = { selectedCategory = null },
+                            onClick = {
+                                if (selectedCategory != null) {
+                                    selectedCategory = null
+                                    loadContent(1, reset = true)
+                                }
+                            },
                             label = { Text("All", fontWeight = FontWeight.SemiBold) },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = MaterialTheme.colorScheme.primary,
@@ -351,22 +527,49 @@ fun ProviderScreen(
                             )
                         )
                         categories.forEach { cat ->
-                            FilterChip(
-                                selected = selectedCategory?.id == cat.id,
-                                onClick = { selectedCategory = cat },
-                                label = { Text(cat.name, fontWeight = FontWeight.SemiBold) },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                    selectedLabelColor = Color.Black
-                                )
+                            val catName = cat.name.trim()
+                            val isAlphabet = catName.length == 1 && catName[0].isLetter()
+                            val isExcluded = !isAlphabet && (
+                                catName.equals("All Categories", ignoreCase = true) ||
+                                catName.equals("All", ignoreCase = true) ||
+                                cat.url.endsWith("/categories/") ||
+                                catName.matches(Regex("""^\d+$""")) ||
+                                catName.length <= 1 ||
+                                cat.url.contains("/page/")
                             )
+                            if (!isExcluded) {
+                                FilterChip(
+                                    selected = selectedCategory?.id == cat.id,
+                                    onClick = {
+                                        if (catName.equals("All", ignoreCase = true)) {
+                                            if (selectedCategory != null) {
+                                                selectedCategory = null
+                                                loadContent(1, reset = true)
+                                            }
+                                        } else if (isAlphabet) {
+                                            selectedCategory = cat
+                                            loadContent(1, reset = true)
+                                        } else if (isCategoryUrl(cat.url)) {
+                                            onCategoryItemClick(cat.name, cat.url)
+                                        } else {
+                                            selectedCategory = cat
+                                            loadContent(1, reset = true)
+                                        }
+                                    },
+                                    label = { Text(cat.name, fontWeight = FontWeight.SemiBold) },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                        selectedLabelColor = Color.Black
+                                    )
+                                )
+                            }
                         }
                     }
                 }
             }
 
             // Loading Skeletons
-            if (isLoading && feedItems.isEmpty()) {
+            if (isLoading && feedItems.isEmpty() && errorMessage == null) {
                 items(6) {
                     Box(modifier = Modifier.padding(horizontal = 8.dp)) {
                         VideoCardSkeleton()
@@ -379,7 +582,8 @@ fun ProviderScreen(
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     val isCloudflare = errorMessage?.contains("Cloudflare", ignoreCase = true) == true ||
                         errorMessage?.contains("403", ignoreCase = true) == true ||
-                        errorMessage?.contains("challenge", ignoreCase = true) == true
+                        errorMessage?.contains("challenge", ignoreCase = true) == true ||
+                        errorMessage?.contains("security", ignoreCase = true) == true
 
                     if (isCloudflare) {
                         Card(
@@ -447,10 +651,74 @@ fun ProviderScreen(
             // Empty State
             if (!isLoading && feedItems.isEmpty() && errorMessage == null) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    EmptyStateView(
-                        title = "No Content",
-                        subtitle = "No videos currently available from this provider."
-                    )
+                    if (searchQuery.isNotBlank()) {
+                        EmptyStateView(
+                            title = "No Results Found",
+                            subtitle = "No videos matched \"$searchQuery\" on ${info?.name ?: providerId}."
+                        )
+                    } else {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(20.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Security,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    text = "No Content Visible",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp,
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = "If this provider requires security verification or Cloudflare clearance, tap below to solve the challenge in WebView and unlock content.",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Button(
+                                        onClick = {
+                                            val targetUrl = info?.baseUrl ?: "https://brazzpw.xyz/"
+                                            val intent = CloudflareChallengeActivity.createIntent(
+                                                context,
+                                                targetUrl,
+                                                info?.name ?: providerId
+                                            )
+                                            challengeLauncher.launch(intent)
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Icon(imageVector = Icons.Default.Security, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text("Verify Security Clearance", color = Color.Black, fontWeight = FontWeight.Bold)
+                                    }
+                                    OutlinedButton(
+                                        onClick = { loadContent(1, reset = true) },
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Text("Reload", color = Color.White)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -463,7 +731,7 @@ fun ProviderScreen(
             }
 
             // Bottom loading indicator
-            if (isLoading && feedItems.isNotEmpty()) {
+            if (isLoadingMore && feedItems.isNotEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Box(
                         modifier = Modifier

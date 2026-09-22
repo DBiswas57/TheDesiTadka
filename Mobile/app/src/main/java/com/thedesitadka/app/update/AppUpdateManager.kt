@@ -3,7 +3,9 @@ package com.thedesitadka.app.update
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import androidx.core.content.FileProvider
 import com.thedesitadka.app.BuildConfig
 import com.thedesitadka.core.network.NetworkClient
@@ -144,6 +146,29 @@ object AppUpdateManager {
         }
     }
 
+    fun getDownloadedUpdateFile(context: Context, versionName: String): File? {
+        val updatesDir = File(context.cacheDir, "updates")
+        val file = File(updatesDir, "TheDesiTadka-$versionName.apk")
+        return if (file.exists() && file.length() > 1024 * 1024 && verifyArchive(context, file)) file else null
+    }
+
+    fun verifyArchive(context: Context, targetFile: File): Boolean {
+        return try {
+            val pm = context.packageManager
+            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                PackageManager.GET_SIGNING_CERTIFICATES
+            } else {
+                @Suppress("DEPRECATION")
+                PackageManager.GET_SIGNATURES
+            }
+            val archiveInfo = pm.getPackageArchiveInfo(targetFile.absolutePath, flags) ?: return false
+            if (archiveInfo.packageName != ApkIntegrityManager.EXPECTED_PACKAGE_NAME) return false
+            verifyArchiveCertificate(context, targetFile)
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     /**
      * Downloads the official update APK into the app's cache directory and
      * cryptographically verifies its package identity and signing certificate
@@ -158,7 +183,20 @@ object AppUpdateManager {
             val updatesDir = File(context.cacheDir, "updates").apply { mkdirs() }
             val targetFile = File(updatesDir, "TheDesiTadka-${updateInfo.latestVersionName}.apk")
 
-            // 1. Download binary safely
+            // Check if already downloaded and verified
+            if (targetFile.exists() && targetFile.length() > 1024 * 1024) {
+                val shaMatches = updateInfo.expectedSha256.isNullOrBlank() || computeFileSha256(targetFile).equals(updateInfo.expectedSha256, ignoreCase = true)
+                if (shaMatches && verifyArchive(context, targetFile)) {
+                    StreamHubLogger.i("AppUpdateManager", "Using existing verified update APK: ${targetFile.name}")
+                    onProgress(1f)
+                    return@withContext Result.success(targetFile)
+                }
+            }
+
+            val tempFile = File(updatesDir, "TheDesiTadka-${updateInfo.latestVersionName}.apk.tmp")
+            if (tempFile.exists()) tempFile.delete()
+
+            // 1. Download binary safely into temp file
             val url = URL(updateInfo.downloadUrl)
             val connection = url.openConnection()
             connection.connect()
@@ -167,7 +205,7 @@ object AppUpdateManager {
             var downloaded = 0L
 
             connection.getInputStream().use { input ->
-                FileOutputStream(targetFile).use { output ->
+                FileOutputStream(tempFile).use { output ->
                     val buffer = ByteArray(8192)
                     var bytesRead: Int
                     while (input.read(buffer).also { bytesRead = it } != -1) {
@@ -182,9 +220,9 @@ object AppUpdateManager {
 
             // 2. Validate SHA-256 Checksum if provided in official metadata
             if (!updateInfo.expectedSha256.isNullOrBlank()) {
-                val computedSha = computeFileSha256(targetFile)
+                val computedSha = computeFileSha256(tempFile)
                 if (!computedSha.equals(updateInfo.expectedSha256, ignoreCase = true)) {
-                    targetFile.delete()
+                    tempFile.delete()
                     val err = "Update checksum mismatch! Expected ${updateInfo.expectedSha256}, got $computedSha"
                     StreamHubLogger.e("AppUpdateManager", err)
                     return@withContext Result.failure(SecurityException(err))
@@ -192,35 +230,17 @@ object AppUpdateManager {
             }
 
             // 3. Security Check: Validate Package Name and Certificate via PackageManager
-            val pm = context.packageManager
-            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                PackageManager.GET_SIGNING_CERTIFICATES
-            } else {
-                @Suppress("DEPRECATION")
-                PackageManager.GET_SIGNATURES
-            }
-
-            val archiveInfo = pm.getPackageArchiveInfo(targetFile.absolutePath, flags)
-                ?: run {
-                    targetFile.delete()
-                    return@withContext Result.failure(SecurityException("Corrupt or invalid APK archive"))
-                }
-
-            // Validate package identity
-            if (archiveInfo.packageName != ApkIntegrityManager.EXPECTED_PACKAGE_NAME) {
-                targetFile.delete()
-                val err = "Untrusted APK package name: ${archiveInfo.packageName} (expected ${ApkIntegrityManager.EXPECTED_PACKAGE_NAME})"
+            if (!verifyArchive(context, tempFile)) {
+                tempFile.delete()
+                val err = "Untrusted or corrupt package in update APK! Installation aborted."
                 StreamHubLogger.e("AppUpdateManager", err)
                 return@withContext Result.failure(SecurityException(err))
             }
 
-            // Validate signing certificate matches current installed application
-            val isCertValid = verifyArchiveCertificate(context, targetFile)
-            if (!isCertValid) {
-                targetFile.delete()
-                val err = "Untrusted signing certificate in update APK! Installation aborted."
-                StreamHubLogger.e("AppUpdateManager", err)
-                return@withContext Result.failure(SecurityException(err))
+            if (targetFile.exists()) targetFile.delete()
+            if (!tempFile.renameTo(targetFile)) {
+                tempFile.copyTo(targetFile, overwrite = true)
+                tempFile.delete()
             }
 
             StreamHubLogger.i("AppUpdateManager", "Update APK verified successfully: ${targetFile.name}")
@@ -231,22 +251,78 @@ object AppUpdateManager {
         }
     }
 
+    fun canRequestPackageInstalls(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.packageManager.canRequestPackageInstalls()
+        } else {
+            true
+        }
+    }
+
+    fun openUnknownAppSourcesSettings(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                data = Uri.parse("package:${context.packageName}")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            try {
+                context.startActivity(intent)
+            } catch (e: Exception) {
+                StreamHubLogger.e("AppUpdateManager", "Failed to open unknown app sources settings: ${e.message}")
+            }
+        }
+    }
+
     /**
      * Prompts the system package installer using the secure FileProvider.
+     * Ensures proper permissions and checks before starting the system installer.
      */
-    fun launchInstallIntent(context: Context, apkFile: File) {
-        val uri = FileProvider.getUriForFile(
-            context,
-            "com.thedesitadka.app.fileprovider",
-            apkFile
-        )
+    fun launchInstallIntent(context: Context, apkFile: File): Boolean {
+        return try {
+            if (!apkFile.exists()) {
+                StreamHubLogger.e("AppUpdateManager", "APK file does not exist: ${apkFile.absolutePath}")
+                return false
+            }
 
-        val installIntent = Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(uri, "application/vnd.android.package-archive")
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+            apkFile.setReadable(true, false)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !context.packageManager.canRequestPackageInstalls()) {
+                StreamHubLogger.w("AppUpdateManager", "Install permission not granted. Redirecting to settings...")
+                openUnknownAppSourcesSettings(context)
+                return false
+            }
+
+            val uri = FileProvider.getUriForFile(
+                context,
+                "com.thedesitadka.app.fileprovider",
+                apkFile
+            )
+
+            val installIntent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/vnd.android.package-archive")
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+            }
+
+            // Explicitly grant read URI permission
+            val resInfoList = try {
+                context.packageManager.queryIntentActivities(installIntent, PackageManager.MATCH_DEFAULT_ONLY)
+            } catch (e: Exception) {
+                emptyList()
+            }
+            for (resolveInfo in resInfoList) {
+                val packageName = resolveInfo.activityInfo?.packageName
+                if (!packageName.isNullOrBlank()) {
+                    context.grantUriPermission(packageName, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+            }
+
+            context.startActivity(installIntent)
+            StreamHubLogger.i("AppUpdateManager", "Installer intent launched successfully for ${apkFile.name}")
+            true
+        } catch (e: Exception) {
+            StreamHubLogger.e("AppUpdateManager", "Failed to launch installer: ${e.message}")
+            false
         }
-
-        context.startActivity(installIntent)
     }
 
     private fun verifyArchiveCertificate(context: Context, apkFile: File): Boolean {

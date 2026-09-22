@@ -100,4 +100,24 @@ class ProviderEngineTest {
         monitor.recordSuccess("prov_1")
         assertEquals(ProviderStatus.ENABLED, monitor.getStatus("prov_1"))
     }
+
+    @Test
+    fun testGetActiveProvidersAlphabeticalSorting() {
+        val engine = ProviderEngine()
+        val manifest = ProviderManifest(
+            schemaVersion = 1,
+            configVersion = 1,
+            providers = listOf(
+                ProviderConfig(id = "z_prov", name = "Zebra Provider", baseUrl = "https://z.com", adapter = "html_selector"),
+                ProviderConfig(id = "a_prov", name = "Alpha Provider", baseUrl = "https://a.com", adapter = "html_selector"),
+                ProviderConfig(id = "m_prov", name = "Mango Provider", baseUrl = "https://m.com", adapter = "html_selector")
+            )
+        )
+        engine.updateFromManifest(manifest)
+        val active = engine.getActiveProviders()
+        assertEquals(3, active.size)
+        assertEquals("Alpha Provider", active[0].name)
+        assertEquals("Mango Provider", active[1].name)
+        assertEquals("Zebra Provider", active[2].name)
+    }
 }

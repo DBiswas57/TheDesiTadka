@@ -1,8 +1,10 @@
 package com.thedesitadka.app.data
 
 import com.thedesitadka.app.storage.PreferenceStore
+import com.thedesitadka.core.model.ContentCategoryDefinition
 import com.thedesitadka.core.model.ProviderInfo
 import com.thedesitadka.core.model.VideoItem
+import com.thedesitadka.core.network.CloudflareChallengeException
 import com.thedesitadka.core.security.StreamHubLogger
 import com.thedesitadka.provider.ProviderEngine
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +33,7 @@ data class DashboardState(
     val isRefreshing: Boolean = false,
     val providerStatuses: Map<String, ProviderFetchStatus> = emptyMap(),
     val errorMessage: String? = null,
+    val challengeProviderId: String? = null,
     val lastUpdated: Long = 0L
 )
 
@@ -42,11 +45,13 @@ class DashboardRepository(
 
     companion object {
         private const val CACHE_TTL_MS = 10 * 60 * 1000L // 10 minutes cache validity
+        private const val FETCH_COOLDOWN_MS = 5_000L // 5 seconds cooldown to prevent rapid loops
     }
 
     private val cache = ConcurrentHashMap<String, CachedCategoryData>()
     private val stateFlows = ConcurrentHashMap<String, MutableStateFlow<DashboardState>>()
     private val fetchJobs = ConcurrentHashMap<String, Job>()
+    private val lastFetchTimes = ConcurrentHashMap<String, Long>()
     private val mutex = Mutex()
 
     init {
@@ -75,7 +80,7 @@ class DashboardRepository(
 
         // Check if we have valid memory cache
         val cached = cache[categoryId]
-        if (cached != null && cached.videos.isNotEmpty()) {
+        if (cached != null) {
             val isStale = (System.currentTimeMillis() - cached.timestamp) > CACHE_TTL_MS
             flow.update {
                 it.copy(
@@ -86,12 +91,14 @@ class DashboardRepository(
                 )
             }
             if (isStale) {
-                // Background refresh without blanking UI
                 refreshInBackground(categoryId)
             }
         } else {
-            // No cache: initial load
-            refreshInBackground(categoryId)
+            // No cache: initial load if cooldown elapsed
+            val lastAttempt = lastFetchTimes[categoryId] ?: 0L
+            if ((System.currentTimeMillis() - lastAttempt) > FETCH_COOLDOWN_MS) {
+                refreshInBackground(categoryId)
+            }
         }
 
         return flow.asStateFlow()
@@ -117,6 +124,11 @@ class DashboardRepository(
                 val existingJob = fetchJobs[categoryId]
                 if (existingJob != null && existingJob.isActive) {
                     return@withLock // Deduplicate: already fetching
+                }
+
+                val lastAttempt = lastFetchTimes[categoryId] ?: 0L
+                if (!forceRefresh && (System.currentTimeMillis() - lastAttempt) < FETCH_COOLDOWN_MS) {
+                    return@withLock // Cooldown active, suppress redundant rapid fetch
                 }
 
                 val flow = stateFlows.getOrPut(categoryId) {
@@ -167,9 +179,18 @@ class DashboardRepository(
             return
         }
 
-        val providersToQuery = when (categoryId) {
-            "free" -> candidateProviders.filter { it.id != "premium_catalog" }
-            "premium" -> candidateProviders.filter { it.id == "premium_catalog" || it.capabilities.any { c -> c.name == "PREVIEW" } }
+        val categoryDef = ContentCategoryDefinition.DEFAULT_CATEGORIES.find { it.id == categoryId }
+        val providersToQuery = when {
+            categoryDef != null && categoryDef.providerIds.isNotEmpty() -> {
+                candidateProviders.filter { it.id in categoryDef.providerIds }
+            }
+            categoryId == "downloadable" -> {
+                candidateProviders.filter { it.capabilities.any { c -> c.name == "DOWNLOAD" } }
+            }
+            categoryId == "movies" -> {
+                candidateProviders.filter { it.id in listOf("movienerds", "cineapse", "prmovies", "prmovies_church") }
+            }
+            categoryId == "free" -> candidateProviders.filter { it.id != "premium_catalog" }
             else -> candidateProviders
         }.ifEmpty { candidateProviders }
 
@@ -178,11 +199,18 @@ class DashboardRepository(
 
         flow.update { it.copy(providerStatuses = statuses.toMap()) }
 
-        // Structured multi-provider concurrent execution with failure isolation and bounded concurrency (max 4 concurrent requests)
-        val semaphore = Semaphore(4)
-        val results = supervisorScope {
-            providersToQuery.map { provider ->
-                async(Dispatchers.IO) {
+        val collectedVideos = java.util.Collections.synchronizedList(mutableListOf<VideoItem>())
+        val seenIds = ConcurrentHashMap.newKeySet<String>()
+        val seenUrls = ConcurrentHashMap.newKeySet<String>()
+
+        var detectedChallengeProviderId: String? = null
+        var lastErrorMessage: String? = null
+
+        // Structured multi-provider concurrent execution with failure isolation and progressive streaming
+        val semaphore = Semaphore(12)
+        supervisorScope {
+            providersToQuery.forEach { provider ->
+                launch(Dispatchers.IO) {
                     semaphore.withPermit {
                         val start = System.currentTimeMillis()
                         try {
@@ -196,50 +224,90 @@ class DashboardRepository(
                                     "INFO",
                                     "PROVIDER_FETCH: id=${provider.id}, items=${items.size}, time=${duration}ms"
                                 )
-                                items
+
+                                if (items.isNotEmpty()) {
+                                    val newItems = items.filter { item ->
+                                        val isNewId = seenIds.add(item.id)
+                                        val isNewUrl = if (item.detailUrl.isNotBlank()) seenUrls.add(item.detailUrl) else true
+                                        isNewId && isNewUrl
+                                    }
+                                    if (newItems.isNotEmpty()) {
+                                        collectedVideos.addAll(newItems)
+                                        val currentSnapshot = collectedVideos.toList()
+                                        flow.update { current ->
+                                            current.copy(
+                                                videos = currentSnapshot,
+                                                isLoading = true,
+                                                providerStatuses = statuses.toMap(),
+                                                lastUpdated = System.currentTimeMillis()
+                                            )
+                                        }
+                                    } else {
+                                        flow.update { it.copy(providerStatuses = statuses.toMap()) }
+                                    }
+                                } else {
+                                    flow.update { it.copy(providerStatuses = statuses.toMap()) }
+                                }
                             } else {
                                 statuses[provider.id] = ProviderFetchStatus.ERROR
-                                val err = feedResult.exceptionOrNull()?.message ?: "Unknown error"
+                                val exception = feedResult.exceptionOrNull()
+                                val err = exception?.message ?: "Unknown error"
+                                val isCloudflare = exception is CloudflareChallengeException ||
+                                        err.contains("cloudflare", ignoreCase = true) ||
+                                        err.contains("security", ignoreCase = true) ||
+                                        err.contains("turnstile", ignoreCase = true)
+                                if (isCloudflare && detectedChallengeProviderId == null) {
+                                    detectedChallengeProviderId = provider.id
+                                }
+                                lastErrorMessage = err
                                 StreamHubLogger.w("DashboardRepository", "Provider '${provider.id}' error ($duration ms): $err")
-                                emptyList()
+                                flow.update { it.copy(providerStatuses = statuses.toMap()) }
                             }
                         } catch (e: Exception) {
                             statuses[provider.id] = ProviderFetchStatus.ERROR
+                            val isCloudflare = e is CloudflareChallengeException ||
+                                    e.message?.contains("cloudflare", ignoreCase = true) == true ||
+                                    e.message?.contains("security", ignoreCase = true) == true
+                            if (isCloudflare && detectedChallengeProviderId == null) {
+                                detectedChallengeProviderId = provider.id
+                            }
+                            lastErrorMessage = e.message
                             StreamHubLogger.e("DashboardRepository", "Exception in provider '${provider.id}': ${e.message}")
-                            emptyList()
+                            flow.update { it.copy(providerStatuses = statuses.toMap()) }
                         }
                     }
                 }
             }
         }
 
-        val allItems = results.map { it.await() }.flatten()
-
-        // Deduplicate items based on ID and detailUrl
-        val seenIds = HashSet<String>()
-        val seenUrls = HashSet<String>()
-        val deduplicated = allItems.filter { item ->
-            val isNewId = seenIds.add(item.id)
-            val isNewUrl = if (item.detailUrl.isNotBlank()) seenUrls.add(item.detailUrl) else true
-            isNewId && isNewUrl
-        }
-
+        // All concurrent providers have completed
+        val finalVideos = collectedVideos.toList()
         val now = System.currentTimeMillis()
+        lastFetchTimes[categoryId] = now
 
         // Only overwrite cache if we received items or had empty cache
-        if (deduplicated.isNotEmpty() || cache[categoryId] == null) {
-            cache[categoryId] = CachedCategoryData(deduplicated, now)
+        if (finalVideos.isNotEmpty() || cache[categoryId] == null) {
+            cache[categoryId] = CachedCategoryData(finalVideos, now)
         }
 
-        val finalVideos = if (deduplicated.isNotEmpty()) deduplicated else cache[categoryId]?.videos ?: emptyList()
+        val videosToDisplay = if (finalVideos.isNotEmpty()) finalVideos else cache[categoryId]?.videos ?: emptyList()
+
+        val finalError = if (videosToDisplay.isEmpty()) {
+            if (detectedChallengeProviderId != null) {
+                "Cloudflare security verification required for $detectedChallengeProviderId"
+            } else {
+                lastErrorMessage ?: "Unable to load media feeds. Tap to retry."
+            }
+        } else null
 
         flow.update {
             it.copy(
-                videos = finalVideos,
+                videos = videosToDisplay,
                 isLoading = false,
                 isRefreshing = false,
                 providerStatuses = statuses.toMap(),
-                errorMessage = if (finalVideos.isEmpty()) "Unable to load media feeds. Tap to retry." else null,
+                errorMessage = finalError,
+                challengeProviderId = detectedChallengeProviderId,
                 lastUpdated = now
             )
         }

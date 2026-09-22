@@ -73,7 +73,7 @@ class ProviderEngine(
     }
 
     fun getAllAdapters(): List<ProviderAdapter> {
-        return adapters.values.toList()
+        return adapters.values.sortedBy { it.providerInfo.name.lowercase() }
     }
 
     fun getActiveProviders(): List<ProviderInfo> {
@@ -81,7 +81,7 @@ class ProviderEngine(
             val info = adapter.providerInfo
             val currentStatus = healthMonitor.getStatus(info.id, info.status)
             info.copy(status = currentStatus)
-        }
+        }.sortedBy { it.name.lowercase() }
     }
 
     suspend fun getHomeFeed(providerId: String, page: Int = 1): Result<FeedPage> {
@@ -146,6 +146,13 @@ class ProviderEngine(
             ?: return Result.failure(StreamHubError.ProviderUnavailable(providerId, "Provider not found"))
         return adapter.getRelatedContent(detailUrl)
     }
+
+    suspend fun getCategoryFeed(providerId: String, categoryUrl: String, page: Int = 1): Result<FeedPage> {
+        val adapter = adapters[providerId]
+            ?: return Result.failure(StreamHubError.ProviderUnavailable(providerId, "Provider not found"))
+        return adapter.getCategoryFeed(categoryUrl, page)
+    }
+
 
     private fun createAdapter(config: ProviderConfig): ProviderAdapter {
         return when (config.adapter.lowercase()) {

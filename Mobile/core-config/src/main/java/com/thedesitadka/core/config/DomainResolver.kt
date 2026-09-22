@@ -50,13 +50,20 @@ class DomainResolver(
             val cached = activeDomains[providerId]
             val now = System.currentTimeMillis()
 
-            if (!forceRefresh && cached != null && (now - cached.lastVerifiedMs < cacheTtlMs)) {
+            val isCachedAllowed = cached != null && isDomainAllowed(cached.domain, config)
+            if (cached != null && !isCachedAllowed) {
+                StreamHubLogger.w("DomainResolver", "Purging stale/unauthorized cached domain '${cached.domain}' for provider '$providerId'")
+                activeDomains.remove(providerId)
+                saveCache()
+            }
+
+            if (!forceRefresh && isCachedAllowed && cached != null && (now - cached.lastVerifiedMs < cacheTtlMs)) {
                 return@withContext cached.domain
             }
 
-            // Build candidate list starting with cached domain, baseUrl, then alternative domains
+            // Build candidate list starting with cached domain (only if allowed), baseUrl, then alternative domains
             val candidates = mutableListOf<String>()
-            if (cached != null && cached.domain.isNotBlank()) {
+            if (isCachedAllowed && cached != null && cached.domain.isNotBlank()) {
                 candidates.add(cached.domain)
             }
             if (!candidates.contains(config.baseUrl)) {
@@ -135,6 +142,26 @@ class DomainResolver(
     fun markDomainFailed(providerId: String) {
         activeDomains.remove(providerId)
         saveCache()
+    }
+
+    /**
+     * Verifies whether a candidate or cached domain belongs to the provider's authorized baseUrl or mirror domains.
+     * Prevents cross-provider domain collision when different sites share brand names with different TLDs.
+     */
+    fun isDomainAllowed(domain: String, config: ProviderConfig): Boolean {
+        if (domain.isBlank()) return false
+        val targetHost = extractHost(domain) ?: return false
+        val allowedHosts = (listOf(config.baseUrl) + config.domains).mapNotNull { extractHost(it) }
+        return allowedHosts.any { it.equals(targetHost, ignoreCase = true) }
+    }
+
+    private fun extractHost(urlStr: String): String? {
+        return try {
+            val uri = URI(if (!urlStr.startsWith("http://") && !urlStr.startsWith("https://")) "https://$urlStr" else urlStr)
+            uri.host?.lowercase()?.removePrefix("www.")
+        } catch (e: Exception) {
+            null
+        }
     }
 
     private fun loadCache() {

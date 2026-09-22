@@ -35,8 +35,11 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Verified
+import com.thedesitadka.app.download.StoragePermissionHelper
+import com.thedesitadka.app.download.NotificationPermissionHelper
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -70,7 +73,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.thedesitadka.app.download.StoragePermissionHelper
 import com.thedesitadka.core.model.MediaResolutionResult
 import com.thedesitadka.core.model.MediaResolutionState
 import androidx.compose.ui.text.font.FontWeight
@@ -122,43 +124,57 @@ fun DetailsScreen(
     }
 
     var pendingDownloadAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+
+    val allFilesAccessLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (StoragePermissionHelper.hasFullStorageAccess(context)) {
+            Toast.makeText(context, "Storage access granted. Starting download...", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Saving to public Movies/TheDesiTadka storage...", Toast.LENGTH_SHORT).show()
+        }
+        pendingDownloadAction?.invoke()
+        pendingDownloadAction = null
+    }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        if (isGranted) {
+        if (isGranted || Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             pendingDownloadAction?.invoke()
-            pendingDownloadAction = null
         } else {
-            Toast.makeText(context, "Permission is required to download media", Toast.LENGTH_SHORT).show()
-            pendingDownloadAction = null
+            Toast.makeText(context, "Download cancelled: Storage permission is required to save media", Toast.LENGTH_SHORT).show()
+        }
+        pendingDownloadAction = null
+    }
+
+    val proceedWithStorageAndDownload: (() -> Unit) -> Unit = { action ->
+        if (StoragePermissionHelper.hasFullStorageAccess(context) || Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            action()
+        } else {
+            pendingDownloadAction = action
+            permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+    }
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        val action = pendingDownloadAction
+        pendingDownloadAction = null
+        if (action != null) {
+            proceedWithStorageAndDownload(action)
         }
     }
 
     val requestPermissionAndDownload: (() -> Unit) -> Unit = { action ->
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
-            val granted = ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED
-            if (granted) {
-                action()
-            } else {
-                pendingDownloadAction = action
-                permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            }
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val granted = ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-            if (granted) {
-                action()
-            } else {
-                pendingDownloadAction = action
-                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            !NotificationPermissionHelper.hasNotificationPermission(context)
+        ) {
+            pendingDownloadAction = action
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         } else {
-            action()
+            proceedWithStorageAndDownload(action)
         }
     }
 
@@ -249,11 +265,27 @@ fun DetailsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                windowInsets = WindowInsets(0.dp),
+                windowInsets = TopAppBarDefaults.windowInsets,
                 title = { Text(resolvedItem.title, maxLines = 1, fontWeight = FontWeight.Bold, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        val intent = CloudflareChallengeActivity.createIntent(
+                            context,
+                            videoItem.detailUrl,
+                            resolvedItem.title
+                        )
+                        challengeLauncher.launch(intent)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Security,
+                            contentDescription = "Verify Security Clearance",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
@@ -422,7 +454,7 @@ fun DetailsScreen(
                                     mediaSourceToDownload
                                 )
                                 if (result.isSuccess) {
-                                    Toast.makeText(context, "Download started", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Download started. Check notification bar for progress.", Toast.LENGTH_SHORT).show()
                                 } else {
                                     val err = result.exceptionOrNull()?.message ?: "Download unavailable"
                                     Toast.makeText(context, "Download failed: $err", Toast.LENGTH_SHORT).show()
@@ -588,6 +620,31 @@ fun DetailsScreen(
                     } else {
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(text = mediaError!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(
+                                onClick = {
+                                    val intent = CloudflareChallengeActivity.createIntent(
+                                        context,
+                                        videoItem.detailUrl,
+                                        resolvedItem.title
+                                    )
+                                    challengeLauncher.launch(intent)
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Icon(imageVector = Icons.Default.Security, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Verify Security Clearance", color = Color.Black, fontWeight = FontWeight.Bold)
+                            }
+                            OutlinedButton(
+                                onClick = { reloadTrigger++ },
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text("Retry", color = Color.White)
+                            }
+                        }
                     }
                 }
 

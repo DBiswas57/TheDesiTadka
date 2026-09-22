@@ -23,6 +23,7 @@ class EmbeddedPlayerAdapter(
     override suspend fun search(query: String, page: Int): Result<FeedPage> = delegate.search(query, page)
     override suspend fun getDetails(detailUrl: String): Result<VideoItem> = delegate.getDetails(detailUrl)
     override suspend fun getRelatedContent(detailUrl: String): Result<List<VideoItem>> = delegate.getRelatedContent(detailUrl)
+    override suspend fun getCategoryFeed(categoryUrl: String, page: Int): Result<FeedPage> = delegate.getCategoryFeed(categoryUrl, page)
 
     override suspend fun getPlayableMedia(detailUrl: String): Result<List<MediaSource>> {
         val result = delegate.getPlayableMedia(detailUrl)

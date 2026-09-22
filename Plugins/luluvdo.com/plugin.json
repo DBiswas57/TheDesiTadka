@@ -1,0 +1,39 @@
+{
+  "id": "luluvdo",
+  "name": "LuluVdo / LuluStream Video Host Resolver Plugin",
+  "version": "1.0.0",
+  "description": "Resolves external video player iframes from luluvdo.com, lulustream.com, luluvid.com, and playmogo.com to direct HLS (.m3u8) streams.",
+  "author": "TheDesiTadka Engine",
+  "type": "host_resolver",
+  "domains": [
+    "luluvdo.com",
+    "lulustream.com",
+    "luluvid.com",
+    "playmogo.com"
+  ],
+  "urlPatterns": [
+    "^https?://(?:www\\.)?luluvdo\\.com/(?:e|d)/([A-Za-z0-9_-]+)",
+    "^https?://(?:www\\.)?lulustream\\.com/(?:e|d)/([A-Za-z0-9_-]+)",
+    "^https?://(?:www\\.)?luluvid\\.com/(?:e|d)/([A-Za-z0-9_-]+)",
+    "^https?://(?:www\\.)?playmogo\\.com/(?:e|d)/([A-Za-z0-9_-]+)"
+  ],
+  "dom": {
+    "packerPattern": "eval\\(function\\(p,a,c,k,e,[rd]\\)",
+    "jwplayerSourcePattern": "sources:\\s*\\[\\{\\s*file:\\s*[\"']([^\"']+)[\"']"
+  },
+  "decryption": {
+    "method": "dean_edwards_unpack",
+    "steps": [
+      "1. Extract packed JavaScript block matching eval(function(p,a,c,k,e,d)...)",
+      "2. Parse payload, radix base, symbol count, and pipe-delimited symbol dictionary",
+      "3. Unpack tokens to restore readable JWPlayer initialization code",
+      "4. Extract direct HLS master playlist URL from jwplayer().setup({sources:[{file: '...'}]})",
+      "5. Play direct master.m3u8 from CDN node (e.g. *.tnmr.org) with Referer and Origin headers"
+    ]
+  },
+  "headers": {
+    "Referer": "https://luluvdo.com/",
+    "Origin": "https://luluvdo.com",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+  }
+}

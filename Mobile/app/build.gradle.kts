@@ -14,8 +14,8 @@ android {
         applicationId = "com.thedesitadka.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 10
-        versionName = "1.0.9"
+        versionCode = 18
+        versionName = "1.1.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -100,6 +100,7 @@ dependencies {
     implementation(libs.media3.session)
     implementation(libs.media3.exoplayer.hls)
     implementation(libs.media3.exoplayer.dash)
+    implementation("androidx.media3:media3-datasource-okhttp:1.5.1")
 
     // Room Database
     implementation(libs.room.runtime)

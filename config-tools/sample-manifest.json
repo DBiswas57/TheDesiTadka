@@ -1,574 +1,3379 @@
 {
-  "schemaVersion": 1,
-  "configVersion": 106,
-  "generatedAt": 1773532800000,
-  "expiresAt": 1893456000000,
-  "minimumAppVersion": 1,
-  "recommendedAppVersion": 1,
-  "forceUpdate": false,
-  "maintenanceMode": false,
-  "providers": [
-    {
-      "id": "kamababa1",
-      "name": "KamaBaba Media Portal",
-      "enabled": true,
-      "baseUrl": "https://www.kamababa1.com",
-      "adapter": "html_selector",
-      "capabilities": [
-        "HOME",
-        "SEARCH",
-        "DETAILS",
-        "STREAM",
-        "DOWNLOAD"
-      ],
-      "icon": "https://www.kamababa1.com/wp-content/uploads/2020/07/kamababa_logo_50px.png",
-      "description": "Public Indian streaming video index and community media clips",
-      "navigation": {
-        "home": "/",
-        "search": "/?s={query}",
-        "page": "/page/{page}/"
-      },
-      "selectors": {
-        "item": "article.thumb-block, article.video-preview-item, article",
-        "title": "a[title], h2.entry-title a, h2 a",
-        "thumbnail": "img.video-main-thumb, img",
-        "thumbnailAttr": "src",
-        "detailUrl": "a[href*='kamababa1.com/']",
-        "duration": ".duration",
-        "detailTitle": "h1",
-        "detailDescription": ".entry-content p, .video-details, p",
-        "detailThumbnail": "meta[property='og:image'], img.video-main-thumb",
-        "player": "iframe[src*='player']",
-        "videoSource": "meta[itemprop='contentURL'], video source[src], video[src], source[type='video/mp4']",
-        "videoSourceAttr": "src"
-      },
-      "contentPolicy": {
-        "isAuthorizedPublicSource": true,
-        "rightsStatus": "Authorized Public Aggregation",
-        "termsUrl": "https://www.kamababa1.com/terms/",
-        "privacyPolicyUrl": "https://www.kamababa1.com/privacy/"
-      }
-    },
-    {
-      "id": "masa49",
-      "name": "Masa49 Media Archive",
-      "enabled": true,
-      "baseUrl": "https://www.masa49.nl",
-      "adapter": "html_selector",
-      "capabilities": [
-        "HOME",
-        "SEARCH",
-        "DETAILS",
-        "STREAM"
-      ],
-      "icon": "https://www.masa49.nl/favicon.ico",
-      "description": "Public Dutch media library and community video streams",
-      "navigation": {
-        "home": "/",
-        "search": "/?s={query}",
-        "page": "/page/{page}/"
-      },
-      "selectors": {
-        "item": "article, div.item, div.post",
-        "title": "h2.entry-title a, h2 a",
-        "thumbnail": "img.video-img, img",
-        "thumbnailAttr": "data-src",
-        "detailUrl": "h2.entry-title a, a",
-        "duration": ".badge-duration",
-        "detailTitle": "h1",
-        "detailDescription": ".video-description, .desc, .entry-content p",
-        "detailThumbnail": "video[poster], meta[property='og:image'], img.video-img, img",
-        "player": "video, iframe",
-        "videoSource": "video source[src], source[type='video/mp4'], video[src]",
-        "videoSourceAttr": "src",
-        "relatedItems": ".related article"
-      },
-      "contentPolicy": {
-        "isAuthorizedPublicSource": true,
-        "rightsStatus": "Public Web Feeds",
-        "termsUrl": "https://www.masa49.nl/disclaimer",
-        "privacyPolicyUrl": "https://www.masa49.nl/privacy/"
-      }
-    },
-    {
-      "id": "fsiblogxx",
-      "name": "FSIBlog Media",
-      "enabled": true,
-      "baseUrl": "https://www.fsiblogxx.com",
-      "adapter": "html_selector",
-      "capabilities": [
-        "HOME",
-        "SEARCH",
-        "DETAILS",
-        "STREAM"
-      ],
-      "icon": "https://www.fsiblogxx.com/wp-content/uploads/2020/07/fsiblog-logo.png",
-      "description": "Public community video blog and streaming media",
-      "navigation": {
-        "home": "/",
-        "search": "/?s={query}",
-        "page": "/page/{page}/"
-      },
-      "selectors": {
-        "item": "article, div.post, div.item",
-        "title": "h2.entry-title a, h2 a, a.entry-title, a",
-        "thumbnail": "img.attachment-medium, img",
-        "thumbnailAttr": "src",
-        "detailUrl": "h2.entry-title a, h2 a, a",
-        "duration": ".duration, .time",
-        "detailTitle": "h1.entry-title, h1",
-        "detailDescription": ".entry-content p, .post-content",
-        "detailThumbnail": "meta[property='og:image'], img",
-        "player": "iframe[src*='player']",
-        "videoSource": "video source[src], video[src]",
-        "videoSourceAttr": "src"
-      },
-      "contentPolicy": {
-        "isAuthorizedPublicSource": true,
-        "rightsStatus": "Public Aggregation Index",
-        "termsUrl": "https://www.fsiblogxx.com/terms/",
-        "privacyPolicyUrl": "https://www.fsiblogxx.com/privacy/"
-      }
-    },
-    {
-      "id": "masahub2",
-      "name": "MasaHub2",
-      "enabled": true,
-      "baseUrl": "https://masahub2.com",
-      "adapter": "html_selector",
-      "capabilities": [
-        "HOME",
-        "SEARCH",
-        "DETAILS",
-        "STREAM"
-      ],
-      "icon": "https://masahub2.com/favicon.ico",
-      "description": "Public video directory and media streaming index",
-      "navigation": {
-        "home": "/",
-        "search": "/?s={query}",
-        "page": "/page/{page}/"
-      },
-      "selectors": {
-        "item": "article.vcard, article, div.item, div.post",
-        "title": "h3.vtitle, h2 a, .video-title, a",
-        "thumbnail": ".thumb, img",
-        "thumbnailAttr": "style",
-        "detailUrl": "a",
-        "duration": "span.dur, .badge-duration",
-        "detailTitle": "h1",
-        "detailDescription": ".entry-content p, .video-details",
-        "detailThumbnail": "video[poster], meta[property='og:image'], img",
-        "player": "video, iframe",
-        "videoSource": "video source[src], source[type='video/mp4'], video[src]",
-        "videoSourceAttr": "src"
-      },
-      "contentPolicy": {
-        "isAuthorizedPublicSource": true,
-        "rightsStatus": "Public Web Feeds",
-        "termsUrl": "https://masahub2.com/terms",
-        "privacyPolicyUrl": "https://masahub2.com/privacy"
-      }
-    },
-    {
-      "id": "aagmaal",
-      "name": "AagMaal",
-      "enabled": true,
-      "baseUrl": "https://aagmaal.com",
-      "adapter": "html_selector",
-      "capabilities": [
-        "HOME",
-        "SEARCH",
-        "DETAILS",
-        "STREAM"
-      ],
-      "icon": "https://aagmaal.com/favicon.ico",
-      "description": "Public Indian web series and short film index",
-      "navigation": {
-        "home": "/",
-        "search": "/?s={query}",
-        "page": "/page/{page}/"
-      },
-      "selectors": {
-        "item": "article.post, div.post, article",
-        "title": "h2.entry-title a, h2 a, a[title]",
-        "thumbnail": "img",
-        "thumbnailAttr": "src",
-        "detailUrl": "a[href*='aagmaal.com/']",
-        "duration": ".duration",
-        "detailTitle": "h1.entry-title, h1",
-        "detailDescription": ".entry-content p, .video-details",
-        "detailThumbnail": "meta[property='og:image'], img",
-        "player": "iframe, video",
-        "videoSource": "video source[src], a[href*='.mp4'], iframe[src]",
-        "videoSourceAttr": "src"
-      },
-      "contentPolicy": {
-        "isAuthorizedPublicSource": true,
-        "rightsStatus": "Public Index",
-        "termsUrl": "https://aagmaal.com/terms",
-        "privacyPolicyUrl": "https://aagmaal.com/privacy"
-      }
-    },
-    {
-      "id": "fry99",
-      "name": "Fry99",
-      "enabled": true,
-      "baseUrl": "https://fry99.cc",
-      "adapter": "html_selector",
-      "capabilities": [
-        "HOME",
-        "SEARCH",
-        "DETAILS",
-        "STREAM"
-      ],
-      "icon": "https://fry99.cc/favicon.ico",
-      "description": "Public streaming index (Protected by Cloudflare; solve challenge in-app to access)",
-      "navigation": {
-        "home": "/",
-        "search": "/?s={query}",
-        "page": "/page/{page}/"
-      },
-      "selectors": {
-        "item": "article.post, div.post, article",
-        "title": "h2.entry-title a, h2 a, a.entry-title",
-        "thumbnail": "img.attachment-post-thumbnail, img",
-        "thumbnailAttr": "src",
-        "detailUrl": "a.entry-featured-image-url, h2.entry-title a, a",
-        "duration": ".duration, .time",
-        "detailTitle": "h1.entry-title, h1",
-        "detailDescription": ".entry-content p, .entry-content",
-        "detailThumbnail": "img.attachment-post-thumbnail, meta[property='og:image']",
-        "player": "iframe, video",
-        "videoSource": "video source[src], iframe[src]",
-        "videoSourceAttr": "src",
-        "relatedItems": ".related-posts article, .related article"
-      },
-      "contentPolicy": {
-        "isAuthorizedPublicSource": true,
-        "rightsStatus": "Cloudflare Protected Public Index",
-        "termsUrl": "https://fry99.cc/terms",
-        "privacyPolicyUrl": "https://fry99.cc/privacy"
-      }
-    },
-    {
-      "id": "public_domain_archive",
-      "name": "Public Domain Film Archive",
-      "enabled": true,
-      "baseUrl": "https://commondatastorage.googleapis.com",
-      "adapter": "json_api",
-      "capabilities": [
-        "HOME",
-        "DETAILS",
-        "STREAM",
-        "DOWNLOAD"
-      ],
-      "icon": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
-      "description": "Verified open-access public domain educational and open-source media",
-      "contentPolicy": {
-        "isAuthorizedPublicSource": true,
-        "rightsStatus": "Creative Commons Attribution / Public Domain",
-        "termsUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
-        "privacyPolicyUrl": "https://creativecommons.org/privacy"
-      }
-    },
-    {
-      "id": "webxseries",
-      "name": "WebXSeries",
-      "enabled": true,
-      "baseUrl": "https://webxseries.hot",
-      "adapter": "html_selector",
-      "capabilities": [
-        "HOME",
-        "CATEGORY",
-        "SEARCH",
-        "DETAILS",
-        "STREAM",
-        "DOWNLOAD"
-      ],
-      "icon": "https://webxseries.hot/wp-content/uploads/2026/02/cropped-favicon-192x192.png",
-      "description": "Public adult web series index and media streams",
-      "navigation": {
-        "home": "/",
-        "search": "/?s={query}",
-        "page": "/page/{page}/",
-        "categories": "/hot-web-series/"
-      },
-      "selectors": {
-        "item": "a.video",
-        "title": "h2.vtitle, a[title]",
-        "thumbnail": "a.video",
-        "thumbnailAttr": "data-bg",
-        "detailUrl": "a.video",
-        "duration": "span.time",
-        "detailTitle": "h1",
-        "detailDescription": ".entry-content p, .video-details, p",
-        "detailThumbnail": "video[poster], meta[property='og:image']",
-        "player": "video",
-        "videoSource": "video source[src], video[src]",
-        "videoSourceAttr": "src",
-        "relatedItems": "a.video"
-      },
-      "contentPolicy": {
-        "isAuthorizedPublicSource": true,
-        "rightsStatus": "Public Web Index",
-        "termsUrl": "https://webxseries.hot/terms/",
-        "privacyPolicyUrl": "https://webxseries.hot/privacy/"
-      }
-    },
-    {
-      "id": "bmaal",
-      "name": "BMaal",
-      "enabled": true,
-      "baseUrl": "https://bmaal.io",
-      "adapter": "html_selector",
-      "capabilities": [
-        "HOME",
-        "CATEGORY",
-        "SEARCH",
-        "DETAILS",
-        "STREAM",
-        "DOWNLOAD"
-      ],
-      "icon": "https://bmaal.io/wp-content/uploads/2026/02/favicon.png",
-      "description": "Indian OTT 18+ Web Series (ULLU, PrimeShots, Jugnu, Makhan, BulBul Play)",
-      "navigation": {
-        "home": "/",
-        "search": "/?s={query}",
-        "page": "/page/{page}/",
-        "categories": "/ott/"
-      },
-      "selectors": {
-        "item": "article.video-card, article.post, article",
-        "title": "h2.loop-title a, h2.loop-title, h2 a, a[title]",
-        "thumbnail": "div.video-thumbnail img, img.wp-post-image, img",
-        "thumbnailAttr": "src",
-        "detailUrl": "div.video-thumbnail a, h2.loop-title a, a",
-        "duration": "span.video-duration-badge, .duration",
-        "detailTitle": "h1.entry-title, h1",
-        "detailDescription": ".series-description, .entry-content p, .video-details, p",
-        "detailThumbnail": "meta[property='og:image'], img.wp-post-image, img",
-        "player": "div.xplayer, video, iframe",
-        "videoSource": "div.xplayer-lazy-source, .xplayer-lazy-source, meta[itemprop*='embedUrl'], video source[src], video[src], source[type='video/mp4']",
-        "videoSourceAttr": "data-src",
-        "relatedItems": ".related-series article, .related-videos article, article.video-card"
-      },
-      "contentPolicy": {
-        "isAuthorizedPublicSource": true,
-        "rightsStatus": "Public Web Index",
-        "termsUrl": "https://bmaal.io/disclaimer/",
-        "privacyPolicyUrl": "https://bmaal.io/privacy-policy/"
-      }
-    },
-    {
-      "id": "chiggywiggy",
-      "name": "ChiggyWiggy",
-      "enabled": true,
-      "baseUrl": "https://chiggywiggy.com",
-      "adapter": "html_selector",
-      "capabilities": [
-        "HOME",
-        "CATEGORY",
-        "SEARCH",
-        "DETAILS",
-        "STREAM",
-        "DOWNLOAD"
-      ],
-      "icon": "https://chiggywiggy.com/media/videos/tmb/loading.jpg",
-      "description": "Viral Sex Videos, MMS, Desi, Indian Porn",
-      "navigation": {
-        "home": "/",
-        "search": "/search/video/?s={query}",
-        "page": "/?page={page}",
-        "categories": "/categories/"
-      },
-      "selectors": {
-        "item": "div.video-thumb, div.video-preview, .thumb-block",
-        "title": "a[title], img[alt]",
-        "thumbnail": "img.thumb, img",
-        "thumbnailAttr": "data-src, src",
-        "detailUrl": "a",
-        "duration": ".video-duration, .duration, span.time",
-        "detailTitle": "h1",
-        "detailDescription": ".video-details, .description, p",
-        "detailThumbnail": "meta[property='og:image'], img.thumb, img",
-        "player": "video, script",
-        "videoSource": "source[type='video/mp4'], video source, script"
-      },
-      "contentPolicy": {
-        "isAuthorizedPublicSource": true,
-        "rightsStatus": "Public Web Index",
-        "termsUrl": "https://chiggywiggy.com/terms/",
-        "privacyPolicyUrl": "https://chiggywiggy.com/privacy/"
-      }
-    },
-    {
-      "id": "desibabe",
-      "name": "DesiBabe",
-      "enabled": true,
-      "baseUrl": "https://desibabe.to",
-      "adapter": "html_selector",
-      "capabilities": [
-        "HOME",
-        "CATEGORY",
-        "SEARCH",
-        "DETAILS",
-        "STREAM",
-        "DOWNLOAD"
-      ],
-      "icon": "https://desibabe.to/favicon.ico",
-      "description": "Desi Babe Leaked XXX & MMS Videos",
-      "navigation": {
-        "home": "/",
-        "search": "/search?q={query}",
-        "page": "/?page={page}",
-        "categories": "/categories"
-      },
-      "selectors": {
-        "item": "a[href*='/post/']",
-        "title": "h3, img[alt]",
-        "thumbnail": "img",
-        "thumbnailAttr": "src",
-        "detailUrl": "this",
-        "duration": ".duration",
-        "detailTitle": "h1",
-        "detailDescription": ".post-description, p",
-        "detailThumbnail": "meta[property='og:image'], img",
-        "player": "iframe[src*='downloaddirect.xyz'], iframe, video",
-        "videoSource": "iframe[src*='downloaddirect.xyz'], iframe, video source"
-      },
-      "contentPolicy": {
-        "isAuthorizedPublicSource": true,
-        "rightsStatus": "Public Web Index",
-        "termsUrl": "https://desibabe.to/terms",
-        "privacyPolicyUrl": "https://desibabe.to/privacy"
-      }
-    },
-    {
-      "id": "desigirlxx",
-      "name": "DesiGirlXX",
-      "enabled": true,
-      "baseUrl": "https://desigirlxx.beer",
-      "adapter": "html_selector",
-      "capabilities": [
-        "HOME",
-        "CATEGORY",
-        "SEARCH",
-        "DETAILS",
-        "STREAM",
-        "DOWNLOAD"
-      ],
-      "icon": "https://desigirlxx.beer/wp-content/uploads/2024/11/cropped-Desigilrxx-1.png",
-      "description": "Desi Girl XX Porn Videos & MMS",
-      "navigation": {
-        "home": "/",
-        "search": "/?s={query}",
-        "page": "/page/{page}/",
-        "categories": "/category/hot-web-series"
-      },
-      "selectors": {
-        "item": "article.loop-video, article.thumb-block, article.video-preview-item",
-        "title": "header h2 a, a[title]",
-        "thumbnail": "img.video-main-thumb, img",
-        "thumbnailAttr": "data-main-thumb, src, data-src",
-        "detailUrl": "header h2 a, a",
-        "duration": ".duration",
-        "detailTitle": "h1.entry-title, h1",
-        "detailDescription": ".entry-content p, .video-details, p",
-        "detailThumbnail": "meta[property='og:image'], img.wp-post-image, img",
-        "player": "iframe[src*='playmate.to'], iframe, video",
-        "videoSource": "iframe[src*='playmate.to'], iframe, video source, source[type='video/mp4']"
-      },
-      "contentPolicy": {
-        "isAuthorizedPublicSource": true,
-        "rightsStatus": "Public Web Index",
-        "termsUrl": "https://desigirlxx.beer/terms",
-        "privacyPolicyUrl": "https://desigirlxx.beer/privacy"
-      }
-    },
-    {
-      "id": "desimaals",
-      "name": "DesiMaals",
-      "enabled": true,
-      "baseUrl": "https://www.desimaals.fun",
-      "adapter": "html_selector",
-      "capabilities": [
-        "HOME",
-        "CATEGORY",
-        "SEARCH",
-        "DETAILS",
-        "STREAM",
-        "DOWNLOAD"
-      ],
-      "icon": "https://www.desimaals.fun/favicon.ico",
-      "description": "DesiMaals Hot Web Series, Desi MMS Videos & Short Films",
-      "navigation": {
-        "home": "/?filter=latest",
-        "search": "/?s={query}",
-        "page": "/page/{page}/?filter=latest",
-        "categories": "/categories/"
-      },
-      "selectors": {
-        "item": "article.loop-video, article.thumb-block, article.post",
-        "title": "header h2 a, a[title]",
-        "thumbnail": "img.video-main-thumb, img",
-        "thumbnailAttr": "src, data-src",
-        "detailUrl": "header h2 a, a",
-        "duration": ".duration",
-        "detailTitle": "h1.entry-title, h1",
-        "detailDescription": ".entry-content p, .video-details, p",
-        "detailThumbnail": "meta[property='og:image'], img",
-        "player": "iframe[src*='clean-tube-player'], iframe, video",
-        "videoSource": "iframe[src*='clean-tube-player'], iframe, video source, source[type='video/mp4']"
-      },
-      "contentPolicy": {
-        "isAuthorizedPublicSource": true,
-        "rightsStatus": "Public Web Index",
-        "termsUrl": "https://www.desimaals.fun/terms",
-        "privacyPolicyUrl": "https://www.desimaals.fun/privacy"
-      }
-    },
-    {
-      "id": "desivideo",
-      "name": "DesiVideo",
-      "enabled": true,
-      "baseUrl": "https://desivideo.net",
-      "adapter": "html_selector",
-      "capabilities": [
-        "HOME",
-        "CATEGORY",
-        "SEARCH",
-        "DETAILS",
-        "STREAM",
-        "DOWNLOAD"
-      ],
-      "icon": "https://desivideo.net/favicon.ico",
-      "description": "Free Indian, Pakistani & Bangladeshi Sex Clips - DesiVideo.Net",
-      "navigation": {
-        "home": "/latest-video",
-        "search": "/search?s={query}",
-        "page": "?page={page}",
-        "categories": "/categories"
-      },
-      "selectors": {
-        "item": "article.thumb-block, article.post",
-        "title": "a[title]",
-        "thumbnail": "video[poster], img",
-        "thumbnailAttr": "poster, src",
-        "detailUrl": "a",
-        "duration": ".duration",
-        "detailTitle": "h1",
-        "detailDescription": ".video-details, .entry-content p, p",
-        "detailThumbnail": "meta[property='og:image'], video[poster], img",
-        "player": "video#main-video, video",
-        "videoSource": "video#main-video source, meta[property='og:video'], video source, source[type='video/mp4']"
-      },
-      "contentPolicy": {
-        "isAuthorizedPublicSource": true,
-        "rightsStatus": "Public Web Index",
-        "termsUrl": "https://desivideo.net/terms",
-        "privacyPolicyUrl": "https://desivideo.net/privacy"
-      }
-    }
-  ]
+    "schemaVersion": 1,
+    "configVersion": 163,
+    "generatedAt": 1790064863824,
+    "expiresAt": 1821600863824,
+    "minimumAppVersion": 4,
+    "recommendedAppVersion": 1,
+    "forceUpdate": true,
+    "maintenanceMode": false,
+    "providers": [
+        {
+            "id": "kamababa1",
+            "name": "KamaBaba",
+            "enabled": true,
+            "baseUrl": "https://www.mykamababa.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/?filter=latest",
+                "search": "/?s={query}",
+                "page": "/page/{page}/?filter=latest"
+            },
+            "selectors": {
+                "item": "article.thumb-block, article.video-preview-item, article",
+                "title": "a[title], h2.entry-title a, h2 a",
+                "thumbnail": "img.video-main-thumb, img",
+                "thumbnailAttr": "src",
+                "detailUrl": "a.video-preview-link, a[href*='kamababa'], a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": ".entry-content p, .video-details, p",
+                "detailThumbnail": "meta[property='og:image'], img.video-main-thumb",
+                "player": "iframe[src*='player']",
+                "videoSource": "meta[itemprop='contentURL'], video source[src], video[src], source[type='video/mp4']",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Aggregation Index",
+                "disclaimer": "Aggregated public reference media feed."
+            },
+            "domains": [
+                "https://www.mykamababa.com",
+                "https://mykamababa.com",
+                "https://www.kamababa1.com",
+                "https://kamababa1.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "kamababa"
+        },
+        {
+            "id": "masa49",
+            "name": "Masa49",
+            "enabled": true,
+            "baseUrl": "https://www.masa49.nl",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/"
+            },
+            "selectors": {
+                "item": "div.video-block, .video-block, article",
+                "title": "span.title, a.infos, a[title], h2",
+                "thumbnail": "img.video-img, img",
+                "thumbnailAttr": "data-src",
+                "detailUrl": "a.thumb, a.infos, a",
+                "duration": ".duration, .badge-duration",
+                "detailTitle": "h1",
+                "detailDescription": ".video-description, .desc, .entry-content p",
+                "detailThumbnail": "video[poster], meta[property='og:image'], img.video-img, img",
+                "player": "video, iframe",
+                "videoSource": "video source[src], source[type='video/mp4'], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": "div.video-block, .video-block"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Aggregation Index",
+                "disclaimer": "Aggregated public reference feed."
+            },
+            "domains": [
+                "https://www.masa49.nl",
+                "https://masa49.nl"
+            ],
+            "familyId": "masa_network_family",
+            "validationMarker": "masa"
+        },
+        {
+            "id": "fsiblogxx",
+            "name": "FSIBlog",
+            "enabled": true,
+            "baseUrl": "https://www.fsiblogxx.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/"
+            },
+            "selectors": {
+                "item": "article.type-porn-video, article.porn-video, div.porn-video, article",
+                "title": "h2.entry-title a, h2 a, a.entry-title, a",
+                "thumbnail": "img.attachment-medium, img",
+                "thumbnailAttr": "data-src",
+                "detailUrl": "h2.entry-title a, h2 a, a",
+                "duration": ".duration, .time",
+                "detailTitle": "h1.entry-title, h1",
+                "detailDescription": ".entry-content p, .post-content",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "iframe[src*='player'], video",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.fsiblogxx.com",
+                "https://fsiblogxx.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "fsiblog"
+        },
+        {
+            "id": "masahub2",
+            "name": "MasaHub2",
+            "enabled": true,
+            "baseUrl": "https://masahub2.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/"
+            },
+            "selectors": {
+                "item": "article.vcard, article, div.item",
+                "title": "h3.vtitle, .vtitle, h2 a, a.vtitle, h2",
+                "thumbnail": ".thumb, img",
+                "thumbnailAttr": "style",
+                "detailUrl": "a",
+                "duration": "span.dur, .badge-duration",
+                "detailTitle": "h1",
+                "detailDescription": ".entry-content p, .video-details",
+                "detailThumbnail": "video[poster], meta[property='og:image'], img",
+                "player": "video, iframe",
+                "videoSource": "video source[src], source[type='video/mp4'], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://masahub2.com"
+            ],
+            "familyId": "masa_network_family",
+            "validationMarker": "masahub"
+        },
+        {
+            "id": "aagmaal",
+            "name": "AagMaal",
+            "enabled": true,
+            "baseUrl": "https://aagmaal.date",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/?filter=latest",
+                "search": "/?s={query}",
+                "page": "/page/{page}/?filter=latest",
+                "categories": "/categories/"
+            },
+            "selectors": {
+                "item": "article.thumb-block, article.loop-video, article.post, article",
+                "title": "header.entry-header a, h2.entry-title a, h2 a, a[title], .cat-title",
+                "thumbnail": "img",
+                "thumbnailAttr": "src",
+                "detailUrl": "header.entry-header a, a.thumb-pop, h2.entry-title a, a[title], a",
+                "duration": ".duration, span.hd, .thumb-block span",
+                "detailTitle": "h1.entry-title, h1",
+                "detailDescription": ".entry-content p, .video-details",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "iframe[src*='tube279'], iframe[src*='streamtape'], iframe[src*='lulu'], iframe[src*='/e/'], a[href*='tube279'], video",
+                "videoSource": "video source[src], video[src], source[type='video/mp4']",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-posts article, .related article, .videos-list article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://aagmaal.date",
+                "https://aagmaal.run"
+            ],
+            "familyId": "aagmaal_date_family",
+            "validationMarker": "aagmaal"
+        },
+        {
+            "id": "fry99",
+            "name": "Fry99",
+            "enabled": true,
+            "baseUrl": "https://fry99.cc",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/"
+            },
+            "selectors": {
+                "item": "li.video, .video, article, .post",
+                "title": "a.title, a.thumb, h2 a, h2, a",
+                "thumbnail": "img",
+                "thumbnailAttr": "src",
+                "detailUrl": "a.title, a.thumb, a",
+                "duration": ".video-duration, .duration, .time",
+                "detailTitle": "h1.entry-title, h1",
+                "detailDescription": ".video_description, .entry-content p, .entry-content",
+                "detailThumbnail": "video[poster], meta[property='og:image']",
+                "player": "video, iframe",
+                "videoSource": "video source[src], video[src], a[href*='.mp4'], iframe[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".releated li.video, .video_list li.video"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Aggregation Index",
+                "disclaimer": "Protected by Cloudflare Turnstile. Interactive in-app verification supported."
+            },
+            "domains": [
+                "https://fry99.cc"
+            ],
+            "familyId": "fry99_family",
+            "validationMarker": "fry99"
+        },
+        {
+            "id": "hitmaal",
+            "name": "HitMaal",
+            "enabled": true,
+            "baseUrl": "https://hitmaal.io",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/"
+            },
+            "selectors": {
+                "item": "a.video",
+                "title": "h2.vtitle, a[title]",
+                "thumbnail": "a.video",
+                "thumbnailAttr": "data-bg",
+                "detailUrl": "a.video",
+                "duration": "span.time",
+                "detailTitle": "h1",
+                "detailDescription": ".entry-content p, .video-details, p",
+                "detailThumbnail": "video[poster], meta[property='og:image']",
+                "player": "video, iframe",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": "a.video"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Aggregation Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://hitmaal.io"
+            ],
+            "familyId": "hitmaal_family",
+            "validationMarker": "hitmaal"
+        },
+        {
+            "id": "webxseries",
+            "name": "WebXSeries",
+            "enabled": true,
+            "baseUrl": "https://webxseries.hot",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/",
+                "categories": "/hot-web-series/"
+            },
+            "selectors": {
+                "item": "a.video",
+                "title": "h2.vtitle, a[title]",
+                "thumbnail": "a.video",
+                "thumbnailAttr": "data-bg",
+                "detailUrl": "a.video",
+                "duration": "span.time",
+                "detailTitle": "h1",
+                "detailDescription": ".entry-content p, .video-details, p",
+                "detailThumbnail": "video[poster], meta[property='og:image']",
+                "player": "video",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": "a.video"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://webxseries.hot"
+            ],
+            "familyId": "webxseries_family",
+            "validationMarker": "webxseries"
+        },
+        {
+            "id": "desibf",
+            "name": "DesiBF",
+            "enabled": true,
+            "baseUrl": "https://desibf.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/"
+            },
+            "selectors": {
+                "item": "article, div.item, div.post",
+                "title": "h2.entry-title a, h2 a, a[title]",
+                "thumbnail": "img",
+                "thumbnailAttr": "src",
+                "detailUrl": "h2.entry-title a, h2 a, a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": ".entry-content p, .video-details",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "iframe, video",
+                "videoSource": "video source[src], video[src], a[href*='.mp4'], iframe[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": "article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://desibf.com"
+            ],
+            "familyId": "direct_cdn_family",
+            "validationMarker": "desibf"
+        },
+        {
+            "id": "antarvasnabf",
+            "name": "AntarvasnaBF",
+            "enabled": true,
+            "baseUrl": "https://antarvasnabf.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/"
+            },
+            "selectors": {
+                "item": "article, div.item, div.post",
+                "title": "h2.entry-title a, h2 a, a[title]",
+                "thumbnail": "img",
+                "thumbnailAttr": "src",
+                "detailUrl": "h2.entry-title a, h2 a, a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": ".entry-content p, .video-details",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "iframe, video",
+                "videoSource": "meta[itemprop*='contentUrl' i], meta[itemprop*='contentURL'], video source[src], video[src], a[href*='.mp4'], iframe[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": "article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://antarvasnabf.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "antarvasnabf"
+        },
+        {
+            "id": "desisex",
+            "name": "DesiSex",
+            "enabled": true,
+            "baseUrl": "https://desisex.site",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/?filter=latest",
+                "search": "/?s={query}",
+                "page": "/page/{page}/?filter=latest"
+            },
+            "selectors": {
+                "item": "article, div.item, div.post",
+                "title": "h2.entry-title a, h2 a, a[title]",
+                "thumbnail": "video[poster], img",
+                "thumbnailAttr": "poster",
+                "detailUrl": "h2.entry-title a, h2 a, a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": ".entry-content p, .video-details",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "iframe, video",
+                "videoSource": "meta[itemprop='contentURL'], meta[itemprop='contentUrl'], video source[src], video[src], source[type='video/mp4']",
+                "videoSourceAttr": "src",
+                "relatedItems": "article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://desisex.site",
+                "https://www.desisex.site"
+            ],
+            "familyId": "direct_cdn_family",
+            "validationMarker": "desisex"
+        },
+        {
+            "id": "ixiporn",
+            "name": "IxiPorn",
+            "enabled": true,
+            "baseUrl": "https://ixiporn.live",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/"
+            },
+            "selectors": {
+                "item": "div.video-block, .video-block, article",
+                "title": "span.title, a.infos, h2 a, a[title]",
+                "thumbnail": "img.video-img, img",
+                "thumbnailAttr": "data-src",
+                "detailUrl": "a.thumb, a.infos, a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": ".video-description, .desc, .entry-content p",
+                "detailThumbnail": "video[poster], meta[property='og:image'], img",
+                "player": "video, iframe",
+                "videoSource": "video source[src], video[src], iframe[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": "div.video-block"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://ixiporn.live"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "ixiporn"
+        },
+        {
+            "id": "masafun",
+            "name": "MasaFun",
+            "enabled": true,
+            "baseUrl": "https://masafun.art",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/"
+            },
+            "selectors": {
+                "item": "article.vcard, article, div.item, div.post",
+                "title": "h3.vtitle, h2 a, .video-title, a",
+                "thumbnail": ".thumb, img",
+                "thumbnailAttr": "style",
+                "detailUrl": "a",
+                "duration": "span.dur, .badge-duration, .duration",
+                "detailTitle": "h1",
+                "detailDescription": ".entry-content p, .video-details",
+                "detailThumbnail": "video[poster], meta[property='og:image'], img",
+                "player": "video, iframe",
+                "videoSource": "video source[src], source[type='video/mp4'], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": "article.vcard, article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://masafun.art"
+            ],
+            "familyId": "masa_network_family",
+            "validationMarker": "masafun"
+        },
+        {
+            "id": "uncutmaza",
+            "name": "UncutMaza",
+            "enabled": true,
+            "baseUrl": "https://uncutmaza.cc",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}"
+            },
+            "selectors": {
+                "item": "article.thumb-block",
+                "title": "h2.entry-title a, h2 a, a[title]",
+                "thumbnail": "img",
+                "thumbnailAttr": "src",
+                "detailUrl": "h2.entry-title a, h2 a, a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": ".entry-content p, .video-details",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "iframe[src*='player']",
+                "videoSource": "meta[itemprop='contentUrl'], meta[itemprop='contentURL'], video source[src], video[src], source[type='video/mp4']",
+                "videoSourceAttr": "src",
+                "relatedItems": ".under-video-block article, article.thumb-block"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://uncutmaza.cc"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "uncutmaza"
+        },
+        {
+            "id": "wowuncut",
+            "name": "WowUncut",
+            "enabled": true,
+            "baseUrl": "https://wowuncut.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/"
+            },
+            "selectors": {
+                "item": "article.thumb-block, article.video-preview-item:not(.slide), article:not(.slide)",
+                "title": "a[title], a[data-title], h2.entry-title a, h2 a",
+                "thumbnail": "img.video-main-thumb, img",
+                "thumbnailAttr": "src",
+                "detailUrl": "a[title], a[href*='/video/'], a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": ".entry-content p, .video-details",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "iframe, video",
+                "videoSource": "video source[src], video[src], iframe[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": "article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://wowuncut.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "wowuncut"
+        },
+        {
+            "id": "desikahani2",
+            "name": "DesiKahani2",
+            "enabled": true,
+            "baseUrl": "https://desikahani2.net",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/videos/",
+                "search": "/videos/search/?q={query}",
+                "page": "/videos/latest-updates/{page}/"
+            },
+            "selectors": {
+                "item": "div.item, .video-item, div[data-video-id], article",
+                "title": "div.title a[title], strong.title, a.title, .video-title, a[title]",
+                "thumbnail": "img.thumb, img",
+                "thumbnailAttr": "data-webp",
+                "detailUrl": "a",
+                "duration": "span.duration, .duration",
+                "detailTitle": "h1",
+                "detailDescription": ".video-description, .entry-content p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video, iframe",
+                "videoSource": "a[href*='/videos/get_file/'], video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": "div.item, .video-item"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://desikahani2.net"
+            ],
+            "familyId": "kvs_tube_family",
+            "validationMarker": "desikahani"
+        },
+        {
+            "id": "desitales2",
+            "name": "DesiTales2",
+            "enabled": true,
+            "baseUrl": "https://desitales2.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/videos/",
+                "search": "/videos/search/?q={query}",
+                "page": "/videos/latest-updates/{page}/"
+            },
+            "selectors": {
+                "item": "div.item, .video-item, div[data-video-id], article",
+                "title": "div.title a[title], strong.title, a.title, .video-title, a[title]",
+                "thumbnail": "img.thumb, img",
+                "thumbnailAttr": "data-webp",
+                "detailUrl": "a",
+                "duration": "span.duration, .duration",
+                "detailTitle": "h1",
+                "detailDescription": ".video-description, .entry-content p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video, iframe",
+                "videoSource": "a[href*='/videos/get_file/'], video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": "div.item, .video-item"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://desitales2.com"
+            ],
+            "familyId": "kvs_tube_family",
+            "validationMarker": "desitales"
+        },
+        {
+            "id": "indiansexstories3",
+            "name": "IndianSexStories3",
+            "enabled": true,
+            "baseUrl": "https://www.indiansexstories3.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/videos/latest-updates/",
+                "search": "/videos/search/?q={query}",
+                "page": "/videos/latest-updates/{page}/",
+                "categories": "/videos/categories/"
+            },
+            "selectors": {
+                "item": "div.thumb_rel.item, div.list-videos div.item, div.item",
+                "title": "a[title], div.title, strong.title, a.title, .video-title",
+                "thumbnail": "img",
+                "thumbnailAttr": "data-webp",
+                "detailUrl": "a",
+                "duration": "span.duration, .duration, .time",
+                "detailTitle": "h1.title, h1",
+                "detailDescription": ".video-description, .entry-content p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video, iframe",
+                "videoSource": "video source[src], video[src], a[href*='/videos/get_file/'][href*='.mp4']",
+                "videoSourceAttr": "src",
+                "relatedItems": "div.item, .video-item"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.indiansexstories3.com",
+                "https://indiansexstories3.com"
+            ],
+            "familyId": "kvs_tube_family",
+            "validationMarker": "indiansexstories"
+        },
+        {
+            "id": "xxxindianstories",
+            "name": "XXXIndianStories",
+            "enabled": true,
+            "baseUrl": "https://xxxindianstories.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/videos/",
+                "search": "/videos/search/?q={query}",
+                "page": "/videos/latest-updates/{page}/"
+            },
+            "selectors": {
+                "item": "div.item, .video-item, div[data-video-id], article",
+                "title": "div.title a[title], strong.title, a.title, .video-title, a[title]",
+                "thumbnail": "img.thumb, img",
+                "thumbnailAttr": "data-webp",
+                "detailUrl": "a",
+                "duration": "span.duration, .duration",
+                "detailTitle": "h1",
+                "detailDescription": ".video-description, .entry-content p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video, iframe",
+                "videoSource": "a[href*='/videos/get_file/'], video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": "div.item, .video-item"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://xxxindianstories.com"
+            ],
+            "familyId": "kvs_tube_family",
+            "validationMarker": "xxxindianstories"
+        },
+        {
+            "id": "xmaza",
+            "name": "XMaza",
+            "enabled": true,
+            "baseUrl": "https://xmaza.xxx",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/"
+            },
+            "selectors": {
+                "item": "a.video, article, div.item, div.post",
+                "title": "h2.vtitle, a[title], h2, a",
+                "thumbnail": "a.video, img",
+                "thumbnailAttr": "data-bg, style",
+                "detailUrl": "a.video, a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": ".entry-content p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video, iframe",
+                "videoSource": "video source[src], video[src], iframe[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://xmaza.xxx"
+            ],
+            "familyId": "direct_cdn_family",
+            "validationMarker": "xmaza"
+        },
+        {
+            "id": "xnxx",
+            "name": "XNXX",
+            "enabled": true,
+            "baseUrl": "https://www.xnxx.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/todays-selection",
+                "search": "/search/{query}/",
+                "page": "/todays-selection/{page}",
+                "categories": "/tags"
+            },
+            "selectors": {
+                "item": "div.thumb-block:not(.thumb-cat), div.thumb-block, div.mozaique > div",
+                "title": ".thumb-under p a[title], .thumb-under a[title], p.title a, .title a, a[title]",
+                "thumbnail": "img.thumb, img[data-src], img",
+                "thumbnailAttr": "data-src, data-mzl, src",
+                "detailUrl": ".thumb-inside a[href*='/video-'], a[href*='/video-'], p.title a, .thumb a, a[href*='/video']",
+                "duration": ".duration, span.duration",
+                "detailTitle": "h1.page-title, h1, .video-title",
+                "detailDescription": ".video-description, .metadata, p",
+                "detailThumbnail": "meta[property='og:image'], img.thumb, img",
+                "player": "div#html5video, video, iframe",
+                "videoSource": "html5player.setVideoHLS, meta[property='og:video:url'], video source[src]",
+                "videoSourceAttr": "content, src",
+                "relatedItems": "div.thumb-block:not(.thumb-cat), div.mozaique > div, div.thumb-block"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.xnxx.com",
+                "https://xnxx.health",
+                "https://www.xnxx.es",
+                "https://www.xnxx2.com"
+            ],
+            "familyId": "xvideos_network_family",
+            "validationMarker": "xnxx"
+        },
+        {
+            "id": "xvideos",
+            "name": "XVideos",
+            "enabled": true,
+            "baseUrl": "https://www.xvideos.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?k={query}",
+                "page": "/new/{page}/",
+                "categories": "/tags"
+            },
+            "selectors": {
+                "item": "div.thumb-block, div.mozaique > div",
+                "title": ".thumb-under p a[title], .thumb-under a[title], p.title a, a[title]",
+                "thumbnail": "img.thumb, img[data-src], img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": ".thumb-inside a[href*='/video-'], a[href*='/video-'], a[href*='/video.'], p.title a, .thumb-under p a, a[href^='/video']",
+                "duration": ".duration, span.duration",
+                "detailTitle": "h1.page-title, h1",
+                "detailDescription": ".video-description, .metadata, p",
+                "detailThumbnail": "meta[property='og:image'], img.thumb, img",
+                "player": "div#html5video, video, iframe",
+                "videoSource": "html5player.setVideoHLS, meta[property='og:video:url'], video source[src]",
+                "videoSourceAttr": "content, src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.xvideos.com",
+                "https://www.xvideos3.com",
+                "https://www.xvideos.es",
+                "https://www.xvideos.red"
+            ],
+            "familyId": "xvideos_network_family",
+            "validationMarker": "xvideos"
+        },
+        {
+            "id": "aagmaal_com",
+            "name": "AagMaal.com",
+            "enabled": true,
+            "baseUrl": "https://aagmaal.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/",
+                "categories": "/ott/"
+            },
+            "selectors": {
+                "item": "article.vp-card, article.post, article",
+                "title": "h2.vp-card__title a, h2.entry-title a, h2 a, a[title]",
+                "thumbnail": "a.vp-card__thumb img, img",
+                "thumbnailAttr": "src",
+                "detailUrl": "a.vp-card__thumb, h2.vp-card__title a, h2.entry-title a, a",
+                "duration": ".duration, .vp-card__duration",
+                "detailTitle": "h1.vp-single-hero__title, h1.entry-title, h1",
+                "detailDescription": ".vp-single-content p, .entry-content p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "iframe[src*='cdn1'], iframe[src*='lulu'], iframe[src*='streamtape'], iframe[src*='/e/'], a[href*='luluvdo'], a[href*='streamtape'], video",
+                "videoSource": "video source[src], video[src], source[type='video/mp4']",
+                "videoSourceAttr": "src",
+                "relatedItems": ".vp-related article, .related article, article.vp-card"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://aagmaal.com",
+                "https://govmaal.com",
+                "https://kambihub.com",
+                "https://cine350.com",
+                "https://aagmaal.bz",
+                "https://kaamuu.cfd",
+                "https://kaamuu.com",
+                "https://sohot.cyou",
+                "https://webmaal.info",
+                "https://www.aagmaal.help",
+                "https://webmaal.bz"
+            ],
+            "familyId": "aagmaal_com_family",
+            "validationMarker": "vp-card"
+        },
+        {
+            "id": "bmaal",
+            "name": "BMaal",
+            "enabled": true,
+            "baseUrl": "https://bmaal.io",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/",
+                "categories": "/ott/"
+            },
+            "selectors": {
+                "item": "article.video-card, article.post, article",
+                "title": "h2.loop-title a, h2.loop-title, h2 a, a[title]",
+                "thumbnail": "div.video-thumbnail img, img.wp-post-image, img",
+                "thumbnailAttr": "src",
+                "detailUrl": "div.video-thumbnail a, h2.loop-title a, a",
+                "duration": "span.video-duration-badge, .duration",
+                "detailTitle": "h1.entry-title, h1",
+                "detailDescription": ".series-description, .entry-content p, .video-details, p",
+                "detailThumbnail": "meta[property='og:image'], img.wp-post-image, img",
+                "player": "div.xplayer, video, iframe",
+                "videoSource": "div.xplayer-lazy-source, .xplayer-lazy-source, meta[itemprop*='embedUrl'], video source[src], video[src], source[type='video/mp4']",
+                "videoSourceAttr": "data-src",
+                "relatedItems": ".related-series article, .related-videos article, article.video-card"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public reference media feed."
+            },
+            "domains": [
+                "https://bmaal.io",
+                "https://bmaal.com"
+            ],
+            "familyId": "web_series_family",
+            "validationMarker": "bmaal"
+        },
+        {
+            "id": "chiggywiggy",
+            "name": "ChiggyWiggy",
+            "enabled": true,
+            "baseUrl": "https://chiggywiggy.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/search/video/?s={query}",
+                "page": "/?page={page}",
+                "categories": "/categories/"
+            },
+            "selectors": {
+                "item": "div.video-thumb, div.video-preview, .thumb-block",
+                "title": "a[title], img[alt]",
+                "thumbnail": "img.thumb, img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a",
+                "duration": ".video-duration, .duration, span.time",
+                "detailTitle": "h1",
+                "detailDescription": ".video-details, .description, p",
+                "detailThumbnail": "meta[property='og:image'], img.thumb, img",
+                "player": "video#player, video",
+                "videoSource": "video source[src], video[src], source[type='video/mp4']",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public reference media feed."
+            },
+            "domains": [
+                "https://chiggywiggy.com",
+                "https://www.chiggywiggy.com"
+            ],
+            "familyId": "direct_cdn_family",
+            "validationMarker": "chiggywiggy"
+        },
+        {
+            "id": "desibabe",
+            "name": "DesiBabe",
+            "enabled": true,
+            "baseUrl": "https://desibabe.to",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/search?q={query}",
+                "page": "/?page={page}",
+                "categories": "/categories"
+            },
+            "selectors": {
+                "item": "a[href*='/post/']",
+                "title": "h3, img[alt]",
+                "thumbnail": "img",
+                "thumbnailAttr": "src",
+                "detailUrl": "this",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": ".post-description, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "iframe[src*='downloaddirect.xyz'], iframe, video",
+                "videoSource": "iframe[src*='downloaddirect.xyz'], iframe, video source",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public reference media feed."
+            },
+            "domains": [
+                "https://desibabe.to",
+                "https://www.desibabe.to",
+                "https://desibabe.net",
+                "https://www.desibabe.net"
+            ],
+            "familyId": "direct_cdn_family",
+            "validationMarker": "desibabe"
+        },
+        {
+            "id": "desigirlxx",
+            "name": "DesiGirlXX",
+            "enabled": true,
+            "baseUrl": "https://desigirlxx.beer",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/",
+                "categories": "/category/hot-web-series"
+            },
+            "selectors": {
+                "item": "article.loop-video, article.thumb-block, article.video-preview-item",
+                "title": "header h2 a, a[title]",
+                "thumbnail": "img.video-main-thumb, img",
+                "thumbnailAttr": "data-main-thumb, src, data-src",
+                "detailUrl": "header h2 a, a",
+                "duration": ".duration",
+                "detailTitle": "h1.entry-title, h1",
+                "detailDescription": ".entry-content p, .video-details, p",
+                "detailThumbnail": "meta[property='og:image'], img.wp-post-image, img",
+                "player": "iframe[src*='playmate.to'], iframe, video",
+                "videoSource": "iframe[src*='playmate.to'], iframe, video source, source[type='video/mp4']",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public reference media feed."
+            },
+            "domains": [
+                "https://desigirlxx.beer",
+                "https://www.desigirlxx.beer"
+            ],
+            "familyId": "direct_cdn_family",
+            "validationMarker": "desigirlxx"
+        },
+        {
+            "id": "desimaals",
+            "name": "DesiMaals",
+            "enabled": true,
+            "baseUrl": "https://www.desimaals.fun",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/?filter=latest",
+                "search": "/?s={query}",
+                "page": "/page/{page}/?filter=latest",
+                "categories": "/categories/"
+            },
+            "selectors": {
+                "item": "article.loop-video, article.thumb-block, article.post",
+                "title": "header h2 a, a[title]",
+                "thumbnail": "img.video-main-thumb, img",
+                "thumbnailAttr": "src, data-src",
+                "detailUrl": "header h2 a, a",
+                "duration": ".duration",
+                "detailTitle": "h1.entry-title, h1",
+                "detailDescription": ".entry-content p, .video-details, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "iframe[src*='clean-tube-player'], iframe, video",
+                "videoSource": "iframe[src*='clean-tube-player'], iframe, video source, source[type='video/mp4']",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public reference media feed."
+            },
+            "domains": [
+                "https://www.desimaals.fun",
+                "https://desimaals.fun",
+                "https://desimaals.com",
+                "https://www.desimaals.com"
+            ],
+            "familyId": "direct_cdn_family",
+            "validationMarker": "desimaals"
+        },
+        {
+            "id": "desivideo",
+            "name": "DesiVideo",
+            "enabled": true,
+            "baseUrl": "https://desivideo.net",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/latest-video",
+                "search": "/search?s={query}",
+                "page": "?page={page}",
+                "categories": "/categories"
+            },
+            "selectors": {
+                "item": "article.thumb-block, article.post",
+                "title": "a[title]",
+                "thumbnail": "video[poster], img",
+                "thumbnailAttr": "poster, src",
+                "detailUrl": "a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": ".video-details, .entry-content p, p",
+                "detailThumbnail": "meta[property='og:image'], video[poster], img",
+                "player": "video#main-video, video",
+                "videoSource": "video#main-video source, meta[property='og:video'], video source, source[type='video/mp4']",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public reference media feed."
+            },
+            "domains": [
+                "https://desivideo.net",
+                "https://www.desivideo.net",
+                "https://desivideo.us",
+                "https://www.desivideo.us"
+            ],
+            "familyId": "direct_cdn_family",
+            "validationMarker": "desivideo"
+        },
+        {
+            "id": "brazzpw",
+            "name": "BrazzPW",
+            "enabled": true,
+            "baseUrl": "https://brazzpw.xyz",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/videos/free-brazz-premium-full-new-2026/",
+                "search": "/search/free-brazz-premium-full-new-2026/?s={query}",
+                "page": "/videos/page/{page}/free-brazz-premium-full-new-2026/",
+                "categories": "/categories/free-brazz-premium-full-new-2026/"
+            },
+            "selectors": {
+                "item": "div.videos-list article.thumb-block:not(.slide):not(.bx-clone), div.videos-list .loop-video:not(.slide):not(.bx-clone), article.thumb-block:not(.slide):not(.bx-clone), div.content-area article",
+                "title": "a[title], h2.entry-title a, h2 a, a.title, .entry-title",
+                "thumbnail": "img.video-main-thumb, img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/video/'], a[href*='/videos/'], a[href*='brazzpw.xyz/'], a[href*='brazzpw.com/'], a",
+                "duration": ".duration",
+                "detailTitle": "h1.entry-title, h1",
+                "detailDescription": ".entry-content p, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "iframe[src*='player'], video",
+                "videoSource": "video source[src], video[src], source[type='video/mp4']",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Aggregation Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://brazzpw.xyz",
+                "https://brazzpw.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "brazzpw"
+        },
+        {
+            "id": "fpo",
+            "name": "FPO.xxx",
+            "enabled": true,
+            "baseUrl": "https://www.fpo.xxx",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/new-1/",
+                "search": "/search/{query}/",
+                "page": "/new-1/{page}/",
+                "categories": "/categories/"
+            },
+            "selectors": {
+                "item": "div.item:not(.pfb-slider-group *), a.item:not(.pfb-slider-group *)",
+                "title": "strong.title, a.title, [title]",
+                "thumbnail": "img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/video/'], a[href*='/sites/'], a[href*='/models/'], a",
+                "duration": ".duration, span.time",
+                "detailTitle": "h1",
+                "detailDescription": ".description, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video",
+                "videoSource": "div.kt-player[data-url], [data-url*='.mp4'], [data-url*='/hls/'], video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.fpo.xxx",
+                "https://fpo.xxx"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "fpo"
+        },
+        {
+            "id": "hello",
+            "name": "Hello.porn",
+            "enabled": true,
+            "baseUrl": "https://hello.porn",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/trending/",
+                "search": "/search?q={query}",
+                "page": "/trending/{page}/",
+                "categories": "/categories/"
+            },
+            "selectors": {
+                "item": "div.items-videos div.item, div.item:not(.navigation *):not(.items-categories *):not(.slider-cat *):not(.pfb-slider-group *)",
+                "title": "a.title, strong.title, [title], a",
+                "thumbnail": "img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/videos/'], a[href*='/video/'], a[href*='/pornstar/'], a[href*='/channels/'], a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video",
+                "videoSource": "div.kt-player[data-url], [data-url*='.mp4'], [data-url*='/hls/'], video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Aggregation Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://hello.porn"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "hello"
+        },
+        {
+            "id": "hqporner",
+            "name": "HQPorner",
+            "enabled": true,
+            "baseUrl": "https://hqporner.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?q={query}",
+                "page": "/hdporn/{page}",
+                "categories": "/categories"
+            },
+            "selectors": {
+                "item": "section.box.feature:has(h3), section.feature:has(h3), div.video-item",
+                "title": "h3.meta-data-title a, a.title, h3 a, a[title], a",
+                "thumbnail": "img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/hdporn/'], a[href*='/category/'], a[href*='/actress/'], h3 a, a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "iframe[src*='mydaddy'], video, iframe",
+                "videoSource": "iframe[src*='mydaddy'], iframe[src*='video'], video source[src], video[src], [data-url*='.mp4'], [data-url*='.m3u8']",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Aggregation Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://hqporner.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "hqporner"
+        },
+        {
+            "id": "max",
+            "name": "MAX.porn",
+            "enabled": true,
+            "baseUrl": "https://max.porn",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/search/{query}/",
+                "page": "/{page}/",
+                "categories": "/channels/"
+            },
+            "selectors": {
+                "item": "div.item:not(.swiper-slide):not(.pfb-slider-group *):not(.page):not(.jump):not(.last):not(.next):not(.prev)",
+                "title": "a.title, [title], a",
+                "thumbnail": "img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/videos/'], a[href*='/channels/'], a",
+                "duration": ".duration_item, .duration",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Aggregation Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://max.porn",
+                "http://max.porn"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "max"
+        },
+        {
+            "id": "netfapx",
+            "name": "Netfapx",
+            "enabled": true,
+            "baseUrl": "https://netfapx.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/",
+                "categories": "/categories/"
+            },
+            "selectors": {
+                "item": "article.pinbox, div.pinbox, article.post, article:not(.pfb-slider-group *)",
+                "title": "h2.entry-title a, h2 a, a[title]",
+                "thumbnail": "img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "h2.entry-title a, a[href*='netfapx.com/20'], a[href*='?cat='], a",
+                "duration": ".duration",
+                "detailTitle": "h1.entry-title, h1",
+                "detailDescription": ".entry-content p, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video, iframe",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Aggregation Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://netfapx.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "netfapx"
+        },
+        {
+            "id": "ok_porn",
+            "name": "OK.porn",
+            "enabled": true,
+            "baseUrl": "https://ok.porn",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/search/{query}/",
+                "page": "/{page}/",
+                "categories": "/channels/"
+            },
+            "selectors": {
+                "item": "div.list_video_wrapper div.item:not(.swiper-slide):not(.pfb-slider-group *):not(.page):not(.jump):not(.last):not(.next):not(.prev), div.item:not(.swiper-slide):not(.pfb-slider-group *):not(.page):not(.jump):not(.last):not(.next):not(.prev), div.thumb-bl:not(.item):not(.item *):not(.swiper-slide):not(.pfb-slider-group *):not(.page):not(.jump):not(.last):not(.next):not(.prev)",
+                "title": "a.title, [title], a",
+                "thumbnail": "img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/video/'], a[href*='/sites/'], a[href*='/models/'], a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://ok.porn"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "ok.porn"
+        },
+        {
+            "id": "ok_xxx",
+            "name": "OK.xxx",
+            "enabled": true,
+            "baseUrl": "https://ok.xxx",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/search/{query}/",
+                "page": "/{page}/",
+                "categories": "/channels/"
+            },
+            "selectors": {
+                "item": "div.list_video_wrapper div.item:not(.swiper-slide):not(.pfb-slider-group *):not(.page):not(.jump):not(.last):not(.next):not(.prev), div.item:not(.swiper-slide):not(.pfb-slider-group *):not(.page):not(.jump):not(.last):not(.next):not(.prev), div.thumb-bl:not(.item):not(.item *):not(.swiper-slide):not(.pfb-slider-group *):not(.page):not(.jump):not(.last):not(.next):not(.prev)",
+                "title": "a.title, [title], a",
+                "thumbnail": "img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/video/'], a[href*='/sites/'], a[href*='/models/'], a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://ok.xxx"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "ok.xxx"
+        },
+        {
+            "id": "perfectgirls",
+            "name": "PerfectGirls",
+            "enabled": true,
+            "baseUrl": "https://www.perfectgirls.xxx",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/search/{query}/",
+                "page": "/{page}/",
+                "categories": "/channels/"
+            },
+            "selectors": {
+                "item": "div.list_video_wrapper div.item:not(.swiper-slide):not(.pfb-slider-group *):not(.page):not(.jump):not(.last):not(.next):not(.prev), div.item:not(.swiper-slide):not(.pfb-slider-group *):not(.page):not(.jump):not(.last):not(.next):not(.prev), div.thumb-bl:not(.item):not(.item *):not(.swiper-slide):not(.pfb-slider-group *):not(.page):not(.jump):not(.last):not(.next):not(.prev)",
+                "title": "a.title, [title], a",
+                "thumbnail": "img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/video/'], a[href*='/videos/'], a[href*='/channels/'], a[href*='/pornstars/'], a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.perfectgirls.xxx",
+                "https://perfectgirls.xxx"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "perfectgirls"
+        },
+        {
+            "id": "porn4days",
+            "name": "Porn4Days",
+            "enabled": true,
+            "baseUrl": "https://porn4days.pw",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/newest",
+                "search": "/search/{query}",
+                "page": "/newest/page{page}/",
+                "categories": "/paysitelist"
+            },
+            "selectors": {
+                "item": "div.card.video-card:not(.slick-slider *):not(.slick-slide):not(.slick-slide *)",
+                "title": "img[alt], a[title], h5, .card-title, a",
+                "thumbnail": "img.card-img-top, img",
+                "thumbnailAttr": "src, data-src",
+                "detailUrl": "a[href*='video/'], a",
+                "duration": ".duration, .badge, .time",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Aggregation Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://porn4days.pw"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "porn4days"
+        },
+        {
+            "id": "pornhat",
+            "name": "PornHat",
+            "enabled": true,
+            "baseUrl": "https://www.pornhat.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/search/{query}/",
+                "page": "/latest-updates/{page}/",
+                "categories": "/channels/"
+            },
+            "selectors": {
+                "item": "div.list_video_wrapper div.item:not(.swiper-slide):not(.pfb-slider-group *):not(.page):not(.jump):not(.last):not(.next):not(.prev), div.item:not(.swiper-slide):not(.pfb-slider-group *):not(.page):not(.jump):not(.last):not(.next):not(.prev), div.thumb-bl:not(.item):not(.item *):not(.swiper-slide):not(.pfb-slider-group *):not(.page):not(.jump):not(.last):not(.next):not(.prev)",
+                "title": "a.title, [title], a",
+                "thumbnail": "img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/video/'], a[href*='/videos/'], a[href*='/channels/'], a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.pornhat.com",
+                "https://pornhat.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "pornhat"
+        },
+        {
+            "id": "pornhd4k",
+            "name": "PornHD4K",
+            "enabled": true,
+            "baseUrl": "https://pornhd4k.net",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/premium-porn-hd/page-{page}",
+                "categories": "/tag/asian"
+            },
+            "selectors": {
+                "item": "div.item, div.ml-item, div.video-item",
+                "title": "img[alt], a.title, h3 a, [title], a",
+                "thumbnail": "img[data-original], img[data-src], img",
+                "thumbnailAttr": "data-original, data-src, src",
+                "detailUrl": "a[href*='/movies/'], a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video, iframe",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://pornhd4k.net"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "pornhd4k"
+        },
+        {
+            "id": "pornhouse",
+            "name": "PornHouse",
+            "enabled": true,
+            "baseUrl": "https://pornhouse.me",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/porn-hd-free-full-1080p/page-{page}",
+                "categories": "/tag/asian"
+            },
+            "selectors": {
+                "item": "div.item, div.ml-item, div.video-item",
+                "title": "img[alt], a.title, h3 a, [title], a",
+                "thumbnail": "img[data-original], img[data-src], img",
+                "thumbnailAttr": "data-original, data-src, src",
+                "detailUrl": "a[href*='/movies/'], a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video, iframe",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://pornhouse.me"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "pornhouse"
+        },
+        {
+            "id": "pornmz",
+            "name": "PornMZ",
+            "enabled": true,
+            "baseUrl": "https://pornmz.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}?filter=latest",
+                "categories": "/categories"
+            },
+            "selectors": {
+                "item": "article.post, article.thumb-block, article.video-preview-item, article, div.item",
+                "title": "a[title], h2.entry-title a, h2 a, a.title, a",
+                "thumbnail": "img.video-main-thumb, img",
+                "thumbnailAttr": "src",
+                "detailUrl": "a[href*='/video/id='], a[href*='/video/'], a[href*='pornmz.com/video/'], a",
+                "duration": ".duration",
+                "detailTitle": "h1.entry-title, h1",
+                "detailDescription": ".entry-content p, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "iframe, video",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Aggregation Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://pornmz.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "pornmz"
+        },
+        {
+            "id": "pornstars_tube",
+            "name": "Pornstars.tube",
+            "enabled": true,
+            "baseUrl": "https://pornstars.tube",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/models/",
+                "search": "/search/{query}/",
+                "page": "/models/{page}/",
+                "categories": "/models/"
+            },
+            "selectors": {
+                "item": "div.item, div.video-card, div.thumb",
+                "title": "a.title, [title], img[alt], a",
+                "thumbnail": "img[data-src], img[src], img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/videos/'], a[href*='/models/'], a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://pornstars.tube",
+                "http://pornstars.tube"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "pornstars.tube"
+        },
+        {
+            "id": "sxyprn",
+            "name": "SxyPrn",
+            "enabled": true,
+            "baseUrl": "https://sxyprn.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/orgasm/{page}",
+                "categories": "/popular/top-pop.html"
+            },
+            "selectors": {
+                "item": "div.post_el_small:not(.post_el_post), div.post_el:not(.post_el_post)",
+                "title": "div.post_text, a.ps_link, a[title]",
+                "thumbnail": "img.mini_post_vid_thumb, img[src*='trafficdeposit.com'], .post_vid_thumb img, img",
+                "thumbnailAttr": "src, data-src",
+                "detailUrl": "a[href*='/post/']",
+                "duration": ".post_control_time, .duration",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video#player_el, video.player_el, div.ypsv-download, video, iframe",
+                "videoSource": "video#player_el, video.player_el, div.ypsv-download a, a[download], video source[src], video[src]",
+                "videoSourceAttr": "src, href",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://sxyprn.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "sxyprn"
+        },
+        {
+            "id": "watchxxxfree",
+            "name": "WatchXXXFree",
+            "enabled": true,
+            "baseUrl": "https://watchxxxfree.xyz",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/?filter=latest",
+                "search": "/?s={query}",
+                "page": "/page/{page}/?filter=latest",
+                "categories": "/categories/"
+            },
+            "selectors": {
+                "item": "div.videos-list article",
+                "title": "a[title], img[alt], h2.entry-title a, h2 a, a",
+                "thumbnail": "img.video-main-thumb, img",
+                "thumbnailAttr": "src",
+                "detailUrl": "a[href*='watchxxxfree.xyz/'], a[href*='/'], a",
+                "duration": ".duration",
+                "detailTitle": "h1.entry-title, h1",
+                "detailDescription": ".entry-content p, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "iframe[src*='luluvdo'], iframe[src*='lulustream'], iframe[src*='firestream'], iframe[src*='playmogo'], iframe[src*='vixeo.io'], iframe, video",
+                "videoSource": "iframe[src*='luluvdo'], iframe[src*='lulustream'], iframe[src*='firestream'], iframe[src*='playmogo'], iframe[src*='vixeo.io'], video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Aggregation Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://watchxxxfree.xyz",
+                "https://justfullporn.net"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "watchxxxfree"
+        },
+        {
+            "id": "lalamasa",
+            "name": "LalaMasa",
+            "enabled": true,
+            "baseUrl": "https://lalamasa.mobi",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/",
+                "categories": "/categories/"
+            },
+            "selectors": {
+                "item": "article.vcard, article, div.item",
+                "title": "h3.vtitle, .vtitle, h2 a, a.vtitle, h2",
+                "thumbnail": ".thumb, img",
+                "thumbnailAttr": "style",
+                "detailUrl": "a",
+                "duration": "span.dur, .badge-duration",
+                "detailTitle": "h1",
+                "detailDescription": ".entry-content p, .video-details",
+                "detailThumbnail": "video[poster], meta[property='og:image'], img",
+                "player": "video, iframe",
+                "videoSource": "video source[src], source[type='video/mp4'], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://lalamasa.mobi"
+            ],
+            "familyId": "masa_network_family",
+            "validationMarker": "lalamasa"
+        },
+        {
+            "id": "watchoerotic",
+            "name": "WatchOErotic",
+            "enabled": true,
+            "baseUrl": "https://watchoerotic.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/",
+                "categories": "/genre/desi/"
+            },
+            "selectors": {
+                "item": ".ml-item, div.ml-item",
+                "title": ".mli-info h2, h2, a[oldtitle], img[alt]",
+                "thumbnail": "img.mli-thumb, img",
+                "thumbnailAttr": "data-original, src",
+                "detailUrl": "a.ml-mask, a",
+                "duration": ".mli-quality",
+                "detailTitle": "h1, h2.film-name, .film-info h1, .entry-title",
+                "detailDescription": ".film-desc, .film-description, p",
+                "detailThumbnail": "meta[property='og:image'], img.thumb, img",
+                "player": "iframe[src*='streamoupload'], iframe[data-lazy-src*='streamoupload'], iframe, video",
+                "videoSource": "iframe[src*='streamoupload'], iframe[data-lazy-src*='streamoupload']",
+                "videoSourceAttr": "src, data-lazy-src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://watchoerotic.com"
+            ],
+            "familyId": "erotic_movies_family",
+            "validationMarker": "watchoerotic"
+        },
+        {
+            "id": "prmovies",
+            "name": "PRMovies",
+            "enabled": true,
+            "baseUrl": "https://prmovies.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/account/",
+                "search": "/?s={query}",
+                "page": "/account/page/{page}/",
+                "categories": "/account/"
+            },
+            "selectors": {
+                "item": ".ml-item, div.ml-item",
+                "title": ".mli-info h2, h2, a[oldtitle], img[alt]",
+                "thumbnail": "img.mli-thumb, img",
+                "thumbnailAttr": "data-original, src",
+                "detailUrl": "a.ml-mask, a",
+                "duration": ".mli-quality",
+                "detailTitle": "[itemprop='name'], h3[itemprop='name'], h1, h2.film-name, .film-info h1, .entry-title",
+                "detailDescription": "[itemprop='description'], .desc, .film-desc, .film-description, p",
+                "detailThumbnail": "meta[property='og:image'], [itemprop='image'], [itemprop='thumbnailUrl'], img.thumb, img",
+                "player": "iframe[src*='streamoupload'], iframe[data-lazy-src*='streamoupload'], iframe, video",
+                "videoSource": "iframe[src*='streamoupload'], iframe[data-lazy-src*='streamoupload']",
+                "videoSourceAttr": "src, data-lazy-src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://prmovies.com"
+            ],
+            "familyId": "erotic_movies_family",
+            "validationMarker": "prmovies"
+        },
+        {
+            "id": "prmovies_church",
+            "name": "PRMovies Church",
+            "enabled": true,
+            "baseUrl": "https://prmovies.church",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/bollywood-movies-on-prmovies/",
+                "search": "/?s={query}",
+                "page": "/bollywood-movies-on-prmovies/page/{page}/",
+                "categories": "/account/"
+            },
+            "selectors": {
+                "item": ".ml-item, div.ml-item",
+                "title": ".mli-info h2, h2, a[oldtitle], img[alt]",
+                "thumbnail": "img.mli-thumb, img",
+                "thumbnailAttr": "data-original, src",
+                "detailUrl": "a.ml-mask, a",
+                "duration": ".mli-quality",
+                "detailTitle": "[itemprop='name'], h3[itemprop='name'], h1, h2.film-name, .film-info h1, .entry-title",
+                "detailDescription": "[itemprop='description'], .desc, .film-desc, .film-description, p",
+                "detailThumbnail": "meta[property='og:image'], [itemprop='image'], [itemprop='thumbnailUrl'], img.thumb, img",
+                "player": "iframe[src*='streamoupload'], iframe[data-lazy-src*='streamoupload'], iframe, video",
+                "videoSource": "iframe[src*='streamoupload'], iframe[data-lazy-src*='streamoupload']",
+                "videoSourceAttr": "src, data-lazy-src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://prmovies.church",
+                "https://prmovies.energy"
+            ],
+            "familyId": "cinema_movies_family",
+            "validationMarker": "prmovies"
+        },
+        {
+            "id": "pornhub",
+            "name": "PornHub",
+            "enabled": true,
+            "baseUrl": "https://www.pornhub.org",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/video?o=mr",
+                "search": "/video/search?search={query}",
+                "page": "/video?o=mr&page={page}",
+                "categories": "/categories"
+            },
+            "selectors": {
+                "item": "li.videoBox, .pcVideoListItem",
+                "title": "span.title a[title], .title a, a[title]",
+                "thumbnail": "img[data-src], img[src]",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='view_video.php'], a.linkVideoThumb",
+                "duration": "var.duration, .duration",
+                "detailTitle": "h1.title span, h1.title, h1",
+                "detailDescription": ".video-description, .user-desc, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "div#player, video, iframe",
+                "videoSource": "meta[property='og:video:url'], video source",
+                "videoSourceAttr": "content, src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.pornhub.org",
+                "https://www.pornhub.com",
+                "https://www.pornhub.net"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "pornhub"
+        },
+        {
+            "id": "xhamster",
+            "name": "xHamster",
+            "enabled": true,
+            "baseUrl": "https://xhamster.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/newest",
+                "search": "/search/{query}",
+                "page": "/newest/{page}",
+                "categories": "/categories"
+            },
+            "selectors": {
+                "item": "[data-video-id], .thumb-list__item.video-thumb",
+                "title": "a[data-video-title], a.video-thumb__image-container[aria-label], .video-thumb-info__name, a[title]",
+                "thumbnail": "img.thumb-image-container__image, img[src]",
+                "thumbnailAttr": "src, data-src",
+                "detailUrl": "a[href*='/videos/']",
+                "duration": "[data-role='video-duration'], .duration",
+                "detailTitle": "h1.page-title, h1",
+                "detailDescription": ".video-description, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video, iframe",
+                "videoSource": "meta[property='og:video:url'], video source",
+                "videoSourceAttr": "content, src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://xhamster.com",
+                "https://xhamster3.com",
+                "https://xhamster.desi"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "xhamster"
+        },
+        {
+            "id": "redtube",
+            "name": "RedTube",
+            "enabled": true,
+            "baseUrl": "https://www.redtube.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?search={query}",
+                "page": "/?page={page}",
+                "categories": "/categories"
+            },
+            "selectors": {
+                "item": "li.video_item, div.video_block, .video-thumb, li[data-video-id]",
+                "title": "a[title], .video_title a",
+                "thumbnail": "img[data-src], img[src]",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a.video_link, a[href*='/']",
+                "duration": ".video_duration, .duration",
+                "detailTitle": "h1.video_title, h1",
+                "detailDescription": ".video_description, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "div#redtube_player, video, iframe",
+                "videoSource": "meta[property='og:video:url']",
+                "videoSourceAttr": "content",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.redtube.net",
+                "https://www.redtube.com",
+                "https://www.redtube.xxx"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "redtube"
+        },
+        {
+            "id": "youporn",
+            "name": "YouPorn",
+            "enabled": true,
+            "baseUrl": "https://www.you-porn.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/most_recent/",
+                "search": "/search/?query={query}",
+                "page": "/most_recent/?page={page}",
+                "categories": "/categories/"
+            },
+            "selectors": {
+                "item": "div.video-box, .four-col-content-item, .video_thumb, [data-video-id]",
+                "title": "a[title], .video-title, span.title",
+                "thumbnail": "img[data-src], img[src]",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/watch/']",
+                "duration": ".video-duration, .duration",
+                "detailTitle": "h1.watch-video-title, h1",
+                "detailDescription": ".video-description, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video, iframe",
+                "videoSource": "meta[property='og:video:url']",
+                "videoSourceAttr": "content",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.you-porn.com",
+                "https://m.youporn.com",
+                "https://www.youporn.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "youporn"
+        },
+        {
+            "id": "tube8",
+            "name": "Tube8",
+            "enabled": true,
+            "baseUrl": "https://www.tube8.es",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/latest/",
+                "search": "/searches?q={query}",
+                "page": "/latest/page/{page}/",
+                "categories": "/categories.html"
+            },
+            "selectors": {
+                "item": "div.video_box, .video-box, div.thumb, [data-video-id]",
+                "title": "a[title], .video_title, .title",
+                "thumbnail": "img[data-src], img[src]",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/porn-video/'], a.video_link",
+                "duration": ".video_duration, .duration",
+                "detailTitle": "h1.video_title, h1",
+                "detailDescription": ".video_description, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video, iframe",
+                "videoSource": "meta[property='og:video:url']",
+                "videoSourceAttr": "content",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.tube8.es",
+                "https://www.tube8.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "tube8"
+        },
+        {
+            "id": "freeonestube",
+            "name": "FreeOnes Tube",
+            "enabled": true,
+            "baseUrl": "https://freeonestube.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/search?q={query}",
+                "page": "/page/{page}/",
+                "categories": "/categories"
+            },
+            "selectors": {
+                "item": "a.thumb, div.thumb",
+                "title": "a[title], img[alt]",
+                "thumbnail": "img.video-img, img",
+                "thumbnailAttr": "src, data-src",
+                "detailUrl": "a.thumb, a[href*='/video/']",
+                "duration": ".duration, span.badge",
+                "detailTitle": "h1.page-title, h1",
+                "detailDescription": ".video-description, .desc, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video#fxgp-vod-scene-player, video, iframe",
+                "videoSource": "video source, meta[property='og:video:url']",
+                "videoSourceAttr": "src, content",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://freeonestube.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "freeones"
+        },
+        {
+            "id": "spankbang",
+            "name": "SpankBang",
+            "enabled": true,
+            "baseUrl": "https://spankbang.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/trending_videos",
+                "search": "/s/{query}/",
+                "page": "/trending_videos/{page}/",
+                "categories": "/categories"
+            },
+            "selectors": {
+                "item": "div.video-item, div.item",
+                "title": "div.video-item a.title, a.title, .n a, a[title]",
+                "thumbnail": "img[data-src], img.cover, img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/video/'], a.title",
+                "duration": "span.l, .duration, span.length",
+                "detailTitle": "h1",
+                "detailDescription": ".video-description, .metadata, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video#video_player, video, div#player",
+                "videoSource": "video source[src], meta[property='og:video:url']",
+                "videoSourceAttr": "src, content",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://spankbang.com",
+                "https://spankbang.party",
+                "https://spankbang.porn",
+                "https://spankbang.net"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "video-item"
+        },
+        {
+            "id": "tnaflix",
+            "name": "TNAFlix",
+            "enabled": true,
+            "baseUrl": "https://www.tnaflix.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/search.php?what={query}",
+                "page": "/featured/{page}",
+                "categories": "/categories"
+            },
+            "selectors": {
+                "item": "div.video-list > div, div[data-vid], a.video-thumb",
+                "title": "a[title], img[alt], a.video-thumb",
+                "thumbnail": "img[data-src], img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a.video-thumb, a[href*='/video']",
+                "duration": "div.video-duration, .thumb-icon",
+                "detailTitle": "h1, .video-title",
+                "detailDescription": ".video-description, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video, div#player",
+                "videoSource": "video source[src], meta[property='og:video:url']",
+                "videoSourceAttr": "src, content",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.tnaflix.com",
+                "https://tnaflix.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "video-list"
+        },
+        {
+            "id": "empflix",
+            "name": "EmpFlix",
+            "enabled": true,
+            "baseUrl": "https://www.empflix.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/search.php?what={query}",
+                "page": "/featured/{page}",
+                "categories": "/categories"
+            },
+            "selectors": {
+                "item": "div.video-list > div, div[data-vid], a.video-thumb",
+                "title": "a[title], img[alt], a.video-thumb",
+                "thumbnail": "img[data-src], img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a.video-thumb, a[href*='/video']",
+                "duration": "div.video-duration, .thumb-icon",
+                "detailTitle": "h1, .video-title",
+                "detailDescription": ".video-description, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video, div#player",
+                "videoSource": "video source[src], meta[property='og:video:url']",
+                "videoSourceAttr": "src, content",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.empflix.com",
+                "https://empflix.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "video-list"
+        },
+        {
+            "id": "beeg",
+            "name": "Beeg",
+            "enabled": true,
+            "baseUrl": "https://beeg.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/search?q={query}",
+                "page": "/?p={page}",
+                "categories": "/tags"
+            },
+            "selectors": {
+                "item": "div.video, div.thumb, .item",
+                "title": "a[title], .title, h3",
+                "thumbnail": "img[data-src], img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/video/'], a[href*='/v/'], a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": ".description, .content, article p",
+                "detailThumbnail": ".featured img, meta[property='og:image']",
+                "player": "video, iframe",
+                "videoSource": "video source, meta[property='og:video:url']",
+                "videoSourceAttr": "src, content",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://beeg.com",
+                "https://www.beeg.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "beeg"
+        },
+        {
+            "id": "youjizz",
+            "name": "YouJizz",
+            "enabled": true,
+            "baseUrl": "https://www.youjizz.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/search/{query}-{page}.html",
+                "page": "/most-popular/{page}.html",
+                "categories": "/categories"
+            },
+            "selectors": {
+                "item": "div.video-thumb, div.thumb",
+                "title": "a.title, a[title], .video-title",
+                "thumbnail": "img.lazy, img[data-original], img",
+                "thumbnailAttr": "data-original, src",
+                "detailUrl": "a[href*='/videos/'], a.thumb",
+                "duration": "span.time, .duration",
+                "detailTitle": "h1.title, h1",
+                "detailDescription": ".video-description, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video, div#player",
+                "videoSource": "dataEncodings, mp4Encodings, video source[src]",
+                "videoSourceAttr": "src, content",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.youjizz.com",
+                "https://youjizz.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "video-thumb"
+        },
+        {
+            "id": "eporner",
+            "name": "Eporner",
+            "enabled": true,
+            "baseUrl": "https://www.eporner.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/search/{query}/{page}/",
+                "page": "/0/{page}/",
+                "categories": "/categories/"
+            },
+            "selectors": {
+                "item": "div.mb, div.video-box, div[data-id]",
+                "title": "p.mbtitle a, a[title], .mbtitle",
+                "thumbnail": "img[data-src], img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href^='/video-'], p.mbtitle a",
+                "duration": "span.mblength, span.duration",
+                "detailTitle": "h1, .video-title",
+                "detailDescription": ".video-description, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video#video-player, video",
+                "videoSource": "video source[src], a[href*='/dload/'], meta[property='og:video:url']",
+                "videoSourceAttr": "src, href, content",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.eporner.com",
+                "https://eporner.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "video-box"
+        },
+        {
+            "id": "drtuber",
+            "name": "DrTuber",
+            "enabled": true,
+            "baseUrl": "https://www.drtuber.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/search/videos/{query}/{page}/",
+                "page": "/latest-updates/{page}/",
+                "categories": "/categories"
+            },
+            "selectors": {
+                "item": "div.thumbs_box > div, div.th, div.item",
+                "title": "a.title, a[title], .rate_thumb a",
+                "thumbnail": "img[data-src], img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/video/']",
+                "duration": "span.duration, .time",
+                "detailTitle": "h1, .page-title",
+                "detailDescription": ".video-description, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video, div#player",
+                "videoSource": "video source[src], meta[property='og:video:url']",
+                "videoSourceAttr": "src, content, poster",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.drtuber.com",
+                "https://www.drtuber.desi",
+                "https://drtuber.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "thumbs_box"
+        },
+        {
+            "id": "nuvid",
+            "name": "NuVid",
+            "enabled": true,
+            "baseUrl": "https://www.nuvid.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/search/videos/{query}/{page}",
+                "page": "/videos/{page}",
+                "categories": "/categories"
+            },
+            "selectors": {
+                "item": "div.videos > div, div.th, div.video-thumb",
+                "title": "a.title, a[title], .ch-video a",
+                "thumbnail": "img[data-src], img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/video/']",
+                "duration": "span.duration, .time",
+                "detailTitle": "h1, .page-title",
+                "detailDescription": ".video-description, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video, div#player",
+                "videoSource": "video source[src], meta[property='og:video:url']",
+                "videoSourceAttr": "src, content, poster",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.nuvid.com",
+                "https://www.nuvid.org",
+                "https://nuvid.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "videos"
+        },
+        {
+            "id": "pornone",
+            "name": "PornOne",
+            "enabled": true,
+            "baseUrl": "https://pornone.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/videos/",
+                "search": "/search/{query}/page/{page}/",
+                "page": "/videos/page/{page}/",
+                "categories": "/categories/"
+            },
+            "selectors": {
+                "item": "div.thumb-block, div.video-box, div.item",
+                "title": "a.title, p.title a, a[title]",
+                "thumbnail": "img.thumb, img[data-src], img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/video/'], a[href*='/videos/']",
+                "duration": "span.duration, .time",
+                "detailTitle": "h1, .page-title",
+                "detailDescription": ".video-description, p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video, div#player",
+                "videoSource": "video source[src], meta[property='og:video:url']",
+                "videoSourceAttr": "src, content",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://pornone.com",
+                "https://www.pornone.com",
+                "https://www.vporn.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "thumb-block"
+        },
+        {
+            "id": "definebabe",
+            "name": "DefineBabe",
+            "enabled": true,
+            "baseUrl": "https://www.definebabe.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/videos/",
+                "search": "/search/?s={query}",
+                "page": "/videos/?page={page}",
+                "categories": "/categories/"
+            },
+            "selectors": {
+                "item": "div.models-videos__col, div.models-videos > div",
+                "title": "a.models-image, a[title], .title",
+                "thumbnail": "img.img-fluid, img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a.models-image, a[href*='/video/']",
+                "duration": ".duration, span.time",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "#DF_player, video",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.definebabe.com",
+                "https://definebabe.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "definebabe"
+        },
+        {
+            "id": "three_movs",
+            "name": "3Movs",
+            "enabled": true,
+            "baseUrl": "https://www.3movs.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/latest-updates/",
+                "search": "/search/{query}/",
+                "page": "/latest-updates/{page}/",
+                "categories": "/categories/"
+            },
+            "selectors": {
+                "item": "div.item.thumb:not(.slider *):not(.swiper-slide *), div.item:not(.slider *):not(.swiper-slide *):not(.pagination *):not(.navigation *)",
+                "title": "a[title], a.title, [title]",
+                "thumbnail": "img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a[href*='/videos/']",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "#kt_player, video",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://www.3movs.com",
+                "https://3movs.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "3movs"
+        },
+        {
+            "id": "txxx",
+            "name": "TXXX",
+            "enabled": true,
+            "baseUrl": "https://txxx.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/api/json/videos2/86400/str/latest-updates/60/..1.all...json",
+                "search": "/api/videos2.php?params=86400/str/relevance/60/search..1.all...&s={query}",
+                "page": "/api/json/videos2/86400/str/latest-updates/60/..{page}.all...json",
+                "categories": "/api/json/categories/86400/str.all.en.json"
+            },
+            "selectors": {
+                "item": "div.video-item, div.item",
+                "title": "a.title, [title]",
+                "thumbnail": "img",
+                "thumbnailAttr": "src",
+                "detailUrl": "a[href*='/videos/']",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://txxx.com",
+                "https://www.txxx.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "txxx"
+        },
+        {
+            "id": "upornia",
+            "name": "Upornia",
+            "enabled": true,
+            "baseUrl": "https://upornia.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/api/json/videos2/86400/str/latest-updates/60/..1.all...json",
+                "search": "/api/videos2.php?params=86400/str/relevance/60/search..1.all...&s={query}",
+                "page": "/api/json/videos2/86400/str/latest-updates/60/..{page}.all...json",
+                "categories": "/api/json/categories/86400/str.all.en.json"
+            },
+            "selectors": {
+                "item": "div.video-item, div.item",
+                "title": "a.title, [title]",
+                "thumbnail": "img",
+                "thumbnailAttr": "src",
+                "detailUrl": "a[href*='/videos/']",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://upornia.com",
+                "https://www.upornia.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "upornia"
+        },
+        {
+            "id": "hdzog",
+            "name": "HDZog",
+            "enabled": true,
+            "baseUrl": "https://hdzog.com",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/api/json/videos2/86400/str/latest-updates/60/..1.all...json",
+                "search": "/api/videos2.php?params=86400/str/relevance/60/search..1.all...&s={query}",
+                "page": "/api/json/videos2/86400/str/latest-updates/60/..{page}.all...json",
+                "categories": "/api/json/categories/86400/str.all.en.json"
+            },
+            "selectors": {
+                "item": "div.video-item, div.item",
+                "title": "a.title, [title]",
+                "thumbnail": "img",
+                "thumbnailAttr": "src",
+                "detailUrl": "a[href*='/videos/']",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://hdzog.com",
+                "https://www.hdzog.com"
+            ],
+            "familyId": "clean_tube_family",
+            "validationMarker": "hdzog"
+        },
+        {
+            "id": "movienerds",
+            "name": "MovieNerds",
+            "enabled": true,
+            "baseUrl": "https://movienerds.site",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "https://api.themoviedb.org/3/trending/all/day?api_key=43dcff37851866de14d8acdce668a509",
+                "search": "https://api.themoviedb.org/3/search/multi?api_key=43dcff37851866de14d8acdce668a509&query={query}",
+                "page": "https://api.themoviedb.org/3/trending/all/day?api_key=43dcff37851866de14d8acdce668a509&page={page}",
+                "categories": "https://api.themoviedb.org/3/genre/movie/list?api_key=43dcff37851866de14d8acdce668a509"
+            },
+            "selectors": {
+                "item": "div.movie-card, div.item",
+                "title": "h2, h3, .title",
+                "thumbnail": "img",
+                "thumbnailAttr": "src",
+                "detailUrl": "a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://movienerds.site",
+                "https://api.movienerds.online",
+                "https://api.themoviedb.org"
+            ],
+            "familyId": "movie_series_family",
+            "validationMarker": "movienerds"
+        },
+        {
+            "id": "cineapse",
+            "name": "Cineapse",
+            "enabled": true,
+            "baseUrl": "https://cineapse.net",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "https://cineapse.net/tmdb/trending/all/day",
+                "search": "https://cineapse.net/tmdb/search/multi?query={query}",
+                "page": "https://cineapse.net/tmdb/discover/movie?sort_by=popularity.desc&page={page}",
+                "categories": "https://cineapse.net/api/categories?kind=movie"
+            },
+            "selectors": {
+                "item": "div.movie-card, div.item",
+                "title": "h2, h3, .title",
+                "thumbnail": "img",
+                "thumbnailAttr": "src",
+                "detailUrl": "a",
+                "duration": ".duration",
+                "detailTitle": "h1",
+                "detailDescription": "p",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "video",
+                "videoSource": "video source[src], video[src]",
+                "videoSourceAttr": "src",
+                "relatedItems": ".related-videos article, .related article"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://cineapse.net"
+            ],
+            "familyId": "movie_series_family",
+            "validationMarker": "cineapse"
+        }
+    ]
 }

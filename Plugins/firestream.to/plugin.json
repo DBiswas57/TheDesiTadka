@@ -1,0 +1,39 @@
+{
+  "id": "firestream",
+  "name": "FireStream Video Host Resolver Plugin",
+  "version": "1.0.0",
+  "description": "Resolves external video player iframes from firestream.site, firestream.to, and related mirrors to direct HLS/MP4 CDN streams.",
+  "author": "TheDesiTadka Engine",
+  "type": "host_resolver",
+  "domains": [
+    "firestream.site",
+    "firestream.to",
+    "firestream.me",
+    "firestream.cc",
+    "firestream.org"
+  ],
+  "urlPatterns": [
+    "^https?://(?:www\\.)?firestream\\.(?:site|to|me|cc|org)/(?:e|v|embed)/([A-Za-z0-9_-]+)",
+    "^https?://(?:www\\.)?firestream\\.(?:site|to|me|cc|org)/([A-Za-z0-9_-]+)"
+  ],
+  "dom": {
+    "tokenBlobSelector": "script#token-blob",
+    "slugPattern": "/(?:e|v|embed)/([A-Za-z0-9_-]+)"
+  },
+  "resolution": {
+    "method": "token_blob_api_resolve",
+    "steps": [
+      "1. Extract video slug from embed URL (e.g. /e/{slug})",
+      "2. Fetch embed HTML page",
+      "3. Extract base64 token blob from <script id=\"token-blob\" type=\"text/plain\"> element",
+      "4. Send POST request to https://{domain}/api/videos/{slug}/resolve with JSON body {\"blob\": \"...\"}",
+      "5. Parse JSON response and extract 'signedVideoUrl'",
+      "6. Play direct HLS stream (video.m3u8) from fr-cdn-*.firestream.to with proper Referer and Origin headers"
+    ]
+  },
+  "headers": {
+    "Referer": "https://firestream.site/",
+    "Origin": "https://firestream.site",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+  }
+}

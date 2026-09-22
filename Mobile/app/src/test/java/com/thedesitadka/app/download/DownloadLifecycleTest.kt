@@ -111,8 +111,8 @@ class DownloadLifecycleTest {
         )
 
         assertTrue(liveSource.canPlay)
-        assertFalse(liveSource.canDownload)
-        assertEquals(DownloadType.UNSUPPORTED, liveSource.downloadType)
+        assertTrue(liveSource.canDownload)
+        assertEquals(DownloadType.HLS_OFFLINE, liveSource.downloadType)
 
         val dashSource = MediaSource(
             url = "https://cdn.example.com/manifest.mpd",
@@ -136,5 +136,85 @@ class DownloadLifecycleTest {
         val contentRangeHeader = "bytes 4096-16383/16384"
         val totalFromHeader = contentRangeHeader.substringAfterLast("/").toLongOrNull()
         assertEquals(totalExpected, totalFromHeader)
+    }
+
+    @Test
+    fun testHlsMasterPlaylistVariantSelectionAndSniffing() {
+        val masterPlaylist = """
+            #EXTM3U
+            #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=496002,RESOLUTION=640x360
+            https://cdn.example.com/360p/index.m3u8
+            #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=1359698,RESOLUTION=1280x720
+            https://cdn.example.com/720p/index.m3u8
+            #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=726467,RESOLUTION=854x480
+            https://cdn.example.com/480p/index.m3u8
+        """.trimIndent()
+
+        // 1. Sniff test: Starts with #EXTM3U
+        assertTrue(masterPlaylist.trimStart().startsWith("#EXTM3U"))
+
+        // 2. Parse master playlist variants and select highest bandwidth
+        val lines = masterPlaylist.lines()
+        var bestVariantUrl: String? = null
+        var maxBandwidth = -1L
+
+        for (i in lines.indices) {
+            val line = lines[i].trim()
+            if (line.startsWith("#EXT-X-STREAM-INF")) {
+                val bandwidthMatch = Regex("""BANDWIDTH=(\d+)""").find(line)
+                val bandwidth = bandwidthMatch?.groupValues?.get(1)?.toLongOrNull() ?: 0L
+
+                for (j in (i + 1) until lines.size) {
+                    val nextLine = lines[j].trim()
+                    if (nextLine.isNotBlank() && !nextLine.startsWith("#")) {
+                        if (bandwidth >= maxBandwidth || bestVariantUrl == null) {
+                            maxBandwidth = bandwidth
+                            bestVariantUrl = nextLine
+                        }
+                        break
+                    }
+                }
+            }
+        }
+
+        assertEquals(1359698L, maxBandwidth)
+        assertEquals("https://cdn.example.com/720p/index.m3u8", bestVariantUrl)
+
+        // 3. Media playlist with segments and fMP4 init map
+        val mediaPlaylist = """
+            #EXTM3U
+            #EXT-X-VERSION:4
+            #EXT-X-TARGETDURATION:6
+            #EXT-X-MEDIA-SEQUENCE:100
+            #EXT-X-MAP:URI="init.mp4"
+            #EXTINF:6.0,
+            seg-1.m4s
+            #EXTINF:6.0,
+            seg-2.m4s
+        """.trimIndent()
+
+        val mediaLines = mediaPlaylist.lines()
+        val segments = mutableListOf<String>()
+        var seq = 0L
+
+        for (l in mediaLines) {
+            val trimmed = l.trim()
+            if (trimmed.startsWith("#EXT-X-MEDIA-SEQUENCE:")) {
+                seq = trimmed.substringAfter(":").toLongOrNull() ?: 0L
+            } else if (trimmed.startsWith("#EXT-X-MAP:")) {
+                val match = Regex("""URI="([^"]+)"""").find(trimmed)
+                if (match != null) {
+                    segments.add(match.groupValues[1])
+                }
+            } else if (trimmed.isNotBlank() && !trimmed.startsWith("#")) {
+                segments.add(trimmed)
+            }
+        }
+
+        assertEquals(100L, seq)
+        assertEquals(3, segments.size)
+        assertEquals("init.mp4", segments[0])
+        assertEquals("seg-1.m4s", segments[1])
+        assertEquals("seg-2.m4s", segments[2])
     }
 }

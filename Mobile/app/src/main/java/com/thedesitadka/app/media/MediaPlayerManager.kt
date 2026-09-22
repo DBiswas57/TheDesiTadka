@@ -13,10 +13,12 @@ import androidx.media3.common.util.UnstableApi
 import android.net.Uri
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import com.thedesitadka.core.model.MediaSource
 import com.thedesitadka.core.model.MediaSourceType
+import com.thedesitadka.core.network.NetworkClient
 import com.thedesitadka.core.security.StreamHubLogger
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
@@ -53,6 +55,7 @@ class MediaPlayerManager(
 
     private fun initPlayer() {
         val httpDataSourceFactory = DefaultHttpDataSource.Factory()
+            .setUserAgent(NetworkClient.DEFAULT_USER_AGENT)
             .setAllowCrossProtocolRedirects(true)
             .setConnectTimeoutMs(15000)
             .setReadTimeoutMs(25000)
@@ -193,9 +196,28 @@ class MediaPlayerManager(
         if (!isOffline) {
             // Inject domain-matched Referer required by media CDNs if not already present
             val urlLower = mediaSource.url.lowercase()
-            val existingRef = requestProperties["Referer"]
-            if (existingRef.isNullOrBlank()) {
-                when {
+            if (urlLower.contains("twimg.com")) {
+                requestProperties.remove("Referer")
+                requestProperties.remove("Origin")
+            } else {
+                val existingRef = requestProperties["Referer"]
+                if (existingRef.isNullOrBlank()) {
+                    when {
+                        urlLower.contains("pornhouse.me") || urlLower.contains("cdn.pornhouse.me") -> requestProperties["Referer"] = "https://pornhouse.me/"
+                        urlLower.contains("pornhd4k.net") || urlLower.contains("cdnamz.me") -> requestProperties["Referer"] = "https://pornhd4k.net/"
+                        urlLower.contains("pornmz.com") -> requestProperties["Referer"] = "https://pornmz.com/"
+                        urlLower.contains("pornstars.tube") -> requestProperties["Referer"] = "https://pornstars.tube/"
+                        urlLower.contains("sxyprn.com") || urlLower.contains("trafficdeposit.com") || urlLower.contains("bxcdn.net") || urlLower.contains("bkcdn.net") -> requestProperties["Referer"] = "https://sxyprn.com/"
+                    urlLower.contains("max.porn") -> requestProperties["Referer"] = "https://max.porn/"
+                    urlLower.contains("ok.porn") -> requestProperties["Referer"] = "https://ok.porn/"
+                    urlLower.contains("ok.xxx") -> requestProperties["Referer"] = "https://ok.xxx/"
+                    urlLower.contains("perfectgirls.xxx") -> requestProperties["Referer"] = "https://www.perfectgirls.xxx/"
+                    urlLower.contains("pornhat.com") -> requestProperties["Referer"] = "https://www.pornhat.com/"
+                    urlLower.contains("netfapx.com") || urlLower.contains("videos.netfapx.com") -> requestProperties["Referer"] = "https://netfapx.com/"
+                    urlLower.contains("porn4days.pw") || urlLower.contains("iceyfile.net") -> requestProperties["Referer"] = "https://porn4days.pw/"
+                    urlLower.contains("hello.porn") || urlLower.contains("privatehost.com") -> requestProperties["Referer"] = "https://hello.porn/"
+                    urlLower.contains("fpo.xxx") -> requestProperties["Referer"] = "https://www.fpo.xxx/"
+                    urlLower.contains("bigcdn.cc") || urlLower.contains("mydaddy.cc") || urlLower.contains("hqporner") -> requestProperties["Referer"] = "https://hqporner.com/"
                     urlLower.contains("ixiporn") -> requestProperties["Referer"] = "https://ixiporn.live/"
                     urlLower.contains("wowuncut") -> requestProperties["Referer"] = "https://wowuncut.com/"
                     urlLower.contains("antarvasna") -> requestProperties["Referer"] = "https://antarvasnabf.com/"
@@ -208,22 +230,42 @@ class MediaPlayerManager(
                     urlLower.contains("ixifile") || urlLower.contains("streamclean") || urlLower.contains("cdn2.ixifile.xyz") || urlLower.contains("streamcrypt") -> {
                         requestProperties["Referer"] = if (urlLower.contains("ixiporn")) "https://ixiporn.live/" else "https://wowuncut.com/"
                     }
-                    urlLower.contains("mydown.biz") || urlLower.contains("masahub") -> requestProperties["Referer"] = "https://masahub2.com/"
+                    urlLower.contains("mydown.biz") || urlLower.contains("masahub") || urlLower.contains("lalamasa") -> requestProperties["Referer"] = if (urlLower.contains("lalamasa")) "https://lalamasa.mobi/" else "https://masahub2.com/"
+                    urlLower.contains("streamoupload") -> requestProperties["Referer"] = "https://streamoupload.xyz/"
+                    urlLower.contains("prmovies") -> requestProperties["Referer"] = "https://prmovies.com/"
                     urlLower.contains("pvtcdn.com") || urlLower.contains("masa49") -> requestProperties["Referer"] = "https://www.masa49.nl/"
-                    urlLower.contains("kamababa") -> requestProperties["Referer"] = "https://www.kamababa1.com/"
+                    urlLower.contains("kamababa") -> requestProperties["Referer"] = "https://www.mykamababa.com/"
                     urlLower.contains("fry99") -> requestProperties["Referer"] = "https://fry99.cc/"
                     urlLower.contains("hitmaal") -> requestProperties["Referer"] = "https://hitmaal.io/"
                     urlLower.contains("fsiblog") -> requestProperties["Referer"] = "https://fsiblogxx.com/"
                     urlLower.contains("webxseries") -> requestProperties["Referer"] = "https://webxseries.hot/"
+                    urlLower.contains("aagmaal.date") || urlLower.contains("aagmaal.run") -> requestProperties["Referer"] = "https://aagmaal.date/"
+                    urlLower.contains("cdn1.site") -> requestProperties["Referer"] = "https://cdn1.site/"
                     urlLower.contains("aagmaal") -> requestProperties["Referer"] = "https://aagmaal.com/"
                     urlLower.contains("xhpingcdn") || urlLower.contains("xhcdn") || urlLower.contains("xhamster") -> requestProperties["Referer"] = "https://xhamster.desi/"
                     urlLower.contains("chiggywiggy") -> requestProperties["Referer"] = "https://chiggywiggy.com/"
                     urlLower.contains("desibabe") || urlLower.contains("downloaddirect") -> requestProperties["Referer"] = "https://desibabe.to/"
                     urlLower.contains("desigirlxx") || urlLower.contains("playmate.to") -> requestProperties["Referer"] = "https://desigirlxx.beer/"
-                    urlLower.contains("desimaals") -> requestProperties["Referer"] = "https://www.desimaals.fun/"
                     urlLower.contains("desivideo") -> requestProperties["Referer"] = "https://desivideo.net/"
+                    urlLower.contains("definebabe.com") -> requestProperties["Referer"] = "https://www.definebabe.com/"
+                    urlLower.contains("3movs.com") -> requestProperties["Referer"] = "https://www.3movs.com/"
+                    urlLower.contains("txxx.com") || urlLower.contains("txxx.tube") -> requestProperties["Referer"] = "https://txxx.com/"
+                    urlLower.contains("upornia.com") -> requestProperties["Referer"] = "https://upornia.com/"
+                    urlLower.contains("hdzog.com") -> requestProperties["Referer"] = "https://hdzog.com/"
+                    urlLower.contains("movienerds") -> requestProperties["Referer"] = "https://movienerds.site/"
+                    urlLower.contains("cineapse") -> requestProperties["Referer"] = "https://cineapse.net/"
+                    else -> {
+                        try {
+                            val uri = Uri.parse(mediaSource.url)
+                            val host = uri.host
+                            if (!host.isNullOrBlank()) {
+                                requestProperties["Referer"] = "${uri.scheme ?: "https"}://$host/"
+                            }
+                        } catch (e: Exception) {}
+                    }
                 }
             }
+        }
 
             // Always ensure Origin matches Referer if Referer is present
             val referer = requestProperties["Referer"]
@@ -248,13 +290,10 @@ class MediaPlayerManager(
         val upstreamDataSourceFactory = if (isOffline) {
             DefaultDataSource.Factory(context)
         } else {
-            val httpDataSourceFactory = DefaultHttpDataSource.Factory()
-                .setUserAgent(requestProperties["User-Agent"] ?: "Mozilla/5.0")
-                .setAllowCrossProtocolRedirects(true)
-                .setConnectTimeoutMs(15000)
-                .setReadTimeoutMs(30000)
+            val okHttpDataSourceFactory = OkHttpDataSource.Factory(NetworkClient.okHttpClient)
+                .setUserAgent(requestProperties["User-Agent"] ?: NetworkClient.DEFAULT_USER_AGENT)
                 .setDefaultRequestProperties(requestProperties)
-            DefaultDataSource.Factory(context, httpDataSourceFactory)
+            DefaultDataSource.Factory(context, okHttpDataSourceFactory)
         }
 
         val sourceFactory = DefaultMediaSourceFactory(context)

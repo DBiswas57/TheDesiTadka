@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +33,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -108,6 +111,7 @@ fun HomeScreen(
     // Preserve selected category across navigation
     var selectedCategoryId by rememberSaveable { mutableStateOf("all") }
     var reloadTrigger by remember { mutableIntStateOf(0) }
+    var providerSearchQuery by remember { mutableStateOf("") }
 
     val challengeLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -117,7 +121,7 @@ fun HomeScreen(
         }
     }
 
-    val dashboardState by dashboardRepository.getDashboardState(selectedCategoryId).collectAsState()
+    val dashboardState by remember(selectedCategoryId) { dashboardRepository.getDashboardState(selectedCategoryId) }.collectAsState()
     val aggregatedVideos = dashboardState.videos
     val isLoading = dashboardState.isLoading
     val isRefreshing = dashboardState.isRefreshing
@@ -311,9 +315,14 @@ fun HomeScreen(
                 }
             }
 
-            // 4. Dedicated Providers Section (Separate from content items)
+            // 4. Dedicated Providers Section with search + alphabetical sort
             if (activeProviders.isNotEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
+                    val displayedProviders = remember(activeProviders, providerSearchQuery) {
+                        activeProviders
+                            .filter { providerSearchQuery.isBlank() || it.name.contains(providerSearchQuery, ignoreCase = true) }
+                            .sortedBy { it.name.lowercase() }
+                    }
                     Column(modifier = Modifier.padding(top = 12.dp)) {
                         Row(
                             modifier = Modifier
@@ -323,56 +332,65 @@ fun HomeScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "MEDIA PROVIDERS",
+                                text = if (providerSearchQuery.isBlank()) "MEDIA PROVIDERS (${activeProviders.size})" else "MEDIA PROVIDERS (${displayedProviders.size})",
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary,
                                     letterSpacing = 1.sp
                                 )
                             )
-                            Text(
-                                text = "${activeProviders.size} Sources",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                            // Compact inline search box
+                            BasicTextField(
+                                value = providerSearchQuery,
+                                onValueChange = { providerSearchQuery = it },
+                                singleLine = true,
+                                textStyle = MaterialTheme.typography.labelSmall.copy(
+                                    color = Color.White,
+                                    fontSize = 11.sp
+                                ),
+                                decorationBox = { innerTextField ->
+                                    Box(
+                                        modifier = Modifier
+                                            .width(130.dp)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                                            .padding(horizontal = 8.dp, vertical = 5.dp),
+                                        contentAlignment = Alignment.CenterStart
+                                    ) {
+                                        if (providerSearchQuery.isEmpty()) {
+                                            Text(
+                                                text = "Search...",
+                                                fontSize = 10.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        innerTextField()
+                                    }
+                                }
                             )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(activeProviders) { provider ->
+                            items(displayedProviders) { provider ->
                                 Card(
                                     modifier = Modifier
-                                        .width(140.dp)
                                         .clickable { onProviderClick(provider.id) },
-                                    shape = RoundedCornerShape(10.dp),
+                                    shape = RoundedCornerShape(8.dp),
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                                 ) {
-                                    Column(
-                                        modifier = Modifier.padding(12.dp),
-                                        horizontalAlignment = Alignment.Start
+                                    Box(
+                                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                                        contentAlignment = Alignment.Center
                                     ) {
                                         Text(
                                             text = provider.name,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = 12.sp,
                                             color = Color.White,
                                             maxLines = 1
-                                        )
-                                        Spacer(modifier = Modifier.height(2.dp))
-                                        Text(
-                                            text = provider.id.uppercase(),
-                                            fontSize = 9.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                        Spacer(modifier = Modifier.height(6.dp))
-                                        Text(
-                                            text = "Browse Feed →",
-                                            fontSize = 10.sp,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
                                 }
@@ -382,80 +400,46 @@ fun HomeScreen(
                 }
             }
 
-            // 5. Latest Aggregated Media Section Header
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Text(
-                    text = "LATEST MEDIA",
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        letterSpacing = 1.sp
-                    ),
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
-                )
-            }
-
-            // Contributing Sources Badge Row
+            // 5. Latest Media Section Header — title with site count + inline Customize button
             item(span = { GridItemSpan(maxLineSpan) }) {
                 val contributingProviders = remember(activeProviders, selectedHomeProviders) {
-                    if (selectedHomeProviders.isEmpty()) {
-                        activeProviders
-                    } else {
-                        activeProviders.filter { it.id in selectedHomeProviders }
-                    }
+                    if (selectedHomeProviders.isEmpty()) activeProviders
+                    else activeProviders.filter { it.id in selectedHomeProviders }
                 }
-                Card(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.padding(10.dp)) {
+                    Text(
+                        text = "LATEST MEDIA (${contributingProviders.size})",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            letterSpacing = 1.sp
+                        )
+                    )
+                    if (onCustomizeSourcesClick != null) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier.clickable { onCustomizeSourcesClick() },
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = "Customize sources",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(13.dp)
+                            )
                             Text(
-                                text = "Contributing to Home (${contributingProviders.size} sites)",
+                                text = "Customize",
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             )
-                            if (onCustomizeSourcesClick != null) {
-                                Text(
-                                    text = "Customize ⚙",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    ),
-                                    modifier = Modifier.clickable { onCustomizeSourcesClick() }
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(6.dp))
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            items(contributingProviders) { p ->
-                                Surface(
-                                    shape = RoundedCornerShape(6.dp),
-                                    color = MaterialTheme.colorScheme.surface,
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
-                                ) {
-                                    Text(
-                                        text = p.name,
-                                        style = MaterialTheme.typography.labelSmall.copy(
-                                            fontSize = 10.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            color = Color.White
-                                        ),
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                    )
-                                }
-                            }
                         }
                     }
                 }
@@ -473,7 +457,13 @@ fun HomeScreen(
             // Cloudflare / Error State
             if (errorMessage != null && aggregatedVideos.isEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    val isCloudflare = challengeProvider != null ||
+                    val challengeProviderId = dashboardState.challengeProviderId
+                    val targetProvider = if (!challengeProviderId.isNullOrBlank()) {
+                        activeProviders.find { it.id == challengeProviderId }
+                    } else {
+                        challengeProvider ?: activeProviders.firstOrNull()
+                    }
+                    val isCloudflare = challengeProviderId != null || challengeProvider != null ||
                             errorMessage?.contains("Cloudflare", ignoreCase = true) == true ||
                             errorMessage?.contains("Security", ignoreCase = true) == true
 
@@ -505,20 +495,20 @@ fun HomeScreen(
                                     color = Color.White
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
+                                val providerDisplayName = targetProvider?.name ?: "A provider"
                                 Text(
-                                    text = "A provider is protected by Cloudflare security. Tap below to complete verification and unlock media.",
+                                    text = "$providerDisplayName is protected by Cloudflare security. Tap below to complete verification and unlock media.",
                                     fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
-                                val targetProvider = challengeProvider ?: activeProviders.firstOrNull()
                                 Button(
                                     onClick = {
                                         val intent = CloudflareChallengeActivity.createIntent(
                                             context,
-                                            targetProvider?.baseUrl ?: "https://fry99.cc/",
-                                            targetProvider?.name ?: "Provider"
+                                            targetProvider?.baseUrl ?: "https://prmovies.church/",
+                                            targetProvider?.name ?: "PRMovies Church"
                                         )
                                         challengeLauncher.launch(intent)
                                     },
