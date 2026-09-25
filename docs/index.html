@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TheDesiTadka — Next-Gen Secure Media &amp; Streaming Aggregator for Android</title>
+  <meta name="description" content="TheDesiTadka is an ultra-fast, privacy-first Android media aggregator with 26+ catalog providers, hardware-accelerated Media3 player, Smart DoH bypass, and Ed25519 cryptographic security.">
+  <meta name="keywords" content="TheDesiTadka, Android streaming, media aggregator, video player, ExoPlayer, DoH bypass, APK download, open source">
+  <meta name="theme-color" content="#07090d">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://dbiswas57.github.io/TheDesiTadka/">
+  <meta property="og:title" content="TheDesiTadka — Next-Gen Android Streaming Aggregator">
+  <meta property="og:description" content="Download TheDesiTadka v1.1.9 for Android. 26+ catalog providers, zero tracking, hardware decoding, and resilient offline downloads.">
+  <meta property="og:image" content="assets/hero_mockup.jpg">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="TheDesiTadka Android App">
+  <meta name="twitter:description" content="Download latest TheDesiTadka APK for Android. High-speed media streaming aggregator.">
+  <meta name="twitter:image" content="assets/hero_mockup.jpg">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="assets/app_logo.png">
+  <link rel="apple-touch-icon" href="assets/app_logo.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Ambient Glowing Aura Orbs -->
+  <div class="bg-ambient-layer" aria-hidden="true">
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+  </div>
+
+  <!-- Header Navigation -->
+  <header class="site-header" id="header">
+    <div class="container navbar">
+      <a href="#hero" class="brand-link" id="brandLogoLink">
+        <img src="assets/app_logo.png" alt="TheDesiTadka Logo" class="brand-logo-img">
+        <div class="brand-meta">
+          <span class="brand-name">TheDesiTadka</span>
+          <span class="brand-domain">TheDesiTadka.github.io</span>
+        </div>
+      </a>
+
+      <nav aria-label="Main Navigation">
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="#features" class="nav-link">Features</a></li>
+          <li><a href="#architecture" class="nav-link">Architecture</a></li>
+          <li><a href="#providers" class="nav-link">Providers</a></li>
+          <li><a href="#download" class="nav-link">Download</a></li>
+          <li><a href="#install" class="nav-link">How to Install</a></li>
+          <li><a href="#faq" class="nav-link">FAQ</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="#download" class="btn btn-primary btn-sm" id="navDownloadBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Download APK</span>
+        </a>
+
+        <button class="mobile-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero-section" id="hero">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <div class="badge badge-pulse" id="versionBadge">
+            <span class="dynamic-version-tag">v1.1.9</span> RELEASE • ANDROID 8.0+
+          </div>
+
+          <h1 class="hero-title">
+            The Ultimate <span class="gradient-text">Desi Media &amp; Streaming</span> Aggregator
+          </h1>
+
+          <p class="hero-description">
+            Experience lightning-fast video discovery and playback across 26+ verified media portals. Powered by hardware-accelerated Media3 ExoPlayer, Smart DNS-over-HTTPS bypass, WorkManager background downloads, and cryptographically signed Ed25519 configurations.
+          </p>
+
+          <div class="hero-cta-group">
+            <a href="downloads/TheDesiTadka-release.apk" class="btn btn-primary btn-lg" id="heroDownloadDirectBtn" download="TheDesiTadka-release.apk">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Download APK (v1.1.9)</span>
+            </a>
+
+            <a href="https://github.com/DBiswas57/TheDesiTadka" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-lg" id="heroGithubBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+              </svg>
+              <span>GitHub Repo</span>
+            </a>
+          </div>
+
+          <div class="hero-specs-ribbon">
+            <div class="spec-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Android 8.0+ (API 26-35)</span>
+            </div>
+            <div class="spec-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>100% Zero Tracking</span>
+            </div>
+            <div class="spec-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Hardware Decoding (Media3)</span>
+            </div>
+            <div class="spec-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Ed25519 Verified</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3D Phone Showcase Graphic -->
+        <div class="hero-visual">
+          <div class="hero-mockup-wrapper">
+            <img src="assets/hero_mockup.jpg" alt="TheDesiTadka App Showcase Mockup" class="hero-mockup-img" id="heroMockupImg">
+          </div>
+
+          <div class="floating-badge badge-top-right">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>Ultra HD Playback</span>
+          </div>
+
+          <div class="floating-badge badge-bottom-left">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>Smart DoH Shield</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Ribbon -->
+    <section class="stats-section">
+      <div class="container stats-grid">
+        <div class="stat-card">
+          <div class="stat-number gradient-text">26+</div>
+          <div class="stat-label">Verified Video Portals</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number gradient-text">0 ms</div>
+          <div class="stat-label">Cold Navigation Latency</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number gradient-text">100%</div>
+          <div class="stat-label">Privacy &amp; Zero Telemetry</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number gradient-text">6.0 MB</div>
+          <div class="stat-label">Lightweight R8 Optimized</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+      <div class="container">
+        <div class="section-header">
+          <div class="badge">ENGINEERED FOR EXCELLENCE</div>
+          <h2 class="section-title">High-Octane Streaming Architecture</h2>
+          <p class="section-subtitle">
+            Every component in TheDesiTadka has been forensically refined, hardened against ISP censorship, and optimized for seamless Android playback.
+          </p>
+        </div>
+
+        <div class="features-grid">
+          <!-- Feature 1 -->
+          <article class="feature-card">
+            <div class="feature-icon-wrapper">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polygon points="10 8 16 12 10 16 10 8"></polygon>
+              </svg>
+            </div>
+            <h3 class="feature-card-title">Media3 Hardware Player</h3>
+            <p class="feature-card-desc">
+              Powered by Android's state-of-the-art Media3 ExoPlayer. Enjoy hardware-accelerated H.264/HEVC decoding, authoritative seeking synchronization, dynamic quality toggles (1080p/720p/480p), and fluid swipe gestures for volume and brightness.
+            </p>
+            <div class="feature-tags">
+              <span class="feature-tag">ExoPlayer</span>
+              <span class="feature-tag">Zero Lag</span>
+              <span class="feature-tag">Gesture Controls</span>
+            </div>
+          </article>
+
+          <!-- Feature 2 -->
+          <article class="feature-card">
+            <div class="feature-icon-wrapper">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+            </div>
+            <h3 class="feature-card-title">Smart DoH &amp; Bypass Shield</h3>
+            <p class="feature-card-desc">
+              Overcomes ISP domain blocking and DNS poisoning via built-in DNS-over-HTTPS (DoH). Includes an evidence-based Cloudflare Turnstile state-machine listener with automatic cookie synchronization for uninterrupted access.
+            </p>
+            <div class="feature-tags">
+              <span class="feature-tag">DoH Engine</span>
+              <span class="feature-tag">Turnstile Bypass</span>
+              <span class="feature-tag">No VPN Needed</span>
+            </div>
+          </article>
+
+          <!-- Feature 3 -->
+          <article class="feature-card">
+            <div class="feature-icon-wrapper">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </div>
+            <h3 class="feature-card-title">Background Download Engine</h3>
+            <p class="feature-card-desc">
+              Robust WorkManager-powered multi-part download subsystem. Saves directly to <code style="color: var(--primary-light)">/Movies/TheDesiTadka</code> with automatic Android MediaStore gallery indexing and seamless browser fallback for segmented HLS streams.
+            </p>
+            <div class="feature-tags">
+              <span class="feature-tag">WorkManager</span>
+              <span class="feature-tag">MediaStore Sync</span>
+              <span class="feature-tag">Resume Support</span>
+            </div>
+          </article>
+
+          <!-- Feature 4 -->
+          <article class="feature-card">
+            <div class="feature-icon-wrapper">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
+            <h3 class="feature-card-title">Ed25519 Cryptographic Signatures</h3>
+            <p class="feature-card-desc">
+              Zero arbitrary executable code or dynamic DEX evaluation. Provider manifests are pure declarative JSON DSL validated against strict cryptographic Ed25519 signatures, featuring multi-tier atomic rollback (<code style="color: var(--primary-light)">active</code>, <code style="color: var(--primary-light)">lastKnownGood</code>).
+            </p>
+            <div class="feature-tags">
+              <span class="feature-tag">Ed25519</span>
+              <span class="feature-tag">Declarative DSL</span>
+              <span class="feature-tag">Anti-Tamper</span>
+            </div>
+          </article>
+
+          <!-- Feature 5 -->
+          <article class="feature-card">
+            <div class="feature-icon-wrapper">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+            </div>
+            <h3 class="feature-card-title">Bounded Concurrency &amp; Cache</h3>
+            <p class="feature-card-desc">
+              Provider aggregations execute within a managed <code style="color: var(--primary-light)">Semaphore(4)</code> pipeline backed by an in-memory 10-minute cache layer. Delivers instant initial loading and 0ms instantaneous back-navigation without re-fetching.
+            </p>
+            <div class="feature-tags">
+              <span class="feature-tag">Semaphore(4)</span>
+              <span class="feature-tag">Room DB</span>
+              <span class="feature-tag">Cold Cache</span>
+            </div>
+          </article>
+
+          <!-- Feature 6 -->
+          <article class="feature-card">
+            <div class="feature-icon-wrapper">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+            </div>
+            <h3 class="feature-card-title">Pure Jetpack Compose UI</h3>
+            <p class="feature-card-desc">
+              100% modern declarative Android UI built on Jetpack Compose Material 3. Features immersive dark cyberpunk styling, high-resolution thumbnail cards, category browsing, instant search, and smooth transition animations.
+            </p>
+            <div class="feature-tags">
+              <span class="feature-tag">Compose M3</span>
+              <span class="feature-tag">Kotlin 2.0</span>
+              <span class="feature-tag">Cyberpunk Theme</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Architecture Visual Showcase -->
+    <section class="architecture-section" id="architecture">
+      <div class="container">
+        <div class="section-header">
+          <div class="badge">FORENSIC HARDENING</div>
+          <h2 class="section-title">Inside TheDesiTadka Technology Stack</h2>
+          <p class="section-subtitle">
+            Engineered from the ground up for maximum privacy, zero telemetry, and robust security defenses.
+          </p>
+        </div>
+
+        <div class="arch-banner-card">
+          <img src="assets/feature_architecture.jpg" alt="TheDesiTadka Android Technology Stack Banner" class="arch-banner-img" id="archBannerImg">
+          
+          <div class="arch-details-grid">
+            <div class="arch-col">
+              <h4>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                Network Hardening &amp; SSRF Guard
+              </h4>
+              <p>
+                Strict <code style="color: var(--primary-light)">UrlSecurityValidator</code> automatically drops requests targeting private RFC 1918 subnets, loopbacks, and cloud metadata (<code style="color: var(--primary-light)">169.254.169.254</code>).
+              </p>
+            </div>
+
+            <div class="arch-col">
+              <h4>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+                Zero-Telemetry Privacy Policy
+              </h4>
+              <p>
+                No tracking SDKs, no ad networks, no analytics beacons, and no login required. StreamHubLogger scrubs authorization tokens, cookies, and passwords from system logcat.
+              </p>
+            </div>
+
+            <div class="arch-col">
+              <h4>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                Declarative Selector Engine
+              </h4>
+              <p>
+                Jsoup CSS selector architecture extracts video feeds safely. Adding or fixing feeds requires zero APK recompilations—just publish a signed manifest update!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Supported Providers Catalog -->
+    <section class="catalog-section" id="providers">
+      <div class="container">
+        <div class="section-header">
+          <div class="badge">CATALOG INTEGRITY</div>
+          <h2 class="section-title">26+ Verified Streaming Portals</h2>
+          <p class="section-subtitle">
+            All paywalled or broken endpoints were excised during our deep forensic audit. Only 100% accessible, high-performance reference providers remain.
+          </p>
+        </div>
+
+        <div class="catalog-grid">
+          <!-- Network 1 -->
+          <div class="catalog-card">
+            <div class="catalog-card-header">
+              <span class="catalog-network-title">AagMaal Network</span>
+              <span class="catalog-badge">Verified</span>
+            </div>
+            <ul class="catalog-domains-list">
+              <li>aagmaal.date</li>
+              <li>aagmaal.com</li>
+              <li>tube279.com CDN</li>
+            </ul>
+          </div>
+
+          <!-- Network 2 -->
+          <div class="catalog-card">
+            <div class="catalog-card-header">
+              <span class="catalog-network-title">Masa Hub Network</span>
+              <span class="catalog-badge">Verified</span>
+            </div>
+            <ul class="catalog-domains-list">
+              <li>masahub2.com</li>
+              <li>masafun.art</li>
+              <li>masa49.nl</li>
+            </ul>
+          </div>
+
+          <!-- Network 3 -->
+          <div class="catalog-card">
+            <div class="catalog-card-header">
+              <span class="catalog-network-title">KVS Tube Family</span>
+              <span class="catalog-badge">Verified</span>
+            </div>
+            <ul class="catalog-domains-list">
+              <li>desikahani2.net</li>
+              <li>desitales2.com</li>
+              <li>indiansexstories3.com</li>
+              <li>xxxindianstories.com</li>
+            </ul>
+          </div>
+
+          <!-- Network 4 -->
+          <div class="catalog-card">
+            <div class="catalog-card-header">
+              <span class="catalog-network-title">Clean-Tube Engine</span>
+              <span class="catalog-badge">Verified</span>
+            </div>
+            <ul class="catalog-domains-list">
+              <li>antarvasnabf.com</li>
+              <li>fsiblogxx.com</li>
+              <li>ixiporn.live</li>
+              <li>kamababa1.com</li>
+              <li>uncutmaza.cc</li>
+              <li>wowuncut.com</li>
+            </ul>
+          </div>
+
+          <!-- Network 5 -->
+          <div class="catalog-card">
+            <div class="catalog-card-header">
+              <span class="catalog-network-title">XVideos / XNXX Hub</span>
+              <span class="catalog-badge">Verified</span>
+            </div>
+            <ul class="catalog-domains-list">
+              <li>xvideos.com</li>
+              <li>xnxx.com</li>
+              <li>Direct MP4 High/Low</li>
+            </ul>
+          </div>
+
+          <!-- Network 6 -->
+          <div class="catalog-card">
+            <div class="catalog-card-header">
+              <span class="catalog-network-title">Global Tube Portals</span>
+              <span class="catalog-badge">Verified</span>
+            </div>
+            <ul class="catalog-domains-list">
+              <li>xhamster.com</li>
+              <li>xmaza.xxx</li>
+              <li>desibf.com</li>
+              <li>hitmaal.io</li>
+            </ul>
+          </div>
+
+          <!-- Network 7 -->
+          <div class="catalog-card">
+            <div class="catalog-card-header">
+              <span class="catalog-network-title">Cloudflare Protected</span>
+              <span class="catalog-badge">Turnstile Synced</span>
+            </div>
+            <ul class="catalog-domains-list">
+              <li>fry99.cc</li>
+              <li>wowmasti.com</li>
+              <li>pornx11.com</li>
+            </ul>
+          </div>
+
+          <!-- Network 8 -->
+          <div class="catalog-card">
+            <div class="catalog-card-header">
+              <span class="catalog-network-title">Desi Web Series</span>
+              <span class="catalog-badge">Verified</span>
+            </div>
+            <ul class="catalog-domains-list">
+              <li>webxseries.hot</li>
+              <li>desisex.site</li>
+              <li>public_domain_archive</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Download Section (Primary Highlight) -->
+    <section class="download-section" id="download">
+      <div class="container">
+        <div class="download-box">
+          <div class="download-grid">
+            <div class="download-main-col">
+              <div class="download-header-row">
+                <img src="assets/app_logo.png" alt="TheDesiTadka Official Logo" class="download-app-icon" id="downloadAppLogo">
+                <div>
+                  <div class="badge" style="margin-bottom: 8px;">LATEST OFFICIAL RELEASE</div>
+                  <h2 class="download-heading">Get TheDesiTadka APK</h2>
+                </div>
+              </div>
+
+              <p style="color: var(--text-secondary); font-size: 1.05rem;">
+                Download the complete, pre-built and R8-minified production release. Free of trackers, telemetry, and unnecessary permissions. Install directly on any Android device running Android 8.0 or higher.
+              </p>
+
+              <!-- Technical Specifications Grid -->
+              <div class="download-specs-table">
+                <div class="spec-cell">
+                  <div class="spec-cell-label">Version &amp; Code</div>
+                  <div class="spec-cell-value"><span class="dynamic-version-tag">v1.1.9</span> (Build 20)</div>
+                </div>
+                <div class="spec-cell">
+                  <div class="spec-cell-label">File Size</div>
+                  <div class="spec-cell-value">6.0 MB (6,254,278 bytes)</div>
+                </div>
+                <div class="spec-cell">
+                  <div class="spec-cell-label">Android OS Requirement</div>
+                  <div class="spec-cell-value">Android 8.0+ (Oreo, API 26 - 35)</div>
+                </div>
+                <div class="spec-cell">
+                  <div class="spec-cell-label">Package Name</div>
+                  <div class="spec-cell-value code">com.thedesitadka.app</div>
+                </div>
+              </div>
+
+              <!-- SHA-256 Checksum Container -->
+              <div class="checksum-container">
+                <div class="checksum-info">
+                  <div class="checksum-title">Verified SHA-256 Checksum</div>
+                  <div class="checksum-hash" id="apkHashValue">396c51670965a50d921a577d78eaf10858552c604c8f9ecdb6b51e4798a70c86</div>
+                </div>
+                <button type="button" class="btn-copy-hash" id="copyHashBtn" aria-label="Copy SHA256 checksum">
+                  Copy Hash
+                </button>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="download-cta-row">
+                <a href="downloads/TheDesiTadka-release.apk" class="btn btn-primary btn-lg" id="btnDownloadApk" download="TheDesiTadka-release.apk">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  <span>Download APK (Direct Mirror)</span>
+                </a>
+
+                <a href="https://github.com/DBiswas57/TheDesiTadka/releases/latest/download/TheDesiTadka-release.apk" class="btn btn-secondary btn-lg github-direct-download" id="btnDownloadGithub">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                  </svg>
+                  <span>GitHub CDN Mirror</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- QR Code Mobile Download Section -->
+            <div class="qr-col">
+              <div class="qr-card">
+                <img src="assets/download_qr.png" alt="Scan QR Code to download TheDesiTadka APK" class="qr-code-img" id="qrDownloadImg">
+                <h3 class="qr-title">Scan on Mobile</h3>
+                <p class="qr-desc">Open your phone camera to download APK directly to your Android device.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Installation Steps -->
+    <section class="install-section" id="install">
+      <div class="container">
+        <div class="section-header">
+          <div class="badge">QUICK START GUIDE</div>
+          <h2 class="section-title">How to Install on Android</h2>
+          <p class="section-subtitle">
+            Installing TheDesiTadka takes less than 30 seconds. Follow these 3 easy steps.
+          </p>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <h3 class="step-title">Download APK</h3>
+            <p class="step-desc">
+              Tap the download button above or scan the QR code to save <code style="color: var(--primary-light)">TheDesiTadka-release.apk</code> to your device.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <h3 class="step-title">Allow Unknown Sources</h3>
+            <p class="step-desc">
+              If prompted by Android, enable "Install unknown apps" for your browser or file manager in <strong>Settings &gt; Security &gt; Install Unknown Apps</strong>.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <h3 class="step-title">Install &amp; Stream</h3>
+            <p class="step-desc">
+              Open the downloaded APK and tap <strong>Install</strong>. Once complete, launch TheDesiTadka and enjoy instantaneous media streaming!
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section" id="faq">
+      <div class="container">
+        <div class="section-header">
+          <div class="badge">HELP &amp; INFORMATION</div>
+          <h2 class="section-title">Frequently Asked Questions</h2>
+          <p class="section-subtitle">
+            Got questions about TheDesiTadka? Everything you need to know.
+          </p>
+        </div>
+
+        <div class="faq-container">
+          <div class="faq-item active">
+            <button class="faq-question">
+              <span>Is TheDesiTadka completely free?</span>
+              <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="faq-answer">
+              Yes! TheDesiTadka is 100% free and open-source software. There are no subscriptions, no in-app purchases, and no hidden paywalls. All paywalled sites (such as <code style="color: var(--primary-light)">indianporngirl.org</code>) were systematically removed in our forensic audit.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>How does Smart DoH Bypass work without a VPN?</span>
+              <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="faq-answer">
+              Most internet service providers (ISPs) restrict video portals using simple DNS hijacking or domain tampering. TheDesiTadka integrates DNS-over-HTTPS (DoH) directly into its OkHttp network client, querying encrypted public resolvers directly. This bypasses ISP DNS filters without battery-draining VPN overhead.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Does the app collect my personal data or viewing history?</span>
+              <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="faq-answer">
+              Zero. TheDesiTadka operates strictly as an aggregator of public authorized content. No personal tracking, credentials, or private viewing telemetry is collected or transmitted anywhere. Furthermore, internal loggers scrub sensitive data before it reaches Android's logcat.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Where are downloaded videos saved on my phone?</span>
+              <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="faq-answer">
+              Downloads managed by the app are stored directly in your device's standard <code style="color: var(--primary-light)">/Movies/TheDesiTadka</code> directory. The app automatically notifies Android's MediaStore, so your videos immediately appear in your favorite Gallery or Video Player apps for offline viewing.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>What Android versions are supported?</span>
+              <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="faq-answer">
+              TheDesiTadka supports Android 8.0 (Oreo, API level 26) all the way up through Android 15 (API level 35). It is compatible with virtually all modern Android smartphones and tablets.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="brand-link" style="margin-bottom: 8px;">
+            <img src="assets/app_logo.png" alt="TheDesiTadka Logo" class="brand-logo-img" style="width: 38px; height: 38px;">
+            <span class="brand-name" style="font-size: 1.2rem;">TheDesiTadka</span>
+          </div>
+          <p>
+            Authorized High-Performance Video &amp; Streaming Aggregator for Android. Modular declarative engine with zero arbitrary executable code.
+          </p>
+          <div style="margin-top: 14px;">
+            <span class="footer-domain-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+              TheDesiTadka.github.io
+            </span>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h5>Quick Navigation</h5>
+          <ul class="footer-links">
+            <li><a href="#hero" class="footer-link">Home</a></li>
+            <li><a href="#features" class="footer-link">App Features</a></li>
+            <li><a href="#architecture" class="footer-link">Architecture</a></li>
+            <li><a href="#providers" class="footer-link">Supported Portals</a></li>
+            <li><a href="#download" class="footer-link">Download Latest APK</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>Repository</h5>
+          <ul class="footer-links">
+            <li><a href="https://github.com/DBiswas57/TheDesiTadka" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub Source</a></li>
+            <li><a href="https://github.com/DBiswas57/TheDesiTadka/releases" target="_blank" rel="noopener noreferrer" class="footer-link">Release Archive</a></li>
+            <li><a href="https://github.com/DBiswas57/TheDesiTadka/blob/main/SECURITY.md" target="_blank" rel="noopener noreferrer" class="footer-link">Security Policy</a></li>
+            <li><a href="https://github.com/DBiswas57/TheDesiTadka/blob/main/ARCHITECTURE.md" target="_blank" rel="noopener noreferrer" class="footer-link">Architecture Blueprint</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>Legal &amp; Privacy</h5>
+          <ul class="footer-links">
+            <li><span class="footer-link" style="color: var(--text-dim);">Zero Telemetry Policy</span></li>
+            <li><span class="footer-link" style="color: var(--text-dim);">Aggregator Disclaimer</span></li>
+            <li><span class="footer-link" style="color: var(--text-dim);">MIT / Apache License</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          &copy; 2026 TheDesiTadka. Open Source Android Project.
+        </div>
+        <div>
+          Hosted on GitHub Pages &bull; <a href="https://dbiswas57.github.io/TheDesiTadka/" style="color: var(--primary-light); text-decoration: none;">dbiswas57.github.io/TheDesiTadka</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/app.js"></script>
+</body>
+</html>

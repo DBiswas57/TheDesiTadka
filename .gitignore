@@ -32,4 +32,5 @@ venv/
 release/
 scratch/
 *.apk
+!docs/downloads/*.apk
 *.aab
