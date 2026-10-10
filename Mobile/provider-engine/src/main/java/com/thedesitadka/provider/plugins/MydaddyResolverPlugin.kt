@@ -36,7 +36,7 @@ class MydaddyResolverPlugin : HostResolverPlugin {
             val normalizedUrl = normalizeEmbedUrl(embedUrl)
             val parent = parentUrl ?: "https://hqporner.com/"
             val reqHeaders = mapOf(
-                "User-Agent" to NetworkClient.DEFAULT_USER_AGENT,
+                "User-Agent" to NetworkClient.DESKTOP_USER_AGENT,
                 "Referer" to parent,
                 "Origin" to "https://hqporner.com"
             )
@@ -144,7 +144,7 @@ class MydaddyResolverPlugin : HostResolverPlugin {
             val headers = mapOf(
                 "Referer" to referer,
                 "Origin" to "https://hqporner.com",
-                "User-Agent" to NetworkClient.DEFAULT_USER_AGENT
+                "User-Agent" to NetworkClient.DESKTOP_USER_AGENT
             )
 
             val mediaSource = MediaSource(

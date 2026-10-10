@@ -1,0 +1,13 @@
+{
+  "id": "notice_2026_10_11_v122_update",
+  "title": "New Update Available: TheDesiTadka v1.2.2",
+  "message": "We have released TheDesiTadka v1.2.2 with major video playback and playlist improvements:\n\n• Seamless Auto-Pagination: Reached the end of a category or provider page? Swiping or clicking 'Next' now automatically loads the next page from the site and plays the next video seamlessly!\n• Fixed 'No Content Left' Bug: Resolved playlist reset issues so all videos loaded on your screen remain accessible during playback.\n• Improved Next / Previous Controls: Smooth button and swipe gesture navigation across Player and Video Details screens.\n• Enhanced Stability: Optimized memory and stream resolution across all 73 providers.\n\nTap 'Update Now' to download and install the latest version.",
+  "date": "2026-10-11",
+  "actionText": "Update Now",
+  "actionUrl": "https://github.com/DBiswas57/TheDesiTadka/releases/latest",
+  "dismissible": true,
+  "showOnce": true,
+  "enabled": true,
+  "minAppVersion": 0,
+  "maxAppVersion": 2147483647
+}

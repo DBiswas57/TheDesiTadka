@@ -35,8 +35,11 @@ object NetworkClient {
         return result
     }
 
+    val smartDns: SmartBypassDns by lazy { SmartBypassDns() }
+
     val okHttpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
+            .dns(smartDns)
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
             .writeTimeout(20, TimeUnit.SECONDS)
@@ -46,8 +49,9 @@ object NetworkClient {
                 val orig = chain.request()
                 val reqBuilder = orig.newBuilder()
                 val urlString = orig.url.toString()
-                val cleanHost = orig.url.host.lowercase().removePrefix("www.")
-                val isDesktopHost = cleanHost.contains("hqporner") || cleanHost.contains("sxyprn.com")
+                val cleanHost = orig.url.host.lowercase()
+                val isDesktopHost = cleanHost.contains("hqporner") || cleanHost.contains("sxyprn.com") ||
+                        cleanHost.contains("xhamster") || cleanHost.contains("mydaddy.cc") || cleanHost.contains("bigcdn.cc")
 
                 val isMediaRequest = orig.header("Range") != null ||
                         urlString.contains(".mp4") || urlString.contains(".m3u8") ||
@@ -153,6 +157,33 @@ object NetworkClient {
         return fetchStringInternal(url, headers, retryAntibot = true)
     }
 
+    /**
+     * Fetches website content, automatically falling back to HideProxy (nl.hideproxy.me)
+     * if direct resolution fails due to ISP blocking, DNS failure, or connection reset.
+     */
+    @Throws(IOException::class)
+    fun fetchStringWithProxyFallback(
+        url: String,
+        headers: Map<String, String> = emptyMap(),
+        forceProxy: Boolean = false
+    ): String {
+        if (forceProxy) {
+            return HideProxyEngine.fetchSourceViaProxy(url)
+        }
+        return try {
+            fetchString(url, headers)
+        } catch (e: Exception) {
+            if (e is CloudflareChallengeException) {
+                throw e
+            }
+            try {
+                HideProxyEngine.fetchSourceViaProxy(url)
+            } catch (proxyError: Exception) {
+                throw IOException("Direct fetch failed (${e.message}) and HideProxy fallback failed (${proxyError.message})", e)
+            }
+        }
+    }
+
     private fun fetchStringInternal(url: String, headers: Map<String, String>, retryAntibot: Boolean): String {
         // First check if freshly solved Cloudflare HTML is available for this URL
         val cachedHtml = CloudflareHtmlCache.get(url)
@@ -196,12 +227,15 @@ object NetworkClient {
 
                 val isCloudflareChallenge = isChallengeCode && (
                     cfMitigated?.contains("challenge", ignoreCase = true) == true ||
-                    serverHeader.contains("cloudflare", ignoreCase = true) ||
                     errorBody.contains("challenges.cloudflare.com", ignoreCase = true) ||
                     errorBody.contains("cf-turnstile", ignoreCase = true) ||
-                    errorBody.contains("cf-challenge", ignoreCase = true) ||
-                    errorBody.contains("Just a moment...", ignoreCase = true) ||
-                    errorBody.contains("Attention Required! | Cloudflare", ignoreCase = true)
+                    (errorBody.contains("cf-challenge", ignoreCase = true) && errorBody.contains("form", ignoreCase = true)) ||
+                    (errorBody.contains("Just a moment...", ignoreCase = true) && (errorBody.contains("cloudflare", ignoreCase = true) || errorBody.contains("turnstile", ignoreCase = true))) ||
+                    errorBody.contains("Attention Required! | Cloudflare", ignoreCase = true) ||
+                    (errorBody.contains("cf-browser-verification", ignoreCase = true) && errorBody.contains("cf-im-under-attack", ignoreCase = true)) ||
+                    errorBody.contains("id=\"challenge-stage\"", ignoreCase = true) ||
+                    errorBody.contains("id=\"challenge-form\"", ignoreCase = true) ||
+                    errorBody.contains("id=\"challenge-running\"", ignoreCase = true)
                 )
 
                 if (isCloudflareChallenge) {
@@ -247,7 +281,7 @@ object NetworkClient {
                 (responseString.contains("Just a moment...", ignoreCase = true) && (responseString.contains("cloudflare", ignoreCase = true) || responseString.contains("turnstile", ignoreCase = true))) ||
                 responseString.contains("Attention Required! | Cloudflare", ignoreCase = true) ||
                 (responseString.contains("cf-browser-verification", ignoreCase = true) && responseString.contains("cloudflare", ignoreCase = true)) ||
-                responseString.contains("id=\"challenge-stage\"", ignoreCase = true)
+                (responseString.contains("id=\"challenge-stage\"", ignoreCase = true) && (responseString.contains("challenge-form", ignoreCase = true) || responseString.contains("id=\"challenge-running\"", ignoreCase = true)))
 
             if (isCloudflareChallengeHtml) {
                 throw CloudflareChallengeException(

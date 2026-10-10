@@ -58,6 +58,10 @@ data class MediaSource(
     val downloadUrl: String? = if (type == MediaSourceType.PROGRESSIVE_MP4 || type == MediaSourceType.HLS) url else null,
     val fileExtension: String = "mp4",
     val sizeBytes: Long? = null,
-    val metadata: Map<String, String> = emptyMap()
+    val metadata: Map<String, String> = emptyMap(),
+    val language: String = "Default",
+    val format: String = type.name,
+    val seasonNumber: Int? = null,
+    val episodeNumber: Int? = null
 )
 

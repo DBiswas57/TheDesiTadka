@@ -40,6 +40,18 @@ class ConfigCache(private val baseDir: File) {
     }
 
     @Synchronized
+    fun clear() {
+        try {
+            if (currentConfigFile.exists()) currentConfigFile.delete()
+            if (previousConfigFile.exists()) previousConfigFile.delete()
+            if (lastKnownGoodConfigFile.exists()) lastKnownGoodConfigFile.delete()
+            StreamHubLogger.i("ConfigCache", "Config cache purged successfully")
+        } catch (e: Exception) {
+            StreamHubLogger.w("ConfigCache", "Failed to clear config cache: ${e.message}")
+        }
+    }
+
+    @Synchronized
     fun saveValidatedConfig(manifest: ProviderManifest, markAsLastKnownGood: Boolean = true) {
         val serialized = json.encodeToString(ProviderManifest.serializer(), manifest)
 

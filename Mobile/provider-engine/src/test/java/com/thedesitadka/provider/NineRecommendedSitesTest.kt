@@ -219,38 +219,43 @@ class NineRecommendedSitesTest {
     }
 
     @Test
-    fun testDrTuberAndNuVidPosterToStreamReconstruction() = runBlocking {
+    fun testDrTuberPosterToStreamReconstruction() = runBlocking {
         val adapter = createAdapter(
             id = "drtuber",
-            baseUrl = "https://www.drtuber.com",
+            baseUrl = "https://m.drtuber.desi",
             nav = NavigationConfig(home = "/", page = "/latest-updates/{page}/", search = "/search/videos/{query}/{page}/", categories = "/categories"),
             selectors = SelectorConfig(
-                item = "div.thumbs_box > div, div.th",
-                title = "a.title, a[title]",
-                thumbnail = "img[data-src], img",
+                item = "a.th, a[data-video_id], a.video-thumb, div.th",
+                title = "a[title], img[alt], a.title",
+                thumbnail = "img.b-lazy, img[data-src], img",
                 thumbnailAttr = "data-src, src",
                 detailUrl = "a[href*='/video/']",
-                duration = "span.duration",
-                videoSource = "video source[src]"
+                duration = "span.duration, strong.toolbar em, .time",
+                videoSource = "a[data-adv_play], video source[src]"
             )
         )
 
         // 1. Pagination
-        val p2 = adapter.buildPagedUrl("https://www.drtuber.com/latest-updates/1/", 2)
-        assertEquals("https://www.drtuber.com/latest-updates/2/", p2)
+        val p2 = adapter.buildPagedUrl("https://m.drtuber.desi/latest-updates/1/", 2)
+        assertEquals("https://m.drtuber.desi/latest-updates/2/", p2)
 
-        // 2. Media reconstruction from CDN poster
-        val detailHtml = """
+        // 2. Full Media stream from play/download endpoint
+        val playHtml = """
             <html>
-            <video poster="https://g7.drtst.com/media/videos/tmb/9294590/player/16.jpg"></video>
+            <div class="btn_adv">
+                <a data-adv_play="" data-mobile_adv_pop="" href="https://gcdn.drtuber.desi/mp4/4fefff91b33853cff0b902db61d89fb5.mp4?md5=hqEPAjw7GScXUPvgy-IOwA&expire=1790193544&speed=37k&buffer=146k&tip=1">
+                    Continue to watch video...
+                </a>
+            </div>
             </html>
         """.trimIndent()
-        val mediaResult = adapter.parsePlayableMediaHtml(detailHtml, "https://www.drtuber.com/video/9294590/test")
+        val mediaResult = adapter.parsePlayableMediaHtml(playHtml, "https://m.drtuber.desi/play/9384615")
         assertTrue(mediaResult.isSuccess)
         val media = mediaResult.getOrThrow()
         assertTrue(media.isNotEmpty())
-        assertEquals("https://g7.drtst.com/media/videos/tmb/9294590/9294590.mp4", media[0].url)
+        assertEquals("https://gcdn.drtuber.desi/mp4/4fefff91b33853cff0b902db61d89fb5.mp4?md5=hqEPAjw7GScXUPvgy-IOwA&expire=1790193544&speed=37k&buffer=146k&tip=1", media[0].url)
         assertEquals(MediaSourceType.PROGRESSIVE_MP4, media[0].type)
+        assertEquals("https://m.drtuber.desi/", media[0].headersRequired["Referer"])
     }
 
     @Test
@@ -284,5 +289,111 @@ class NineRecommendedSitesTest {
         )
         val poPage = poAdapter.buildPagedUrl("https://pornone.com/videos/page/1/", 2)
         assertEquals("https://pornone.com/videos/page/2/", poPage)
+    }
+
+    @Test
+    fun testBeegFeedCategoriesAndMediaResolution() = runBlocking {
+        val adapter = createAdapter(
+            id = "beeg",
+            baseUrl = "https://beeg.com",
+            nav = NavigationConfig(
+                home = "https://store.externulls.com/tag/videos/index?limit=48&offset=0",
+                search = "https://store.externulls.com/tag/videos/{query}?limit=48&offset=0",
+                page = "https://store.externulls.com/tag/videos/{slug}?limit=48&offset={offset}",
+                categories = "https://store.externulls.com/tag/recommends?type=other&slug=index"
+            ),
+            selectors = SelectorConfig(
+                item = "div.video, div.thumb, .item",
+                title = "a[title], .title, h3",
+                thumbnail = "img",
+                thumbnailAttr = "src",
+                detailUrl = "a",
+                duration = ".duration"
+            )
+        )
+
+        // 1. Pagination
+        val p2 = adapter.buildPagedUrl("https://store.externulls.com/tag/videos/index?limit=48&offset=0", 2)
+        assertEquals("https://store.externulls.com/tag/videos/index?limit=48&offset=48", p2)
+
+        val p3 = adapter.buildPagedUrl("https://store.externulls.com/tag/videos/anal?limit=48&offset=0", 3)
+        assertEquals("https://store.externulls.com/tag/videos/anal?limit=48&offset=96", p3)
+
+        // 2. Listing parsing (Live Beeg API JsonArray format)
+        val sampleFeedJson = """
+            [
+              {
+                "fc_facts": [
+                  {
+                    "fc_thumbs": [65, 89, 90],
+                    "id": 121368644
+                  }
+                ],
+                "file": {
+                  "id": 949602513022343,
+                  "fl_duration": 1008,
+                  "data": [
+                    {
+                      "cd_column": "sf_name",
+                      "cd_value": "Step-sister offers herself after discovering explicit content"
+                    }
+                  ],
+                  "hls_resources": {
+                    "fl_cdn_multi": "key=abc123hls/multi=480p,720p,1080p/_TPL_/949602513022343.mp4.m3u8"
+                  },
+                  "fallback": "key=def456mp4/480p/949602513022343.mp4"
+                },
+                "tags": [
+                  { "id": 29416, "tg_name": "Step Sister", "tg_slug": "StepSister" }
+                ]
+              }
+            ]
+        """.trimIndent()
+        val feed = adapter.parseListingHtml(sampleFeedJson, 1).getOrThrow()
+        assertEquals(1, feed.items.size)
+        val item = feed.items[0]
+        assertEquals("949602513022343", item.id)
+        assertEquals("Step-sister offers herself after discovering explicit content", item.title)
+        assertEquals("https://thumbs.externulls.com/videos/949602513022343/65.webp?size=480x270", item.thumbnailUrl)
+        assertEquals(1008L, item.durationSeconds)
+        assertEquals("https://store.externulls.com/facts/file/949602513022343", item.detailUrl)
+
+        // 3. Category parsing (Live Beeg recommendations JsonArray format)
+        val sampleCatsJson = """
+            [
+              { "id": 1, "tg_slug": "Anal", "tg_name": "Anal" },
+              { "id": 2, "tg_slug": "BigTits", "tg_name": "Big {Tits}" }
+            ]
+        """.trimIndent()
+        val cats = adapter.parseCategoriesHtml(sampleCatsJson)
+        assertEquals(2, cats.size)
+        assertEquals("Anal", cats[0].name)
+        assertEquals("https://store.externulls.com/tag/videos/anal?limit=48&offset=0", cats[0].url)
+        assertEquals("Big Tits", cats[1].name)
+        assertEquals("https://store.externulls.com/tag/videos/bigtits?limit=48&offset=0", cats[1].url)
+
+        // 4. Playable media resolution (HLS + fallback progressive MP4 with Referer)
+        val detailJson = """
+            {
+              "fc_facts": [{ "id": 121368644 }],
+              "file": {
+                "id": 949602513022343,
+                "hls_resources": {
+                  "fl_cdn_multi": "key=testKeyHls/media=hls4A/multi=720p,1080p/_TPL_/949602513022343.mp4.m3u8"
+                },
+                "fallback": "key=testKeyMp4/480p/949602513022343.mp4"
+              }
+            }
+        """.trimIndent()
+        val mediaResult = adapter.parsePlayableMediaHtml(detailJson, "https://store.externulls.com/facts/file/949602513022343")
+        assertTrue(mediaResult.isSuccess)
+        val media = mediaResult.getOrThrow()
+        assertEquals(2, media.size)
+        assertEquals("https://video.beeg.com/key=testKeyHls/media=hls4A/multi=720p,1080p/_TPL_/949602513022343.mp4.m3u8", media[0].url)
+        assertEquals(MediaSourceType.HLS, media[0].type)
+        assertEquals("https://beeg.com/", media[0].headersRequired["Referer"])
+        assertEquals("https://video.beeg.com/key=testKeyMp4/480p/949602513022343.mp4", media[1].url)
+        assertEquals(MediaSourceType.PROGRESSIVE_MP4, media[1].type)
+        assertEquals("https://beeg.com/", media[1].headersRequired["Referer"])
     }
 }

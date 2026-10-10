@@ -98,4 +98,14 @@ class LuluvdoResolverPluginTest {
         val okHttpResult = com.thedesitadka.core.network.NetworkClient.fetchString(mediaSource.url, headers = mediaSource.headersRequired ?: emptyMap())
         assertTrue("HLS playlist must contain EXTM3U", okHttpResult.contains("#EXTM3U"))
     }
+
+    @Test
+    fun testChiggyWiggyLulustResolution() = kotlinx.coroutines.runBlocking {
+        val res = plugin.resolve("https://lulust.com/e/hjm4rt9n2i3o", "https://chiggywiggy.int.in/horny-school-teacher-sex-student-bathroom-free/")
+        println("CHIGGYWIGGY LULUST RESOLUTION: $res")
+        if (res.isFailure) {
+            res.exceptionOrNull()?.printStackTrace()
+        }
+        assertTrue("Lulust resolution must succeed: ${res.exceptionOrNull()?.message}", res.isSuccess)
+    }
 }

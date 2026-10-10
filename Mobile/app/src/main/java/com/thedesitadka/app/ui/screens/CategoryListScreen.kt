@@ -97,9 +97,13 @@ fun CategoryListScreen(
     val gridState = rememberLazyGridState()
 
     // Restore scroll position from cache on enter
-    LaunchedEffect(cacheKey) {
+    LaunchedEffect(cacheKey, categoryItems.size) {
         if (cachedState != null && (cachedState.firstVisibleItemIndex > 0 || cachedState.firstVisibleItemScrollOffset > 0)) {
-            gridState.scrollToItem(cachedState.firstVisibleItemIndex, cachedState.firstVisibleItemScrollOffset)
+            try {
+                if (categoryItems.isNotEmpty() && cachedState.firstVisibleItemIndex < categoryItems.size) {
+                    gridState.scrollToItem(cachedState.firstVisibleItemIndex, cachedState.firstVisibleItemScrollOffset)
+                }
+            } catch (_: Exception) {}
         }
     }
 
@@ -311,7 +315,7 @@ fun CategoryListScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "No categories found",
+                            text = "No categories found for this site",
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 14.sp
                         )

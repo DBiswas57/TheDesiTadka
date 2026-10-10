@@ -28,7 +28,8 @@ class LuluvdoResolverPlugin : HostResolverPlugin {
         "lulustream.com",
         "luluvid.com",
         "playmogo.com",
-        "cdn1.site"
+        "cdn1.site",
+        "lulust.com"
     )
 
     override fun canHandle(url: String): Boolean {
@@ -37,7 +38,8 @@ class LuluvdoResolverPlugin : HostResolverPlugin {
                 lower.contains("lulustream.") ||
                 lower.contains("luluvid.") ||
                 lower.contains("playmogo.") ||
-                lower.contains("cdn1.site")
+                lower.contains("cdn1.site") ||
+                lower.contains("lulust.")
     }
 
     override suspend fun resolve(embedUrl: String, parentUrl: String?): Result<MediaSource> = withContext(Dispatchers.IO) {
@@ -151,7 +153,7 @@ class LuluvdoResolverPlugin : HostResolverPlugin {
         if (match != null) {
             return match.groupValues[1]
         }
-        val directRegex = Regex("""(?:luluvdo|lulustream|luluvid|playmogo|cdn1)\.[a-z]+/([A-Za-z0-9_-]+)""")
+        val directRegex = Regex("""(?:luluvdo|lulustream|luluvid|playmogo|cdn1|lulust)\.[a-z]+/([A-Za-z0-9_-]+)""")
         return directRegex.find(url)?.groupValues?.getOrNull(1)?.takeUnless { it == "e" || it == "d" }
     }
 

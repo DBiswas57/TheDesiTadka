@@ -157,47 +157,68 @@ class DashboardRepository(
         flow: MutableStateFlow<DashboardState>
     ) {
         val allActiveProviders = providerEngine.getActiveProviders()
-        val isSelectionDone = preferenceStore?.isHomeSelectionCompleted() ?: false
-        val selectedHomeProviders = preferenceStore?.getSelectedHomeProviders() ?: emptySet()
-        val candidateProviders = if (isSelectionDone && selectedHomeProviders.isNotEmpty()) {
-            allActiveProviders.filter { it.id in selectedHomeProviders }
-        } else if (isSelectionDone && selectedHomeProviders.isEmpty()) {
-            emptyList()
+        val isAllCategory = categoryId.equals("all", ignoreCase = true)
+
+        val providersToQuery = if (isAllCategory) {
+            // "Customize home content" is ONLY applicable for "All"
+            val isSelectionDone = preferenceStore?.isHomeSelectionCompleted() ?: false
+            val selectedHomeProviders = preferenceStore?.getSelectedHomeProviders() ?: emptySet()
+            if (isSelectionDone && selectedHomeProviders.isNotEmpty()) {
+                allActiveProviders.filter { it.id in selectedHomeProviders }
+            } else if (isSelectionDone && selectedHomeProviders.isEmpty()) {
+                emptyList()
+            } else {
+                allActiveProviders
+            }
         } else {
-            allActiveProviders
+            // If selection other than "All" -> grab directly from preset providers for that category,
+            // NOT dependent on "Customized Home Content"
+            val categoryDef = ContentCategoryDefinition.DEFAULT_CATEGORIES.find { it.id.equals(categoryId, ignoreCase = true) }
+            when {
+                categoryDef != null && categoryDef.providerIds.isNotEmpty() -> {
+                    allActiveProviders.filter { it.id in categoryDef.providerIds }
+                }
+                categoryId.equals("downloadable", ignoreCase = true) -> {
+                    allActiveProviders.filter { it.capabilities.any { c -> c.name == "DOWNLOAD" } }
+                }
+                categoryId.equals("movies", ignoreCase = true) -> {
+                    allActiveProviders.filter { it.id in listOf("movienerds", "cineapse", "prmovies", "prmovies_church") }
+                }
+                categoryId.equals("free", ignoreCase = true) -> {
+                    allActiveProviders.filter { it.id != "premium_catalog" }
+                }
+                else -> allActiveProviders
+            }
         }
 
-        if (candidateProviders.isEmpty()) {
+        if (providersToQuery.isEmpty()) {
+            val isSelectionDone = preferenceStore?.isHomeSelectionCompleted() ?: false
+            val selectedHomeProviders = preferenceStore?.getSelectedHomeProviders() ?: emptySet()
             flow.update {
                 it.copy(
                     videos = emptyList(),
                     isLoading = false,
                     isRefreshing = false,
-                    errorMessage = if (isSelectionDone && selectedHomeProviders.isEmpty()) "No sites selected for Home. Please customize sources in Settings." else null
+                    errorMessage = if (isAllCategory && isSelectionDone && selectedHomeProviders.isEmpty()) {
+                        "No sites selected for Home. Please customize sources in Settings."
+                    } else {
+                        "No providers available for this category."
+                    }
                 )
             }
             return
         }
 
-        val categoryDef = ContentCategoryDefinition.DEFAULT_CATEGORIES.find { it.id == categoryId }
-        val providersToQuery = when {
-            categoryDef != null && categoryDef.providerIds.isNotEmpty() -> {
-                candidateProviders.filter { it.id in categoryDef.providerIds }
-            }
-            categoryId == "downloadable" -> {
-                candidateProviders.filter { it.capabilities.any { c -> c.name == "DOWNLOAD" } }
-            }
-            categoryId == "movies" -> {
-                candidateProviders.filter { it.id in listOf("movienerds", "cineapse", "prmovies", "prmovies_church") }
-            }
-            categoryId == "free" -> candidateProviders.filter { it.id != "premium_catalog" }
-            else -> candidateProviders
-        }.ifEmpty { candidateProviders }
-
         val statuses = ConcurrentHashMap<String, ProviderFetchStatus>()
         providersToQuery.forEach { statuses[it.id] = ProviderFetchStatus.LOADING }
 
-        flow.update { it.copy(providerStatuses = statuses.toMap()) }
+        flow.update {
+            it.copy(
+                isLoading = true,
+                errorMessage = null,
+                providerStatuses = statuses.toMap()
+            )
+        }
 
         val collectedVideos = java.util.Collections.synchronizedList(mutableListOf<VideoItem>())
         val seenIds = ConcurrentHashMap.newKeySet<String>()
@@ -312,4 +333,22 @@ class DashboardRepository(
             )
         }
     }
+
+    fun clearCache() {
+        cache.clear()
+        lastFetchTimes.clear()
+        stateFlows.values.forEach { flow ->
+            flow.update {
+                it.copy(
+                    videos = emptyList(),
+                    isLoading = false,
+                    isRefreshing = false,
+                    providerStatuses = emptyMap(),
+                    errorMessage = null,
+                    lastUpdated = 0L
+                )
+            }
+        }
+    }
 }
+

@@ -34,7 +34,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Home
@@ -61,6 +64,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -103,6 +107,10 @@ import com.thedesitadka.app.ui.screens.SettingsScreen
 import com.thedesitadka.app.ui.theme.TheDesiTadkaTheme
 import com.thedesitadka.app.update.AppUpdateManager
 import com.thedesitadka.app.update.UpdateInfo
+import com.thedesitadka.app.navigation.PlaylistNavigationContext
+import com.thedesitadka.app.navigation.PlaylistSourceType
+import com.thedesitadka.app.navigation.VideoPlaylistHelper
+import com.thedesitadka.app.storage.NavigationStateStore
 import com.thedesitadka.core.model.MediaSource
 import com.thedesitadka.core.model.VideoItem
 import kotlinx.coroutines.launch
@@ -699,13 +707,273 @@ private fun AppNavigationContent(container: AppContainer) {
         )
     }
 
+    val activeNotice by container.adminNoticeRepository.activeNoticeFlow.collectAsState()
+
+    LaunchedEffect(Unit) {
+        container.adminNoticeRepository.checkNotice()
+    }
+
+    if (activeNotice != null) {
+        val notice = activeNotice!!
+        AlertDialog(
+            onDismissRequest = {
+                if (notice.dismissible) {
+                    coroutineScope.launch {
+                        container.adminNoticeRepository.dismissNotice(notice)
+                    }
+                }
+            },
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Campaign,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = notice.title,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            },
+            text = {
+                Column {
+                    val noticeDate = notice.date
+                    if (!noticeDate.isNullOrBlank()) {
+                        Text(
+                            text = noticeDate,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                    }
+                    Text(
+                        text = notice.message,
+                        fontSize = 14.sp,
+                        color = Color.White.copy(alpha = 0.9f),
+                        lineHeight = 20.sp
+                    )
+                }
+            },
+            confirmButton = {
+                if (!notice.actionUrl.isNullOrBlank()) {
+                    Button(
+                        onClick = {
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(notice.actionUrl))
+                                context.startActivity(intent)
+                            } catch (_: Exception) {}
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text(
+                            text = notice.actionText ?: "View Details",
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            },
+            dismissButton = {
+                if (notice.dismissible) {
+                    TextButton(
+                        onClick = {
+                            coroutineScope.launch {
+                                container.adminNoticeRepository.dismissNotice(notice)
+                            }
+                        }
+                    ) {
+                        Text("Close", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        )
+    }
+
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Active state holders for screens that need objects
     var activeVideoItem by remember { mutableStateOf<VideoItem?>(null) }
     var activeMediaSource by remember { mutableStateOf<MediaSource?>(null) }
+    var activePlaylist by remember { mutableStateOf<List<VideoItem>>(emptyList()) }
+    var activePlaylistIndex by remember { mutableIntStateOf(0) }
+
+    var playlistSourceType by remember { mutableStateOf(PlaylistSourceType.DASHBOARD) }
+    var playlistProviderId by remember { mutableStateOf("") }
+    var playlistCategoryUrl by remember { mutableStateOf("") }
+    var playlistSearchQuery by remember { mutableStateOf("") }
+    var playlistCurrentPage by remember { mutableIntStateOf(1) }
+    var playlistHasNextPage by remember { mutableStateOf(false) }
+    var isFetchingNextPage by remember { mutableStateOf(false) }
+    var isSwitchingVideo by remember { mutableStateOf(false) }
+
+    val playVideoItemInternal: (VideoItem) -> Unit = { targetVid ->
+        isSwitchingVideo = true
+        coroutineScope.launch {
+            try {
+                val directStream = if (targetVid.detailUrl.contains(".mp4") || targetVid.detailUrl.contains(".m3u8")) {
+                    MediaSource(
+                        url = targetVid.detailUrl,
+                        type = if (targetVid.detailUrl.contains(".m3u8")) com.thedesitadka.core.model.MediaSourceType.HLS else com.thedesitadka.core.model.MediaSourceType.PROGRESSIVE_MP4,
+                        canPlay = true
+                    )
+                } else null
+
+                val sourceToPlay = directStream ?: run {
+                    val adapter = container.providerEngine.getAdapter(targetVid.providerId)
+                    val result = adapter?.getPlayableMedia(targetVid.detailUrl)
+                    if (result != null && result.isSuccess && result.getOrThrow().isNotEmpty()) {
+                        result.getOrThrow().first()
+                    } else {
+                        val detResult = adapter?.getDetails(targetVid.detailUrl)
+                        if (detResult != null && detResult.isSuccess) {
+                            val det = detResult.getOrThrow()
+                            val epUrl = det.seasons.firstOrNull()?.episodes?.firstOrNull()?.let { it.streamUrl.ifBlank { it.detailUrl } }
+                            if (!epUrl.isNullOrBlank()) {
+                                adapter.getPlayableMedia(epUrl).getOrNull()?.firstOrNull()
+                            } else null
+                        } else null
+                    }
+                }
+
+                if (sourceToPlay != null) {
+                    activeVideoItem = targetVid
+                    activeMediaSource = sourceToPlay
+                } else {
+                    android.widget.Toast.makeText(context, "Could not load video stream: ${targetVid.title}", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            } finally {
+                isSwitchingVideo = false
+            }
+        }
+    }
+
+    val handleNextVideoNavigation: () -> Unit = {
+        if (isSwitchingVideo || isFetchingNextPage) {
+            // Loading in progress
+        } else if (activePlaylistIndex < activePlaylist.size - 1) {
+            val nextIndex = activePlaylistIndex + 1
+            val nextVid = activePlaylist[nextIndex]
+            activePlaylistIndex = nextIndex
+            playVideoItemInternal(nextVid)
+        } else if (playlistHasNextPage && !isFetchingNextPage) {
+            isFetchingNextPage = true
+            android.widget.Toast.makeText(context, "Loading next page...", android.widget.Toast.LENGTH_SHORT).show()
+            coroutineScope.launch {
+                try {
+                    val nextPage = playlistCurrentPage + 1
+                    val result: Result<com.thedesitadka.core.model.FeedPage>? = when (playlistSourceType) {
+                        PlaylistSourceType.CATEGORY -> {
+                            container.providerEngine.getCategoryFeed(playlistProviderId, playlistCategoryUrl, nextPage)
+                        }
+                        PlaylistSourceType.PROVIDER_FEED -> {
+                            if (playlistSearchQuery.isNotBlank()) {
+                                val adapter = container.providerEngine.getAdapter(playlistProviderId)
+                                adapter?.search(playlistSearchQuery.trim(), nextPage) ?: container.providerEngine.search(playlistSearchQuery.trim(), playlistProviderId, nextPage)
+                            } else if (playlistCategoryUrl.isNotBlank()) {
+                                container.providerEngine.getCategoryFeed(playlistProviderId, playlistCategoryUrl, nextPage)
+                            } else {
+                                container.providerEngine.getHomeFeed(playlistProviderId, nextPage)
+                            }
+                        }
+                        PlaylistSourceType.SEARCH -> {
+                            container.providerEngine.search(playlistSearchQuery.trim(), playlistProviderId.ifBlank { null }, nextPage)
+                        }
+                        else -> null
+                    }
+
+                    if (result != null && result.isSuccess) {
+                        val feedPage = result.getOrThrow()
+                        val validItems = feedPage.items.filter { it.title.isNotBlank() && it.detailUrl.isNotBlank() }
+                        val existingUrls = activePlaylist.map { VideoPlaylistHelper.normalizeUrl(it.detailUrl) }.toSet()
+                        val newUniqueItems = validItems.filter { VideoPlaylistHelper.normalizeUrl(it.detailUrl) !in existingUrls }
+
+                        if (newUniqueItems.isNotEmpty()) {
+                            val updatedList = activePlaylist + newUniqueItems
+                            activePlaylist = updatedList
+                            playlistCurrentPage = nextPage
+                            playlistHasNextPage = feedPage.hasNextPage && newUniqueItems.isNotEmpty()
+
+                            if (playlistSourceType == PlaylistSourceType.CATEGORY) {
+                                val cacheKey = "cat_content:$playlistProviderId:$playlistCategoryUrl"
+                                NavigationStateStore.updateItems(cacheKey, updatedList, nextPage, playlistHasNextPage)
+                            } else if (playlistSourceType == PlaylistSourceType.PROVIDER_FEED) {
+                                val cacheKey = "provider:$playlistProviderId"
+                                NavigationStateStore.updateItems(cacheKey, updatedList, nextPage, playlistHasNextPage)
+                            }
+
+                            val nextIndex = activePlaylistIndex + 1
+                            val nextVid = updatedList[nextIndex]
+                            activePlaylistIndex = nextIndex
+                            playVideoItemInternal(nextVid)
+                        } else {
+                            playlistHasNextPage = false
+                            android.widget.Toast.makeText(context, "No more videos left", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        playlistHasNextPage = false
+                        android.widget.Toast.makeText(context, "No more videos left", android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    playlistHasNextPage = false
+                    android.widget.Toast.makeText(context, "Failed to load next page: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
+                } finally {
+                    isFetchingNextPage = false
+                }
+            }
+        } else {
+            android.widget.Toast.makeText(context, "No next video in playlist", android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val handlePreviousVideoNavigation: () -> Unit = {
+        if (isSwitchingVideo || isFetchingNextPage) {
+            // Loading in progress
+        } else if (activePlaylistIndex > 0) {
+            val prevIndex = activePlaylistIndex - 1
+            val prevVid = activePlaylist[prevIndex]
+            activePlaylistIndex = prevIndex
+            playVideoItemInternal(prevVid)
+        } else {
+            android.widget.Toast.makeText(context, "No previous video in playlist", android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val setPlaylistAndNavigate: (VideoItem, List<VideoItem>, PlaylistNavigationContext?) -> Unit = { video, playlist, navCtx ->
+        if (video.isCategory || isCategoryUrl(video.detailUrl)) {
+            if (video.detailUrl.endsWith("/categories/") || video.detailUrl.endsWith("/categories") || video.title.equals("All Categories", ignoreCase = true)) {
+                navController.navigate(Screen.CategoryList.createRoute(video.providerId))
+            } else {
+                navController.navigate(Screen.CategoryContent.createRoute(video.providerId, video.title, video.detailUrl))
+            }
+        } else {
+            activeVideoItem = video
+            activePlaylist = playlist
+            val idx = VideoPlaylistHelper.findVideoIndex(playlist, video)
+            activePlaylistIndex = if (idx >= 0) idx else 0
+            if (navCtx != null) {
+                playlistSourceType = navCtx.sourceType
+                playlistProviderId = navCtx.providerId
+                playlistCategoryUrl = navCtx.categoryUrl
+                playlistSearchQuery = navCtx.searchQuery
+                playlistCurrentPage = navCtx.currentPage
+                playlistHasNextPage = navCtx.hasNextPage
+            } else {
+                playlistSourceType = PlaylistSourceType.DASHBOARD
+                playlistProviderId = video.providerId
+                playlistCategoryUrl = ""
+                playlistSearchQuery = ""
+                playlistCurrentPage = 1
+                playlistHasNextPage = false
+            }
+            navController.navigate(Screen.Details.route)
+        }
+    }
 
     val showBottomBar = currentRoute in listOf(
         Screen.Home.route,
@@ -814,16 +1082,10 @@ private fun AppNavigationContent(container: AppContainer) {
                     preferenceStore = container.preferenceStore,
                     monetizationManager = container.monetizationManager,
                     onVideoClick = { video ->
-                        if (video.isCategory || isCategoryUrl(video.detailUrl)) {
-                            if (video.detailUrl.endsWith("/categories/") || video.detailUrl.endsWith("/categories") || video.title.equals("All Categories", ignoreCase = true)) {
-                                navController.navigate(Screen.CategoryList.createRoute(video.providerId))
-                            } else {
-                                navController.navigate(Screen.CategoryContent.createRoute(video.providerId, video.title, video.detailUrl))
-                            }
-                        } else {
-                            activeVideoItem = video
-                            navController.navigate(Screen.Details.route)
-                        }
+                        setPlaylistAndNavigate(video, if (activePlaylist.isNotEmpty()) activePlaylist else listOf(video), null)
+                    },
+                    onVideoClickWithPlaylist = { video, playlist, navCtx ->
+                        setPlaylistAndNavigate(video, playlist, navCtx)
                     },
                     onProviderClick = { providerId ->
                         navController.navigate(Screen.Provider.createRoute(providerId))
@@ -843,20 +1105,10 @@ private fun AppNavigationContent(container: AppContainer) {
                     providerId = providerId,
                     providerEngine = container.providerEngine,
                     onVideoClick = { video ->
-                        try {
-                            if (video.isCategory || isCategoryUrl(video.detailUrl)) {
-                                if (video.detailUrl.endsWith("/categories/") || video.detailUrl.endsWith("/categories") || video.title.equals("All Categories", ignoreCase = true)) {
-                                    navController.navigate(Screen.CategoryList.createRoute(providerId))
-                                } else {
-                                    navController.navigate(Screen.CategoryContent.createRoute(providerId, video.title, video.detailUrl))
-                                }
-                            } else {
-                                activeVideoItem = video
-                                navController.navigate(Screen.Details.route)
-                            }
-                        } catch (e: Throwable) {
-                            android.widget.Toast.makeText(context, "Unable to open item", android.widget.Toast.LENGTH_SHORT).show()
-                        }
+                        setPlaylistAndNavigate(video, if (activePlaylist.isNotEmpty()) activePlaylist else listOf(video), null)
+                    },
+                    onVideoClickWithPlaylist = { video, playlist, navCtx ->
+                        setPlaylistAndNavigate(video, playlist, navCtx)
                     },
                     onAllCategoriesClick = {
                         try {
@@ -895,8 +1147,17 @@ private fun AppNavigationContent(container: AppContainer) {
                 )
             }
 
-            composable(Screen.CategoryList.route) { backStackEntry ->
-                val providerId = backStackEntry.arguments?.getString("providerId") ?: ""
+            composable(
+                route = Screen.CategoryList.route,
+                arguments = listOf(
+                    androidx.navigation.navArgument("providerId") {
+                        type = androidx.navigation.NavType.StringType
+                        defaultValue = ""
+                    }
+                )
+            ) { backStackEntry ->
+                val rawId = backStackEntry.arguments?.getString("providerId") ?: ""
+                val providerId = try { java.net.URLDecoder.decode(rawId, "UTF-8") } catch (_: Exception) { rawId }
                 CategoryListScreen(
                     providerId = providerId,
                     providerEngine = container.providerEngine,
@@ -911,8 +1172,25 @@ private fun AppNavigationContent(container: AppContainer) {
                 )
             }
 
-            composable(Screen.CategoryContent.route) { backStackEntry ->
-                val providerId = backStackEntry.arguments?.getString("providerId") ?: ""
+            composable(
+                route = Screen.CategoryContent.route,
+                arguments = listOf(
+                    androidx.navigation.navArgument("providerId") {
+                        type = androidx.navigation.NavType.StringType
+                        defaultValue = ""
+                    },
+                    androidx.navigation.navArgument("title") {
+                        type = androidx.navigation.NavType.StringType
+                        defaultValue = "Category"
+                    },
+                    androidx.navigation.navArgument("url") {
+                        type = androidx.navigation.NavType.StringType
+                        defaultValue = ""
+                    }
+                )
+            ) { backStackEntry ->
+                val rawId = backStackEntry.arguments?.getString("providerId") ?: ""
+                val providerId = try { java.net.URLDecoder.decode(rawId, "UTF-8") } catch (_: Exception) { rawId }
                 val rawTitle = backStackEntry.arguments?.getString("title") ?: "Category"
                 val categoryTitle = try {
                     java.net.URLDecoder.decode(rawTitle, "UTF-8")
@@ -931,20 +1209,10 @@ private fun AppNavigationContent(container: AppContainer) {
                     categoryUrl = categoryUrl,
                     providerEngine = container.providerEngine,
                     onVideoClick = { video ->
-                        try {
-                            if (video.isCategory || isCategoryUrl(video.detailUrl)) {
-                                if (video.detailUrl.endsWith("/categories/") || video.detailUrl.endsWith("/categories") || video.title.equals("All Categories", ignoreCase = true)) {
-                                    navController.navigate(Screen.CategoryList.createRoute(providerId))
-                                } else {
-                                    navController.navigate(Screen.CategoryContent.createRoute(providerId, video.title, video.detailUrl))
-                                }
-                            } else {
-                                activeVideoItem = video
-                                navController.navigate(Screen.Details.route)
-                            }
-                        } catch (e: Throwable) {
-                            android.widget.Toast.makeText(context, "Unable to open video", android.widget.Toast.LENGTH_SHORT).show()
-                        }
+                        setPlaylistAndNavigate(video, if (activePlaylist.isNotEmpty()) activePlaylist else listOf(video), null)
+                    },
+                    onVideoClickWithPlaylist = { video, playlist, navCtx ->
+                        setPlaylistAndNavigate(video, playlist, navCtx)
                     },
                     onBackClick = { navController.popBackStack() }
                 )
@@ -955,12 +1223,10 @@ private fun AppNavigationContent(container: AppContainer) {
                 SearchScreen(
                     providerEngine = container.providerEngine,
                     onVideoClick = { video ->
-                        if (video.isCategory || isCategoryUrl(video.detailUrl)) {
-                            navController.navigate(Screen.CategoryContent.createRoute(video.providerId, video.title, video.detailUrl))
-                        } else {
-                            activeVideoItem = video
-                            navController.navigate(Screen.Details.route)
-                        }
+                        setPlaylistAndNavigate(video, if (activePlaylist.isNotEmpty()) activePlaylist else listOf(video), null)
+                    },
+                    onVideoClickWithPlaylist = { video, playlist, navCtx ->
+                        setPlaylistAndNavigate(video, playlist, navCtx)
                     },
                     onBackClick = { navController.popBackStack() }
                 )
@@ -968,34 +1234,185 @@ private fun AppNavigationContent(container: AppContainer) {
 
             composable(Screen.Details.route) {
                 activeVideoItem?.let { video ->
-                    DetailsScreen(
-                        videoItem = video,
-                        providerEngine = container.providerEngine,
-                        favoriteDao = container.database.favoriteDao(),
-                        downloadRepository = container.downloadRepository,
-                        monetizationManager = container.monetizationManager,
-                        onPlayClick = { vid, src ->
-                            activeVideoItem = vid
-                            activeMediaSource = src
-                            navController.navigate(Screen.Player.route)
-                        },
-                        onRelatedClick = { relVideo ->
-                            activeVideoItem = relVideo
-                        },
-                        onBackClick = { navController.popBackStack() }
-                    )
+                    key(video.id, video.detailUrl) {
+                        DetailsScreen(
+                            videoItem = video,
+                            providerEngine = container.providerEngine,
+                            favoriteDao = container.database.favoriteDao(),
+                            downloadRepository = container.downloadRepository,
+                            monetizationManager = container.monetizationManager,
+                            onOpenDownloadsClick = {
+                                navController.navigate(Screen.Downloads.route)
+                            },
+                            onNextVideoClick = { currentVid ->
+                                if (activePlaylistIndex < activePlaylist.size - 1) {
+                                    activePlaylistIndex++
+                                    val nextVid = activePlaylist[activePlaylistIndex]
+                                    activeVideoItem = nextVid
+                                    android.widget.Toast.makeText(context, "Next: ${nextVid.title}", android.widget.Toast.LENGTH_SHORT).show()
+                                    true
+                                } else if (playlistHasNextPage && !isFetchingNextPage) {
+                                    isFetchingNextPage = true
+                                    android.widget.Toast.makeText(context, "Loading next page...", android.widget.Toast.LENGTH_SHORT).show()
+                                    coroutineScope.launch {
+                                        try {
+                                            val nextPage = playlistCurrentPage + 1
+                                            val result = when (playlistSourceType) {
+                                                PlaylistSourceType.CATEGORY -> container.providerEngine.getCategoryFeed(playlistProviderId, playlistCategoryUrl, nextPage)
+                                                PlaylistSourceType.PROVIDER_FEED -> {
+                                                    if (playlistSearchQuery.isNotBlank()) {
+                                                        container.providerEngine.search(playlistSearchQuery.trim(), playlistProviderId, nextPage)
+                                                    } else if (playlistCategoryUrl.isNotBlank()) {
+                                                        container.providerEngine.getCategoryFeed(playlistProviderId, playlistCategoryUrl, nextPage)
+                                                    } else {
+                                                        container.providerEngine.getHomeFeed(playlistProviderId, nextPage)
+                                                    }
+                                                }
+                                                else -> null
+                                            }
+                                            if (result != null && result.isSuccess) {
+                                                val feedPage = result.getOrThrow()
+                                                val validItems = feedPage.items.filter { it.title.isNotBlank() && it.detailUrl.isNotBlank() }
+                                                val existingUrls = activePlaylist.map { VideoPlaylistHelper.normalizeUrl(it.detailUrl) }.toSet()
+                                                val newUniqueItems = validItems.filter { VideoPlaylistHelper.normalizeUrl(it.detailUrl) !in existingUrls }
+                                                if (newUniqueItems.isNotEmpty()) {
+                                                    val updatedList = activePlaylist + newUniqueItems
+                                                    activePlaylist = updatedList
+                                                    playlistCurrentPage = nextPage
+                                                    playlistHasNextPage = feedPage.hasNextPage && newUniqueItems.isNotEmpty()
+
+                                                    if (playlistSourceType == PlaylistSourceType.CATEGORY) {
+                                                        val cacheKey = "cat_content:$playlistProviderId:$playlistCategoryUrl"
+                                                        NavigationStateStore.updateItems(cacheKey, updatedList, nextPage, playlistHasNextPage)
+                                                    } else if (playlistSourceType == PlaylistSourceType.PROVIDER_FEED) {
+                                                        val cacheKey = "provider:$playlistProviderId"
+                                                        NavigationStateStore.updateItems(cacheKey, updatedList, nextPage, playlistHasNextPage)
+                                                    }
+
+                                                    val nextIndex = activePlaylistIndex + 1
+                                                    activePlaylistIndex = nextIndex
+                                                    activeVideoItem = updatedList[nextIndex]
+                                                    android.widget.Toast.makeText(context, "Next: ${updatedList[nextIndex].title}", android.widget.Toast.LENGTH_SHORT).show()
+                                                } else {
+                                                    playlistHasNextPage = false
+                                                    android.widget.Toast.makeText(context, "No more videos left", android.widget.Toast.LENGTH_SHORT).show()
+                                                }
+                                            } else {
+                                                playlistHasNextPage = false
+                                                android.widget.Toast.makeText(context, "No more videos left", android.widget.Toast.LENGTH_SHORT).show()
+                                            }
+                                        } catch (e: Exception) {
+                                            playlistHasNextPage = false
+                                            android.widget.Toast.makeText(context, "Failed to load next page: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
+                                        } finally {
+                                            isFetchingNextPage = false
+                                        }
+                                    }
+                                    true
+                                } else {
+                                    false
+                                }
+                            },
+                            onPreviousVideoClick = { currentVid ->
+                                if (activePlaylistIndex > 0) {
+                                    activePlaylistIndex--
+                                    val prevVid = activePlaylist[activePlaylistIndex]
+                                    activeVideoItem = prevVid
+                                    android.widget.Toast.makeText(context, "Previous: ${prevVid.title}", android.widget.Toast.LENGTH_SHORT).show()
+                                    true
+                                } else {
+                                    false
+                                }
+                            },
+                            onPlaylistUpdated = { playlist ->
+                                if (activePlaylist.size <= 1 && playlistSourceType != PlaylistSourceType.CATEGORY && playlistSourceType != PlaylistSourceType.PROVIDER_FEED) {
+                                    activePlaylist = playlist
+                                    val idx = VideoPlaylistHelper.findVideoIndex(playlist, video)
+                                    activePlaylistIndex = if (idx >= 0) idx else 0
+                                    playlistSourceType = PlaylistSourceType.RELATED
+                                }
+                            },
+                            onPlayClick = { vid, src ->
+                                activeVideoItem = vid
+                                activeMediaSource = src
+                                val existingIndex = VideoPlaylistHelper.findVideoIndex(activePlaylist, vid)
+                                if (existingIndex >= 0) {
+                                    activePlaylistIndex = existingIndex
+                                } else if (activePlaylist.size > 1) {
+                                    val fallbackIdx = activeVideoItem?.let { VideoPlaylistHelper.findVideoIndex(activePlaylist, it) } ?: -1
+                                    activePlaylistIndex = if (fallbackIdx >= 0) fallbackIdx else 0
+                                } else {
+                                    activePlaylist = listOf(vid)
+                                    activePlaylistIndex = 0
+                                }
+                                navController.navigate(Screen.Player.route)
+                            },
+                            onPlayClickWithPlaylist = { vid, src, playlist ->
+                                activeVideoItem = vid
+                                activeMediaSource = src
+                                if (playlist.size > 1) {
+                                    activePlaylist = playlist
+                                    val idx = VideoPlaylistHelper.findVideoIndex(playlist, vid)
+                                    activePlaylistIndex = if (idx >= 0) idx else 0
+                                    playlistSourceType = PlaylistSourceType.SERIES
+                                    playlistHasNextPage = false
+                                } else {
+                                    val existingIndex = VideoPlaylistHelper.findVideoIndex(activePlaylist, vid)
+                                    if (existingIndex >= 0) {
+                                        activePlaylistIndex = existingIndex
+                                    } else if (activePlaylist.size > 1) {
+                                        val fallbackIdx = activeVideoItem?.let { VideoPlaylistHelper.findVideoIndex(activePlaylist, it) } ?: -1
+                                        if (fallbackIdx >= 0) {
+                                            activePlaylistIndex = fallbackIdx
+                                        } else {
+                                            activePlaylistIndex = 0
+                                        }
+                                    } else if (playlist.isNotEmpty()) {
+                                        activePlaylist = playlist
+                                        activePlaylistIndex = 0
+                                    } else {
+                                        activePlaylist = listOf(vid)
+                                        activePlaylistIndex = 0
+                                    }
+                                }
+                                navController.navigate(Screen.Player.route)
+                            },
+                            onRelatedClick = { relVideo ->
+                                activeVideoItem = relVideo
+                                val existingIdx = VideoPlaylistHelper.findVideoIndex(activePlaylist, relVideo)
+                                if (existingIdx >= 0) {
+                                    activePlaylistIndex = existingIdx
+                                } else {
+                                    activePlaylist = activePlaylist + relVideo
+                                    activePlaylistIndex = activePlaylist.size - 1
+                                }
+                            },
+                            onBackClick = { navController.popBackStack() }
+                        )
+                    }
                 }
             }
 
             composable(Screen.Player.route) {
                 if (activeVideoItem != null && activeMediaSource != null) {
-                    PlayerScreen(
-                        videoItem = activeVideoItem!!,
-                        mediaSource = activeMediaSource!!,
-                        watchHistoryDao = container.database.watchHistoryDao(),
-                        monetizationManager = container.monetizationManager,
-                        onBackClick = { navController.popBackStack() }
-                    )
+                    key(activeVideoItem!!.id, activeMediaSource!!.url) {
+                        val canGoNext = (activePlaylistIndex < activePlaylist.size - 1) || (playlistHasNextPage && !isFetchingNextPage)
+                        val canGoPrevious = activePlaylistIndex > 0
+                        PlayerScreen(
+                            videoItem = activeVideoItem!!,
+                            mediaSource = activeMediaSource!!,
+                            watchHistoryDao = container.database.watchHistoryDao(),
+                            monetizationManager = container.monetizationManager,
+                            hasNext = canGoNext,
+                            hasPrevious = canGoPrevious,
+                            onNextClick = if (canGoNext) handleNextVideoNavigation else null,
+                            onPreviousClick = if (canGoPrevious) handlePreviousVideoNavigation else null,
+                            onOpenDownloadsClick = {
+                                navController.navigate(Screen.Downloads.route)
+                            },
+                            onBackClick = { navController.popBackStack() }
+                        )
+                    }
                 }
             }
 

@@ -31,9 +31,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.ui.input.pointer.changedToUp
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.input.pointer.pointerInput
+import android.widget.Toast
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
 import androidx.compose.material.icons.filled.Fullscreen
@@ -44,6 +54,8 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PictureInPicture
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.VolumeMute
 import androidx.compose.material.icons.filled.VolumeUp
@@ -102,6 +114,11 @@ fun PlayerScreen(
     mediaSource: MediaSource,
     watchHistoryDao: WatchHistoryDao,
     monetizationManager: MonetizationManager? = null,
+    hasNext: Boolean = false,
+    hasPrevious: Boolean = false,
+    onNextClick: (() -> Unit)? = null,
+    onPreviousClick: (() -> Unit)? = null,
+    onOpenDownloadsClick: (() -> Unit)? = null,
     onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -203,22 +220,53 @@ fun PlayerScreen(
         }
     }
 
+    var swipeFeedbackText by remember { mutableStateOf<String?>(null) }
+    var swipeFeedbackIcon by remember { mutableStateOf<ImageVector?>(null) }
+
+    LaunchedEffect(swipeFeedbackText) {
+        if (swipeFeedbackText != null) {
+            delay(1500)
+            swipeFeedbackText = null
+        }
+    }
+
+    val currentOnNextClick by rememberUpdatedState(onNextClick)
+    val currentOnPreviousClick by rememberUpdatedState(onPreviousClick)
+    val currentHasNext by rememberUpdatedState(hasNext)
+    val currentHasPrevious by rememberUpdatedState(hasPrevious)
+
+    val triggerNext: () -> Unit = {
+        if (currentHasNext && currentOnNextClick != null) {
+            swipeFeedbackText = "Next Video"
+            swipeFeedbackIcon = Icons.Default.SkipNext
+            Toast.makeText(context, "Playing next video…", Toast.LENGTH_SHORT).show()
+            currentOnNextClick?.invoke()
+        } else {
+            swipeFeedbackText = "No next video in playlist"
+            swipeFeedbackIcon = Icons.Default.SkipNext
+            Toast.makeText(context, "No next video in playlist", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val triggerPrevious: () -> Unit = {
+        if (currentHasPrevious && currentOnPreviousClick != null) {
+            swipeFeedbackText = "Previous Video"
+            swipeFeedbackIcon = Icons.Default.SkipPrevious
+            Toast.makeText(context, "Playing previous video…", Toast.LENGTH_SHORT).show()
+            currentOnPreviousClick?.invoke()
+        } else {
+            swipeFeedbackText = "No previous video in playlist"
+            swipeFeedbackIcon = Icons.Default.SkipPrevious
+            Toast.makeText(context, "No previous video in playlist", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) {
-                if (isScreenLocked) {
-                    showControls = !showControls
-                } else {
-                    showControls = !showControls
-                }
-            }
     ) {
-        // ExoPlayer View
+        // ExoPlayer View (bottom layer)
         AndroidView(
             factory = { ctx ->
                 PlayerView(ctx).apply {
@@ -227,6 +275,17 @@ fun PlayerScreen(
                 }
             },
             modifier = Modifier.fillMaxSize()
+        )
+
+        // Touch & Gesture Detection Layer (placed on top of AndroidView so native PlayerView doesn't swallow touches)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .playerGestureDetector(
+                    onTap = { showControls = !showControls },
+                    onSwipeLeft = triggerNext,
+                    onSwipeRight = triggerPrevious
+                )
         )
 
         // Initial Preparing / Buffering Overlay (Before playback begins)
@@ -344,6 +403,11 @@ fun PlayerScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.55f))
+                    .playerGestureDetector(
+                        onTap = { showControls = false },
+                        onSwipeLeft = triggerNext,
+                        onSwipeRight = triggerPrevious
+                    )
             ) {
                 // Top Header Row
                 Row(
@@ -436,6 +500,17 @@ fun PlayerScreen(
                         }
                     }
 
+                    // Downloads Quick Access
+                    if (onOpenDownloadsClick != null) {
+                        IconButton(onClick = onOpenDownloadsClick) {
+                            Icon(
+                                imageVector = Icons.Default.Download,
+                                contentDescription = "View Downloads",
+                                tint = Color.White
+                            )
+                        }
+                    }
+
                     // Fullscreen Toggle
                     IconButton(onClick = { toggleFullscreen() }) {
                         Icon(
@@ -446,18 +521,35 @@ fun PlayerScreen(
                     }
                 }
 
-                // Center Play / Pause / 10s Rewind / 10s FastForward (Shown only after initial loading)
+                // Center Play / Pause / 10s Rewind / 10s FastForward / Skip Previous / Skip Next (Shown only after initial loading)
                 if (hasStartedPlaying) {
                     Row(
                         modifier = Modifier.align(Alignment.Center),
-                        horizontalArrangement = Arrangement.spacedBy(32.dp),
+                        horizontalArrangement = Arrangement.spacedBy(18.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        // Skip Previous
+                        IconButton(
+                            onClick = { onPreviousClick?.invoke() },
+                            enabled = hasPrevious,
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = if (hasPrevious) 0.15f else 0.05f))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.SkipPrevious,
+                                contentDescription = "Previous Video",
+                                tint = if (hasPrevious) Color.White else Color.White.copy(alpha = 0.3f),
+                                modifier = Modifier.size(26.dp)
+                            )
+                        }
+
                         IconButton(
                             onClick = { playerManager.seekBackward(10000L) },
                             enabled = !state.isBuffering && !state.isSeeking,
                             modifier = Modifier
-                                .size(52.dp)
+                                .size(48.dp)
                                 .clip(CircleShape)
                                 .background(Color.White.copy(alpha = 0.15f))
                         ) {
@@ -465,7 +557,7 @@ fun PlayerScreen(
                                 imageVector = Icons.Default.FastRewind,
                                 contentDescription = "Rewind 10s",
                                 tint = Color.White,
-                                modifier = Modifier.size(28.dp)
+                                modifier = Modifier.size(26.dp)
                             )
                         }
 
@@ -505,7 +597,7 @@ fun PlayerScreen(
                             onClick = { playerManager.seekForward(10000L) },
                             enabled = !state.isBuffering && !state.isSeeking,
                             modifier = Modifier
-                                .size(52.dp)
+                                .size(48.dp)
                                 .clip(CircleShape)
                                 .background(Color.White.copy(alpha = 0.15f))
                         ) {
@@ -513,7 +605,24 @@ fun PlayerScreen(
                                 imageVector = Icons.Default.FastForward,
                                 contentDescription = "Forward 10s",
                                 tint = Color.White,
-                                modifier = Modifier.size(28.dp)
+                                modifier = Modifier.size(26.dp)
+                            )
+                        }
+
+                        // Skip Next
+                        IconButton(
+                            onClick = { onNextClick?.invoke() },
+                            enabled = hasNext,
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = if (hasNext) 0.15f else 0.05f))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.SkipNext,
+                                contentDescription = "Next Video",
+                                tint = if (hasNext) Color.White else Color.White.copy(alpha = 0.3f),
+                                modifier = Modifier.size(26.dp)
                             )
                         }
                     }
@@ -595,6 +704,91 @@ fun PlayerScreen(
                     placement = AdPlacementType.PLAYER_COMPANION,
                     monetizationManager = monetizationManager
                 )
+            }
+        }
+
+        // Central Swipe HUD feedback
+        AnimatedVisibility(
+            visible = swipeFeedbackText != null,
+            enter = fadeIn() + scaleIn(),
+            exit = fadeOut() + scaleOut(),
+            modifier = Modifier.align(Alignment.Center)
+        ) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.Black.copy(alpha = 0.85f))
+                    .padding(horizontal = 24.dp, vertical = 14.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    swipeFeedbackIcon?.let { icon ->
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                    Text(
+                        text = swipeFeedbackText ?: "",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun Modifier.playerGestureDetector(
+    onTap: () -> Unit,
+    onSwipeLeft: () -> Unit,
+    onSwipeRight: () -> Unit
+): Modifier = this.pointerInput(Unit) {
+    awaitEachGesture {
+        val down = awaitFirstDown(requireUnconsumed = false)
+        val startX = down.position.x
+        val startY = down.position.y
+        var lastX = startX
+        var lastY = startY
+        var hasMovedSignificantly = false
+
+        while (true) {
+            val event = awaitPointerEvent()
+            val change = event.changes.firstOrNull { it.id == down.id } ?: break
+            lastX = change.position.x
+            lastY = change.position.y
+            val curDx = kotlin.math.abs(lastX - startX)
+            val curDy = kotlin.math.abs(lastY - startY)
+            if (curDx > 25f || curDy > 25f) {
+                hasMovedSignificantly = true
+            }
+            if (change.changedToUp()) {
+                val wasConsumedByChild = change.isConsumed
+                if (!wasConsumedByChild) {
+                    change.consume()
+                    val totalDx = lastX - startX
+                    val totalDy = lastY - startY
+                    val absDx = kotlin.math.abs(totalDx)
+                    val absDy = kotlin.math.abs(totalDy)
+
+                    val threshold = 70f
+                    if (absDx >= threshold && absDx > absDy * 0.7f) {
+                        if (totalDx < 0) {
+                            onSwipeLeft()
+                        } else {
+                            onSwipeRight()
+                        }
+                    } else if (!hasMovedSignificantly && absDx < 25f && absDy < 25f) {
+                        onTap()
+                    }
+                }
+                break
             }
         }
     }

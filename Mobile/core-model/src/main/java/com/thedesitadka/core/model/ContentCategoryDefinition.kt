@@ -33,7 +33,8 @@ data class ContentCategoryDefinition(
                     "desisex", "ixiporn", "masafun", "uncutmaza", "wowuncut",
                     "desikahani2", "desitales2", "indiansexstories3", "xxxindianstories", "xmaza",
                     "aagmaal_com", "bmaal", "chiggywiggy", "desibabe", "desigirlxx",
-                    "desimaals", "desivideo", "lalamasa", "watchoerotic"
+                    "desimaals", "desivideo", "lalamasa", "watchoerotic", "masahub",
+                    "livecamrips"
                 )
             ),
             ContentCategoryDefinition(

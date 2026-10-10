@@ -88,6 +88,8 @@ import kotlinx.coroutines.flow.Flow
 import com.thedesitadka.app.monetization.AdPlacementType
 import com.thedesitadka.app.monetization.MonetizationManager
 import com.thedesitadka.app.monetization.ui.AdSlotView
+import com.thedesitadka.app.navigation.PlaylistNavigationContext
+import com.thedesitadka.app.navigation.PlaylistSourceType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -98,12 +100,13 @@ fun HomeScreen(
     preferenceStore: PreferenceStore? = null,
     monetizationManager: MonetizationManager? = null,
     onVideoClick: (VideoItem) -> Unit,
+    onVideoClickWithPlaylist: ((VideoItem, List<VideoItem>, PlaylistNavigationContext?) -> Unit)? = null,
     onProviderClick: (String) -> Unit,
     onSearchClick: () -> Unit,
     onCustomizeSourcesClick: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
-    val activeProviders = remember { providerEngine.getActiveProviders() }
+    val allProviders = remember { providerEngine.getActiveProviders() }
     val selectedHomeProviders by preferenceStore?.selectedHomeProvidersFlow?.collectAsState(
         initial = emptySet()
     ) ?: remember { mutableStateOf(emptySet()) }
@@ -112,6 +115,34 @@ fun HomeScreen(
     var selectedCategoryId by rememberSaveable { mutableStateOf("all") }
     var reloadTrigger by remember { mutableIntStateOf(0) }
     var providerSearchQuery by remember { mutableStateOf("") }
+
+    // Filter providers based on selected category:
+    // "All" -> user's customized home content selection.
+    // Other categories -> preset providers for that category, completely independent of customized home content.
+    val activeProviders = remember(selectedCategoryId, allProviders, selectedHomeProviders) {
+        val isAllCategory = selectedCategoryId.equals("all", ignoreCase = true)
+        if (isAllCategory) {
+            if (selectedHomeProviders.isNotEmpty()) {
+                allProviders.filter { it.id in selectedHomeProviders }
+            } else {
+                allProviders
+            }
+        } else {
+            val categoryDef = ContentCategoryDefinition.DEFAULT_CATEGORIES.find { it.id.equals(selectedCategoryId, ignoreCase = true) }
+            when {
+                categoryDef != null && categoryDef.providerIds.isNotEmpty() -> {
+                    allProviders.filter { it.id in categoryDef.providerIds }
+                }
+                selectedCategoryId.equals("downloadable", ignoreCase = true) -> {
+                    allProviders.filter { p -> p.capabilities.any { c -> c.name == "DOWNLOAD" } }
+                }
+                selectedCategoryId.equals("movies", ignoreCase = true) -> {
+                    allProviders.filter { it.id in listOf("movienerds", "cineapse", "prmovies", "prmovies_church") }
+                }
+                else -> allProviders
+            }
+        }
+    }
 
     val challengeLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -144,6 +175,11 @@ fun HomeScreen(
     LaunchedEffect(selectedCategoryId, reloadTrigger) {
         if (reloadTrigger > 0) {
             dashboardRepository.refresh(selectedCategoryId)
+        } else {
+            val state = dashboardRepository.getDashboardState(selectedCategoryId).value
+            if (state.videos.isEmpty() && !state.isLoading) {
+                dashboardRepository.refresh(selectedCategoryId)
+            }
         }
     }
 
@@ -249,13 +285,34 @@ fun HomeScreen(
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     HeroCarousel(
                         items = carouselItems,
-                        onWatchClick = { onVideoClick(it) }
+                        onWatchClick = {
+                            if (onVideoClickWithPlaylist != null) {
+                                onVideoClickWithPlaylist(
+                                    it,
+                                    if (aggregatedVideos.isNotEmpty()) aggregatedVideos else carouselItems,
+                                    PlaylistNavigationContext(
+                                        sourceType = PlaylistSourceType.DASHBOARD,
+                                        categoryUrl = selectedCategoryId
+                                    )
+                                )
+                            } else {
+                                onVideoClick(it)
+                            }
+                        }
                     )
                 }
             }
 
-            // 3. Continue Watching / History Row
             if (watchHistory.isNotEmpty()) {
+                val historyVideos = watchHistory.map {
+                    VideoItem(
+                        id = it.id,
+                        providerId = it.providerId,
+                        title = it.title,
+                        thumbnailUrl = it.thumbnailUrl,
+                        detailUrl = it.detailUrl
+                    )
+                }
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Column(modifier = Modifier.padding(top = 10.dp)) {
                         Text(
@@ -272,40 +329,38 @@ fun HomeScreen(
                             contentPadding = PaddingValues(horizontal = 8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(watchHistory) { history ->
+                            items(historyVideos) { histVideo ->
                                 Box(
                                     modifier = Modifier
                                         .width(180.dp)
                                         .clickable {
-                                            onVideoClick(
-                                                VideoItem(
-                                                    id = history.id,
-                                                    providerId = history.providerId,
-                                                    title = history.title,
-                                                    thumbnailUrl = history.thumbnailUrl,
-                                                    detailUrl = history.detailUrl
+                                            if (onVideoClickWithPlaylist != null) {
+                                                onVideoClickWithPlaylist(
+                                                    histVideo,
+                                                    historyVideos,
+                                                    PlaylistNavigationContext(
+                                                        sourceType = PlaylistSourceType.DASHBOARD
+                                                    )
                                                 )
-                                            )
+                                            } else {
+                                                onVideoClick(histVideo)
+                                            }
                                         }
                                 ) {
                                     VideoCard(
-                                        videoItem = VideoItem(
-                                            id = history.id,
-                                            providerId = history.providerId,
-                                            title = history.title,
-                                            thumbnailUrl = history.thumbnailUrl,
-                                            detailUrl = history.detailUrl
-                                        ),
+                                        videoItem = histVideo,
                                         onClick = {
-                                            onVideoClick(
-                                                VideoItem(
-                                                    id = history.id,
-                                                    providerId = history.providerId,
-                                                    title = history.title,
-                                                    thumbnailUrl = history.thumbnailUrl,
-                                                    detailUrl = history.detailUrl
+                                            if (onVideoClickWithPlaylist != null) {
+                                                onVideoClickWithPlaylist(
+                                                    histVideo,
+                                                    historyVideos,
+                                                    PlaylistNavigationContext(
+                                                        sourceType = PlaylistSourceType.DASHBOARD
+                                                    )
                                                 )
-                                            )
+                                            } else {
+                                                onVideoClick(histVideo)
+                                            }
                                         }
                                     )
                                 }
@@ -332,7 +387,7 @@ fun HomeScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = if (providerSearchQuery.isBlank()) "MEDIA PROVIDERS (${activeProviders.size})" else "MEDIA PROVIDERS (${displayedProviders.size})",
+                                text = if (providerSearchQuery.isBlank()) "MEDIA PROVIDERS (${activeProviders.size})" else "MEDIA PROVIDERS (${displayedProviders.size}/${activeProviders.size})",
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary,
@@ -402,10 +457,8 @@ fun HomeScreen(
 
             // 5. Latest Media Section Header — title with site count + inline Customize button
             item(span = { GridItemSpan(maxLineSpan) }) {
-                val contributingProviders = remember(activeProviders, selectedHomeProviders) {
-                    if (selectedHomeProviders.isEmpty()) activeProviders
-                    else activeProviders.filter { it.id in selectedHomeProviders }
-                }
+                val contributingProviders = activeProviders
+                val isAllCategory = selectedCategoryId.equals("all", ignoreCase = true)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -421,7 +474,7 @@ fun HomeScreen(
                             letterSpacing = 1.sp
                         )
                     )
-                    if (onCustomizeSourcesClick != null) {
+                    if (onCustomizeSourcesClick != null && isAllCategory) {
                         Row(
                             modifier = Modifier.clickable { onCustomizeSourcesClick() },
                             verticalAlignment = Alignment.CenterVertically,
@@ -464,8 +517,9 @@ fun HomeScreen(
                         challengeProvider ?: activeProviders.firstOrNull()
                     }
                     val isCloudflare = challengeProviderId != null || challengeProvider != null ||
-                            errorMessage?.contains("Cloudflare", ignoreCase = true) == true ||
-                            errorMessage?.contains("Security", ignoreCase = true) == true
+                            errorMessage?.contains("Cloudflare security challenge detected", ignoreCase = true) == true ||
+                            errorMessage?.contains("Cloudflare security verification required", ignoreCase = true) == true ||
+                            errorMessage?.contains("cf-challenge", ignoreCase = true) == true
 
                     if (isCloudflare) {
                         Card(
@@ -549,7 +603,20 @@ fun HomeScreen(
             items(batch1, key = { it.id }) { item ->
                 VideoCard(
                     videoItem = item,
-                    onClick = { onVideoClick(item) }
+                    onClick = {
+                        if (onVideoClickWithPlaylist != null) {
+                            onVideoClickWithPlaylist(
+                                item,
+                                if (aggregatedVideos.isNotEmpty()) aggregatedVideos else remainingVideos,
+                                PlaylistNavigationContext(
+                                    sourceType = PlaylistSourceType.DASHBOARD,
+                                    categoryUrl = selectedCategoryId
+                                )
+                            )
+                        } else {
+                            onVideoClick(item)
+                        }
+                    }
                 )
             }
 
@@ -565,7 +632,20 @@ fun HomeScreen(
             items(batch2, key = { it.id }) { item ->
                 VideoCard(
                     videoItem = item,
-                    onClick = { onVideoClick(item) }
+                    onClick = {
+                        if (onVideoClickWithPlaylist != null) {
+                            onVideoClickWithPlaylist(
+                                item,
+                                if (aggregatedVideos.isNotEmpty()) aggregatedVideos else remainingVideos,
+                                PlaylistNavigationContext(
+                                    sourceType = PlaylistSourceType.DASHBOARD,
+                                    categoryUrl = selectedCategoryId
+                                )
+                            )
+                        } else {
+                            onVideoClick(item)
+                        }
+                    }
                 )
             }
 

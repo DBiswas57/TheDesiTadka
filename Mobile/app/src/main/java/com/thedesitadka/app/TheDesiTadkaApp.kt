@@ -78,19 +78,28 @@ class TheDesiTadkaApp : Application(), ImageLoaderFactory {
 
     override fun newImageLoader(): ImageLoader {
         val client = OkHttpClient.Builder()
+            .dns(NetworkClient.smartDns)
             .addInterceptor { chain ->
                 val orig = chain.request()
                 val host = orig.url.host.lowercase()
                 val referer = when {
+                    host.contains("hdzog.com") || host.contains("tn.hdzog") -> "https://hdzog.com/"
+                    host.contains("externulls.com") || host.contains("beeg") -> "https://beeg.com/"
+                    host.contains("drtuber") -> "https://www.drtuber.desi/"
+                    host.contains("nuvid") || host.contains("nvdst") -> "https://m.nuvid.org/"
+                    host.contains("empflix") -> "https://www.empflix.com/"
+                    host.contains("3movs") -> "https://www.3movs.xxx/"
+                    host.contains("eporner") -> "https://www.eporner.com/"
                     host.contains("pvtcdn.com") || host.contains("masa49") -> "https://www.masa49.nl/"
                     host.contains("kamababa") -> "https://www.mykamababa.com/"
                     host.contains("fry99") -> "https://fry99.cc/"
                     host.contains("masahub") -> "https://masahub2.com/"
                     host.contains("lalamasa") -> "https://lalamasa.mobi/"
                     host.contains("watchoerotic") -> "https://watchoerotic.com/"
-                    host.contains("prmovies") -> "https://prmovies.com/"
+                    host.contains("prmovies") -> "https://prmovies.futbol/"
                     host.contains("aagmaal.com") -> "https://aagmaal.com/"
-                    host.contains("aagmaal") || host.contains("aagimg") -> "https://aagmaal.date/"
+                    host.contains("aagmaal") -> "https://${orig.url.host}/"
+                    host.contains("aagimg") -> "https://aagmaal.webcam/"
                     host.contains("fsiblog") -> "https://www.fsiblogxx.com/"
                     host.contains("webxseries") -> "https://webxseries.hot/"
                     host.contains("xnxx") || host.contains("xvideos") -> "https://www.xnxx.com/"

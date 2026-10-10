@@ -49,6 +49,7 @@ class DownloadWorker(
         const val KEY_WIFI_ONLY = "wifi_only"
         const val KEY_MIME_TYPE = "mime_type"
         const val KEY_IS_HLS = "is_hls"
+        const val KEY_REFERER = "referer"
         const val BUFFER_SIZE = 65536 // 64 KB buffer for high-speed streaming I/O
         const val MAX_RETRIES = 3
     }
@@ -73,6 +74,7 @@ class DownloadWorker(
         val isWifiOnly = inputData.getBoolean(KEY_WIFI_ONLY, false)
         val mimeType = inputData.getString(KEY_MIME_TYPE) ?: ""
         val isHlsExplicit = inputData.getBoolean(KEY_IS_HLS, false)
+        val inputReferer = inputData.getString(KEY_REFERER)
 
         StreamHubLogger.log(
             StreamHubLogger.Category.DOWNLOAD,
@@ -123,6 +125,14 @@ class DownloadWorker(
         val record = downloadDao.getDownload(downloadId)
         if (record == null) {
             StreamHubLogger.e("DownloadWorker", "DOWNLOAD_FAILED: Download record not found for ID: $downloadId")
+            return Result.failure()
+        }
+        if (record.status == DownloadStatus.CANCELLED) {
+            StreamHubLogger.i("DownloadWorker", "Download $downloadId was cancelled before work started")
+            return Result.failure()
+        }
+        if (record.status == DownloadStatus.PAUSED) {
+            StreamHubLogger.i("DownloadWorker", "Download $downloadId was paused before work started")
             return Result.failure()
         }
 
@@ -201,6 +211,7 @@ class DownloadWorker(
             // Inject Referer based on provider or URL host
             val urlLower = mediaUrl.lowercase()
             val referer = when {
+                !inputReferer.isNullOrBlank() -> inputReferer
                 urlLower.contains("twimg.com") -> ""
                 urlLower.contains("pornhouse.me") || urlLower.contains("cdn.pornhouse.me") || providerId == "pornhouse" -> "https://pornhouse.me/"
                 urlLower.contains("pornhd4k.net") || urlLower.contains("cdnamz.me") || providerId == "pornhd4k" -> "https://pornhd4k.net/"
@@ -222,7 +233,7 @@ class DownloadWorker(
                     if (providerId == "wowuncut") "https://wowuncut.com/" else "https://ixiporn.live/"
                 }
                 urlLower.contains("tube279.com") || urlLower.contains("siesta583") -> "https://tube279.com/"
-                urlLower.contains("tnmr.org") || urlLower.contains("lulucdn") || urlLower.contains("lulustream") || urlLower.contains("luluvdo") -> "https://luluvdo.com/"
+                urlLower.contains("tnmr.org") || urlLower.contains("lulucdn") || urlLower.contains("lulustream") || urlLower.contains("luluvdo") || urlLower.contains("lulust") -> "https://luluvdo.com/"
                 urlLower.contains("tpead.net") || urlLower.contains("streamtape.com") || urlLower.contains("tapecontent.net") -> "https://streamtape.com/"
                 urlLower.contains("mydown.biz") || urlLower.contains("masahub") || providerId == "masahub2" || providerId == "lalamasa" || urlLower.contains("lalamasa") -> if (providerId == "lalamasa" || urlLower.contains("lalamasa")) "https://lalamasa.mobi/" else "https://masahub2.com/"
                 urlLower.contains("streamoupload") || providerId == "watchoerotic" || providerId?.startsWith("prmovies") == true -> "https://streamoupload.xyz/"
@@ -233,14 +244,21 @@ class DownloadWorker(
                 urlLower.contains("fsiblog") || providerId == "fsiblogxx" -> "https://fsiblogxx.com/"
                 urlLower.contains("webxseries") || providerId == "webxseries" -> "https://webxseries.hot/"
                 urlLower.contains("desisex") || providerId == "desisex" -> "https://desisex.site/"
+                urlLower.contains("uncutmaza") || urlLower.contains("azmaal.com") || providerId == "uncutmaza" -> "https://uncutmaza.movie/"
                 urlLower.contains("pornx11") || providerId == "pornx11" -> "https://pornx11.com/"
                 urlLower.contains("xhpingcdn") || urlLower.contains("xhcdn") || urlLower.contains("xhamster") || providerId == "xhamster" -> "https://xhamster.desi/"
-                urlLower.contains("chiggywiggy") || providerId == "chiggywiggy" -> "https://chiggywiggy.com/"
+                urlLower.contains("chiggywiggy") || providerId == "chiggywiggy" -> if (urlLower.contains("int.in")) "https://chiggywiggy.int.in/" else "https://chiggywiggy.com/"
                 urlLower.contains("desibabe") || providerId == "desibabe" || urlLower.contains("downloaddirect") -> "https://desibabe.to/"
                 urlLower.contains("desigirlxx") || providerId == "desigirlxx" || urlLower.contains("playmate.to") -> "https://desigirlxx.beer/"
                 urlLower.contains("desivideo") || providerId == "desivideo" -> "https://desivideo.net/"
                 urlLower.contains("definebabe.com") || providerId == "definebabe" -> "https://www.definebabe.com/"
+                urlLower.contains("3movs.xxx") -> "https://www.3movs.xxx/"
                 urlLower.contains("3movs.com") || providerId == "three_movs" -> "https://www.3movs.com/"
+                urlLower.contains("eporner.com") || providerId == "eporner" -> "https://www.eporner.com/"
+                urlLower.contains("nuvid") || urlLower.contains("nvdst.com") || providerId == "nuvid" -> "https://m.nuvid.org/"
+                urlLower.contains("drtuber") || urlLower.contains("drtst.com") || providerId == "drtuber" -> "https://www.drtuber.desi/"
+                urlLower.contains("empflix.com") || providerId == "empflix" -> "https://www.empflix.com/"
+                urlLower.contains("beeg.com") || urlLower.contains("externulls.com") || providerId == "beeg" -> "https://beeg.com/"
                 urlLower.contains("txxx.com") || urlLower.contains("txxx.tube") || providerId == "txxx" -> "https://txxx.com/"
                 urlLower.contains("upornia.com") || providerId == "upornia" -> "https://upornia.com/"
                 urlLower.contains("hdzog.com") || providerId == "hdzog" -> "https://hdzog.com/"
@@ -412,8 +430,16 @@ class DownloadWorker(
                 try {
                     while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                         if (isStopped) {
-                            val isPaused = inputData.getBoolean(KEY_IS_PAUSED, false)
-                            val finalStatus = if (isPaused) DownloadStatus.PAUSED else DownloadStatus.CANCELLED
+                            val dbRec = try { downloadDao.getDownload(downloadId) } catch (e: Exception) { null }
+                            val isPausedExplicitly = dbRec?.status == DownloadStatus.PAUSED || inputData.getBoolean(KEY_IS_PAUSED, false)
+                            val isCancelled = dbRec?.status == DownloadStatus.CANCELLED
+
+                            val finalStatus = when {
+                                isCancelled -> DownloadStatus.CANCELLED
+                                isPausedExplicitly -> DownloadStatus.PAUSED
+                                else -> DownloadStatus.PAUSED // WorkManager stopped due to constraints, app kill, etc. Keep partial file!
+                            }
+
                             StreamHubLogger.log(
                                 StreamHubLogger.Category.DOWNLOAD,
                                 "INFO",
@@ -863,7 +889,26 @@ class DownloadWorker(
                     try { directRaf?.close() } catch (e: Exception) {}
                     try { mediaStoreStream?.close() } catch (e: Exception) {}
                     try { mediaStorePfd?.close() } catch (e: Exception) {}
-                    return Result.retry()
+
+                    val dbRec = try { downloadDao.getDownload(downloadId) } catch (e: Exception) { null }
+                    val isCancelled = dbRec?.status == DownloadStatus.CANCELLED
+                    if (isCancelled) {
+                        if (isDirectFileMode) {
+                            directPartFile.delete()
+                        } else {
+                            mediaStoreUri?.let { uri ->
+                                try { context.contentResolver.delete(uri, null, null) } catch (e: Exception) {}
+                            }
+                        }
+                        return Result.failure()
+                    } else {
+                        val pausedRecord = activeRecord.copy(
+                            status = DownloadStatus.PAUSED,
+                            speedBytesPerSec = 0L
+                        )
+                        downloadDao.updateDownload(pausedRecord)
+                        return Result.failure()
+                    }
                 }
 
                 var segData: ByteArray? = null

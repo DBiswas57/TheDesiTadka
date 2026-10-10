@@ -58,6 +58,8 @@ import com.thedesitadka.app.ui.components.VideoCard
 import com.thedesitadka.app.ui.components.VideoCardSkeleton
 import com.thedesitadka.core.model.VideoItem
 import com.thedesitadka.provider.ProviderEngine
+import com.thedesitadka.app.navigation.PlaylistNavigationContext
+import com.thedesitadka.app.navigation.PlaylistSourceType
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -116,6 +118,7 @@ class SearchViewModel : ViewModel() {
 fun SearchScreen(
     providerEngine: ProviderEngine,
     onVideoClick: (VideoItem) -> Unit,
+    onVideoClickWithPlaylist: ((VideoItem, List<VideoItem>, PlaylistNavigationContext?) -> Unit)? = null,
     onBackClick: () -> Unit,
     viewModel: SearchViewModel = viewModel()
 ) {
@@ -244,7 +247,23 @@ fun SearchScreen(
                     items(searchResults) { item ->
                         VideoCard(
                             videoItem = item,
-                            onClick = { onVideoClick(item) }
+                            onClick = {
+                                if (onVideoClickWithPlaylist != null) {
+                                    onVideoClickWithPlaylist(
+                                        item,
+                                        searchResults.toList(),
+                                        PlaylistNavigationContext(
+                                            sourceType = PlaylistSourceType.SEARCH,
+                                            providerId = selectedProviderId ?: "",
+                                            searchQuery = searchQuery,
+                                            currentPage = 1,
+                                            hasNextPage = false
+                                        )
+                                    )
+                                } else {
+                                    onVideoClick(item)
+                                }
+                            }
                         )
                     }
                 }

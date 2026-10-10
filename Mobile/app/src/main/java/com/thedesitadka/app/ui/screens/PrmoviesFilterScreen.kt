@@ -34,8 +34,8 @@ fun PrmoviesFilterScreen(
 ) {
     val adapter = remember { providerEngine.getAdapter(providerId) }
     val info = remember { adapter?.providerInfo }
-    val providerName = info?.name ?: if (providerId == "prmovies_church") "PRMovies Church" else "PRMovies"
-    val baseUrl = info?.baseUrl ?: if (providerId == "prmovies_church") "https://prmovies.church" else "https://prmovies.com"
+    val providerName = info?.name ?: if (providerId == "prmovies_church") "PrmoviesM" else "PRMovies"
+    val baseUrl = info?.baseUrl ?: if (providerId == "prmovies_church") "https://prmovies.futbol" else "https://prmovies.com"
 
     var selectedSort by remember { mutableStateOf("latest") }
     val selectedQualities = remember { mutableStateListOf<String>() }

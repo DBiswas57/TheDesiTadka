@@ -98,6 +98,8 @@ import kotlinx.coroutines.launch
 
 import com.thedesitadka.app.storage.NavigationStateStore
 import com.thedesitadka.app.storage.SavedListState
+import com.thedesitadka.app.navigation.PlaylistNavigationContext
+import com.thedesitadka.app.navigation.PlaylistSourceType
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -105,6 +107,7 @@ fun ProviderScreen(
     providerId: String,
     providerEngine: ProviderEngine,
     onVideoClick: (VideoItem) -> Unit,
+    onVideoClickWithPlaylist: ((VideoItem, List<VideoItem>, PlaylistNavigationContext?) -> Unit)? = null,
     onAllCategoriesClick: () -> Unit = {},
     onCategoryItemClick: (title: String, url: String) -> Unit = { _, _ -> },
     onFilterClick: () -> Unit = {},
@@ -169,9 +172,13 @@ fun ProviderScreen(
     val gridState = rememberLazyGridState()
 
     // Restore scroll position from cache on enter
-    LaunchedEffect(cacheKey) {
+    LaunchedEffect(cacheKey, feedItems.size) {
         if (cachedState != null && (cachedState.firstVisibleItemIndex > 0 || cachedState.firstVisibleItemScrollOffset > 0)) {
-            gridState.scrollToItem(cachedState.firstVisibleItemIndex, cachedState.firstVisibleItemScrollOffset)
+            try {
+                if (feedItems.isNotEmpty() && cachedState.firstVisibleItemIndex < feedItems.size) {
+                    gridState.scrollToItem(cachedState.firstVisibleItemIndex, cachedState.firstVisibleItemScrollOffset)
+                }
+            } catch (_: Exception) {}
         }
     }
 
@@ -388,10 +395,10 @@ fun ProviderScreen(
                                 if (categories.isNotEmpty() || hasCategoryCap || !catNav.isNullOrBlank()) {
                                     onAllCategoriesClick()
                                 } else {
-                                    android.widget.Toast.makeText(context, "No categories found", android.widget.Toast.LENGTH_SHORT).show()
+                                    android.widget.Toast.makeText(context, "No categories found for this site", android.widget.Toast.LENGTH_SHORT).show()
                                 }
                             } catch (e: Throwable) {
-                                android.widget.Toast.makeText(context, "No categories found", android.widget.Toast.LENGTH_SHORT).show()
+                                android.widget.Toast.makeText(context, "No categories found for this site", android.widget.Toast.LENGTH_SHORT).show()
                             }
                         }) {
                             Icon(imageVector = Icons.Default.GridView, contentDescription = "All Categories", tint = Color.White)
@@ -547,8 +554,12 @@ fun ProviderScreen(
                                                 loadContent(1, reset = true)
                                             }
                                         } else if (isAlphabet) {
-                                            selectedCategory = cat
-                                            loadContent(1, reset = true)
+                                            if (isCategoryUrl(cat.url)) {
+                                                onCategoryItemClick(cat.name, cat.url)
+                                            } else {
+                                                selectedCategory = cat
+                                                loadContent(1, reset = true)
+                                            }
                                         } else if (isCategoryUrl(cat.url)) {
                                             onCategoryItemClick(cat.name, cat.url)
                                         } else {
@@ -580,10 +591,9 @@ fun ProviderScreen(
             // Error State
             if (errorMessage != null && feedItems.isEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    val isCloudflare = errorMessage?.contains("Cloudflare", ignoreCase = true) == true ||
-                        errorMessage?.contains("403", ignoreCase = true) == true ||
-                        errorMessage?.contains("challenge", ignoreCase = true) == true ||
-                        errorMessage?.contains("security", ignoreCase = true) == true
+                    val isCloudflare = errorMessage?.contains("Cloudflare security challenge detected", ignoreCase = true) == true ||
+                        errorMessage?.contains("Cloudflare security verification required", ignoreCase = true) == true ||
+                        errorMessage?.contains("cf-challenge", ignoreCase = true) == true
 
                     if (isCloudflare) {
                         Card(
@@ -657,67 +667,10 @@ fun ProviderScreen(
                             subtitle = "No videos matched \"$searchQuery\" on ${info?.name ?: providerId}."
                         )
                     } else {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(20.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Security,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(48.dp)
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(
-                                    text = "No Content Visible",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp,
-                                    color = Color.White
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = "If this provider requires security verification or Cloudflare clearance, tap below to solve the challenge in WebView and unlock content.",
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    textAlign = TextAlign.Center
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Button(
-                                        onClick = {
-                                            val targetUrl = info?.baseUrl ?: "https://brazzpw.xyz/"
-                                            val intent = CloudflareChallengeActivity.createIntent(
-                                                context,
-                                                targetUrl,
-                                                info?.name ?: providerId
-                                            )
-                                            challengeLauncher.launch(intent)
-                                        },
-                                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                                        shape = RoundedCornerShape(8.dp)
-                                    ) {
-                                        Icon(imageVector = Icons.Default.Security, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Text("Verify Security Clearance", color = Color.Black, fontWeight = FontWeight.Bold)
-                                    }
-                                    OutlinedButton(
-                                        onClick = { loadContent(1, reset = true) },
-                                        shape = RoundedCornerShape(8.dp)
-                                    ) {
-                                        Text("Reload", color = Color.White)
-                                    }
-                                }
-                            }
-                        }
+                        EmptyStateView(
+                            title = "No Content Available",
+                            subtitle = "No videos found on ${info?.name ?: providerId}."
+                        )
                     }
                 }
             }
@@ -726,7 +679,28 @@ fun ProviderScreen(
             items(feedItems) { item ->
                 VideoCard(
                     videoItem = item,
-                    onClick = { onVideoClick(item) }
+                    onClick = {
+                        if (item.isCategory || isCategoryUrl(item.detailUrl)) {
+                            onCategoryItemClick(item.title, item.detailUrl)
+                        } else {
+                            if (onVideoClickWithPlaylist != null) {
+                                onVideoClickWithPlaylist(
+                                    item,
+                                    feedItems.toList(),
+                                    PlaylistNavigationContext(
+                                        sourceType = PlaylistSourceType.PROVIDER_FEED,
+                                        providerId = providerId,
+                                        categoryUrl = selectedCategory?.url ?: "",
+                                        searchQuery = searchQuery,
+                                        currentPage = currentPage,
+                                        hasNextPage = hasNextPage
+                                    )
+                                )
+                            } else {
+                                onVideoClick(item)
+                            }
+                        }
+                    }
                 )
             }
 

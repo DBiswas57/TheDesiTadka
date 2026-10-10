@@ -32,6 +32,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.OutlinedButton
+import com.thedesitadka.app.ui.components.EmptyStateView
+import com.thedesitadka.app.ui.components.ErrorStateView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import com.thedesitadka.app.ui.challenge.CloudflareChallengeActivity
@@ -67,6 +69,8 @@ import kotlinx.coroutines.launch
 
 import com.thedesitadka.app.storage.NavigationStateStore
 import com.thedesitadka.app.storage.SavedListState
+import com.thedesitadka.app.navigation.PlaylistNavigationContext
+import com.thedesitadka.app.navigation.PlaylistSourceType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,6 +80,7 @@ fun CategoryContentScreen(
     categoryUrl: String,
     providerEngine: ProviderEngine,
     onVideoClick: (VideoItem) -> Unit,
+    onVideoClickWithPlaylist: ((VideoItem, List<VideoItem>, PlaylistNavigationContext?) -> Unit)? = null,
     onBackClick: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -111,9 +116,13 @@ fun CategoryContentScreen(
     val gridState = rememberLazyGridState()
 
     // Restore scroll position from cache on enter
-    LaunchedEffect(cacheKey) {
+    LaunchedEffect(cacheKey, videoItems.size) {
         if (cachedState != null && (cachedState.firstVisibleItemIndex > 0 || cachedState.firstVisibleItemScrollOffset > 0)) {
-            gridState.scrollToItem(cachedState.firstVisibleItemIndex, cachedState.firstVisibleItemScrollOffset)
+            try {
+                if (videoItems.isNotEmpty() && cachedState.firstVisibleItemIndex < videoItems.size) {
+                    gridState.scrollToItem(cachedState.firstVisibleItemIndex, cachedState.firstVisibleItemScrollOffset)
+                }
+            } catch (_: Exception) {}
         }
     }
 
@@ -257,10 +266,9 @@ fun CategoryContentScreen(
                     }
                 }
                 errorMessage != null && videoItems.isEmpty() -> {
-                    val isCloudflare = errorMessage?.contains("cloudflare", ignoreCase = true) == true ||
-                        errorMessage?.contains("403") == true ||
-                        errorMessage?.contains("challenge", ignoreCase = true) == true ||
-                        errorMessage?.contains("security", ignoreCase = true) == true
+                    val isCloudflare = errorMessage?.contains("Cloudflare security challenge detected", ignoreCase = true) == true ||
+                        errorMessage?.contains("Cloudflare security verification required", ignoreCase = true) == true ||
+                        errorMessage?.contains("cf-challenge", ignoreCase = true) == true
 
                     Column(
                         modifier = Modifier
@@ -330,89 +338,18 @@ fun CategoryContentScreen(
                                 }
                             }
                         } else {
-                            Text(
-                                text = errorMessage ?: "Failed to load category videos",
-                                color = Color.White,
-                                fontWeight = FontWeight.SemiBold
+                            ErrorStateView(
+                                message = errorMessage ?: "Failed to load category videos",
+                                onRetry = { loadContent(1, reset = true) }
                             )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Button(
-                                onClick = { loadContent(1, reset = true) },
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                            ) {
-                                Text("Retry", color = Color.Black, fontWeight = FontWeight.Bold)
-                            }
                         }
                     }
                 }
                 videoItems.isEmpty() -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(24.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(20.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Security,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(48.dp)
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(
-                                    text = "No Videos Visible",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp,
-                                    color = Color.White
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = "If this category requires Cloudflare security verification, tap below to solve the challenge in WebView.",
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    textAlign = TextAlign.Center
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Button(
-                                        onClick = {
-                                            val targetUrl = if (categoryUrl.startsWith("http")) categoryUrl else (info?.baseUrl ?: categoryUrl)
-                                            val intent = CloudflareChallengeActivity.createIntent(
-                                                context,
-                                                targetUrl,
-                                                info?.name ?: providerId
-                                            )
-                                            challengeLauncher.launch(intent)
-                                        },
-                                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                                        shape = RoundedCornerShape(8.dp)
-                                    ) {
-                                        Icon(imageVector = Icons.Default.Security, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Text("Verify Clearance", color = Color.Black, fontWeight = FontWeight.Bold)
-                                    }
-                                    OutlinedButton(
-                                        onClick = { loadContent(1, reset = true) },
-                                        shape = RoundedCornerShape(8.dp)
-                                    ) {
-                                        Text("Reload", color = Color.White)
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    EmptyStateView(
+                        title = "No Content Available",
+                        subtitle = "No videos found in this category."
+                    )
                 }
                 else -> {
                     LazyVerticalGrid(
@@ -426,7 +363,23 @@ fun CategoryContentScreen(
                         items(videoItems, key = { it.id + it.detailUrl }) { video ->
                             VideoCard(
                                 videoItem = video,
-                                onClick = { onVideoClick(video) }
+                                onClick = {
+                                    if (onVideoClickWithPlaylist != null) {
+                                        onVideoClickWithPlaylist(
+                                            video,
+                                            videoItems.toList(),
+                                            PlaylistNavigationContext(
+                                                sourceType = PlaylistSourceType.CATEGORY,
+                                                providerId = providerId,
+                                                categoryUrl = categoryUrl,
+                                                currentPage = currentPage,
+                                                hasNextPage = hasNextPage
+                                            )
+                                        )
+                                    } else {
+                                        onVideoClick(video)
+                                    }
+                                }
                             )
                         }
 

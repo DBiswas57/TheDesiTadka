@@ -2,6 +2,7 @@ package com.thedesitadka.provider.adapters
 
 import com.thedesitadka.core.model.Category
 import com.thedesitadka.core.model.DownloadAvailability
+import com.thedesitadka.core.model.EpisodeItem
 import com.thedesitadka.core.model.FeedPage
 import com.thedesitadka.core.model.MediaSource
 import com.thedesitadka.core.model.MediaSourceType
@@ -10,6 +11,7 @@ import com.thedesitadka.core.model.ProviderCapability
 import com.thedesitadka.core.model.ProviderConfig
 import com.thedesitadka.core.model.ProviderInfo
 import com.thedesitadka.core.model.ProviderStatus
+import com.thedesitadka.core.model.SeriesSeason
 import com.thedesitadka.core.model.StreamHubError
 import com.thedesitadka.core.model.VideoItem
 import com.thedesitadka.core.model.isCategoryUrl
@@ -75,6 +77,10 @@ class HtmlSelectorAdapter(
     private val nav = config.navigation
     private val selectors = config.selectors
 
+    private fun fetchHtml(url: String, headers: Map<String, String> = emptyMap()): String {
+        return NetworkClient.fetchStringWithProxyFallback(url, headers, forceProxy = config.useProxy)
+    }
+
     override suspend fun getCategories(): Result<List<Category>> = withContext(Dispatchers.IO) {
         if (!hasCapability(ProviderCapability.CATEGORY)) {
             return@withContext Result.success(emptyList())
@@ -89,7 +95,7 @@ class HtmlSelectorAdapter(
             getEffectiveBaseUrl()
             val catPath = nav?.categories ?: "/"
             val targetUrl = resolveUrl(catPath)
-            val html = NetworkClient.fetchString(targetUrl)
+            val html = fetchHtml(targetUrl)
             val categories = parseCategoriesHtml(html)
             Result.success(categories)
         } catch (e: Exception) {
@@ -103,7 +109,7 @@ class HtmlSelectorAdapter(
             getEffectiveBaseUrl()
             val fullUrl = resolveUrl(categoryUrl)
             val pagedUrl = buildPagedUrl(fullUrl, page)
-            val html = NetworkClient.fetchString(pagedUrl)
+            val html = fetchHtml(pagedUrl)
             parseListingHtml(html, page)
         } catch (e: Exception) {
             StreamHubLogger.e("HtmlSelectorAdapter", "Failed to get category feed for '$categoryUrl' (page $page): ${e.message}")
@@ -112,7 +118,7 @@ class HtmlSelectorAdapter(
         }
     }
 
-    internal fun buildPagedUrl(fullUrl: String, page: Int): String {
+    fun buildPagedUrl(fullUrl: String, page: Int): String {
         if (page <= 1) return fullUrl
 
         val cleanUrl = fullUrl.substringBefore("?")
@@ -131,6 +137,17 @@ class HtmlSelectorAdapter(
                 val param = if (config.id == "xvideos" && query.contains("k=")) "p" else "page"
                 return "$cleanUrl?$query&$param=$page"
             }
+        }
+
+        // 1.5 LiveCamRips pagination (/model/.../{page} or /search/.../{page} or /{page} - strictly NO trailing slash)
+        if (config.id == "livecamrips" || cleanUrl.contains("livecamrips.to")) {
+            val trimmed = cleanUrl.trimEnd('/')
+            if (Regex("""/\d+$""").containsMatchIn(trimmed)) {
+                val replaced = trimmed.replace(Regex("""/\d+$"""), "/$page")
+                return if (!query.isNullOrBlank()) "$replaced?$query" else replaced
+            }
+            val res = "$trimmed/$page"
+            return if (!query.isNullOrBlank()) "$res?$query" else res
         }
 
         // 2. WordPress /page/\d+/ pattern
@@ -334,21 +351,35 @@ class HtmlSelectorAdapter(
 
         // 5.13 DefineBabe pagination (?page={page})
         if (config.id == "definebabe" || cleanUrl.contains("definebabe.com")) {
-            return if (query.isNullOrBlank()) "$cleanUrl?page=$page" else "$cleanUrl?$query&page=$page"
+            val baseQuery = if (!query.isNullOrBlank()) {
+                query.replace(Regex("""(?<=^|&)page=\d+(&|$)"""), "").trim('&')
+            } else null
+            return if (baseQuery.isNullOrBlank()) "$cleanUrl?page=$page" else "$cleanUrl?$baseQuery&page=$page"
         }
 
-        // 5.14 3Movs pagination (/latest-updates/{page}/)
-        if (config.id == "three_movs" || cleanUrl.contains("3movs.com")) {
+        // 5.14 3Movs pagination (/videos/{page}/ or /latest-updates/{page}/)
+        if (config.id == "three_movs" || cleanUrl.contains("3movs.com") || cleanUrl.contains("3movs.xxx")) {
             val trimmed = cleanUrl.trimEnd('/')
             if (Regex("""/\d+$""").containsMatchIn(trimmed)) {
                 val replaced = trimmed.replace(Regex("""/\d+$"""), "/$page")
                 return if (!query.isNullOrBlank()) "$replaced/?$query" else "$replaced/"
             }
-            val res = if (trimmed.endsWith("/latest-updates") || trimmed.contains("/categories/") || trimmed.contains("/channels/")) {
+            val res = if (trimmed.endsWith("/videos") || trimmed.endsWith("/latest-updates") || trimmed.contains("/categories/") || trimmed.contains("/channels/") || trimmed.contains("/search/")) {
                 "$trimmed/$page/"
             } else {
-                "$trimmed/latest-updates/$page/"
+                "$trimmed/videos/$page/"
             }
+            return if (!query.isNullOrBlank()) "$res?$query" else res
+        }
+
+        // 5.14.1 FreeOnesTube pagination (/category/.../page/{page}/ or /page/{page}/)
+        if (config.id == "freeonestube" || cleanUrl.contains("freeonestube.com")) {
+            val trimmed = cleanUrl.trimEnd('/')
+            if (Regex("""/page/\d+/?$""").containsMatchIn(trimmed)) {
+                val replaced = trimmed.replace(Regex("""/page/\d+/?$"""), "/page/$page/")
+                return if (!query.isNullOrBlank()) "$replaced?$query" else replaced
+            }
+            val res = "$trimmed/page/$page/"
             return if (!query.isNullOrBlank()) "$res?$query" else res
         }
 
@@ -371,6 +402,16 @@ class HtmlSelectorAdapter(
             return "$clean${delimiter}page=$page"
         }
 
+        // 5.17 Beeg / externulls pagination (?offset={offset}&limit=48)
+        if (config.id == "beeg" || cleanUrl.contains("externulls.com") || cleanUrl.contains("beeg.com")) {
+            val offset = (page - 1) * 48
+            if (fullUrl.contains("offset=")) {
+                return fullUrl.replace(Regex("""offset=\d+"""), "offset=$offset")
+            }
+            val delimiter = if (fullUrl.contains("?")) "&" else "?"
+            return "$fullUrl${delimiter}offset=$offset&limit=48"
+        }
+
         // 6. Default tube sites (fpo, hello, max, ok_porn, ok_xxx, pornstars_tube, etc.)
         // Append /{page}/ to category, channel, model, search, or root path
         val base = cleanUrl.trimEnd('/')
@@ -387,7 +428,7 @@ class HtmlSelectorAdapter(
                 (nav?.page ?: "/page/{page}/").replace("{page}", page.toString())
             }
             val targetUrl = resolveUrl(pagePath)
-            val html = NetworkClient.fetchString(targetUrl)
+            val html = fetchHtml(targetUrl)
             parseListingHtml(html, page)
         } catch (e: Exception) {
             StreamHubLogger.e("HtmlSelectorAdapter", "Failed to get home feed (page $page): ${e.message}")
@@ -402,10 +443,22 @@ class HtmlSelectorAdapter(
         }
         try {
             getEffectiveBaseUrl()
-            val encodedQuery = java.net.URLEncoder.encode(query, "UTF-8")
+            val encodedQuery = if (config.id == "beeg" || activeBaseUrl.contains("beeg.com") || activeBaseUrl.contains("externulls.com")) {
+                query.trim().replace(Regex("""\s+"""), ",")
+            } else {
+                java.net.URLEncoder.encode(query, "UTF-8")
+            }
             var searchPath = (nav?.search ?: "/?s={query}").replace("{query}", encodedQuery)
             if (page > 1) {
-                searchPath = if (searchPath.startsWith("/?")) {
+                if (config.id == "beeg" || activeBaseUrl.contains("beeg.com") || activeBaseUrl.contains("externulls.com") || searchPath.contains("externulls.com")) {
+                    val offset = (page - 1) * 48
+                    searchPath = if (searchPath.contains("offset=")) {
+                        searchPath.replace(Regex("""offset=\d+"""), "offset=$offset")
+                    } else {
+                        val delimiter = if (searchPath.contains("?")) "&" else "?"
+                        "$searchPath${delimiter}offset=$offset&limit=48"
+                    }
+                } else if (searchPath.startsWith("/?")) {
                     if (config.id == "hqporner" || activeBaseUrl.contains("hqporner")) {
                         "$searchPath&p=$page"
                     } else {
@@ -425,13 +478,15 @@ class HtmlSelectorAdapter(
                         activeBaseUrl.contains("max.porn") || activeBaseUrl.contains("ok.porn") ||
                         activeBaseUrl.contains("ok.xxx") || activeBaseUrl.contains("fpo.xxx")) {
                         "${searchPath.removeSuffix("/")}/$page/"
+                    } else if (config.id == "livecamrips" || activeBaseUrl.contains("livecamrips.to")) {
+                        "${searchPath.removeSuffix("/")}/$page"
                     } else {
                         "${searchPath.removeSuffix("/")}/page/$page"
                     }
                 }
             }
             val targetUrl = resolveUrl(searchPath)
-            val html = NetworkClient.fetchString(targetUrl)
+            val html = fetchHtml(targetUrl)
             parseListingHtml(html, page)
         } catch (e: Exception) {
             StreamHubLogger.e("HtmlSelectorAdapter", "Failed to search '$query': ${e.message}")
@@ -444,7 +499,7 @@ class HtmlSelectorAdapter(
         try {
             getEffectiveBaseUrl()
             val fullUrl = resolveUrl(detailUrl)
-            val html = NetworkClient.fetchString(fullUrl)
+            val html = fetchHtml(fullUrl)
             parseDetailsHtml(html, fullUrl)
         } catch (e: Exception) {
             StreamHubLogger.e("HtmlSelectorAdapter", "Failed to get details for $detailUrl: ${e.message}")
@@ -462,11 +517,65 @@ class HtmlSelectorAdapter(
             ))
         }
 
+        val downloadAvail = if (hasCapability(ProviderCapability.DOWNLOAD)) {
+            DownloadAvailability.AUTHORIZED
+        } else {
+            DownloadAvailability.NOT_SUPPORTED
+        }
+
         val trimmed = html.trim()
         if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
             try {
                 val jsonEl = Json.parseToJsonElement(trimmed)
                 if (jsonEl is kotlinx.serialization.json.JsonObject) {
+                    if (jsonEl.containsKey("file") && jsonEl.containsKey("fc_facts")) {
+                        val fileObj = jsonEl["file"] as? kotlinx.serialization.json.JsonObject
+                        val fileId = fileObj?.get("id")?.jsonPrimitive?.content ?: detailUrl.substringAfterLast('/').substringBefore('?')
+                        var title = ""
+                        val dataArr = fileObj?.get("data") as? kotlinx.serialization.json.JsonArray
+                        if (dataArr != null) {
+                            for (dEl in dataArr) {
+                                val dObj = dEl as? kotlinx.serialization.json.JsonObject ?: continue
+                                if (dObj["cd_column"]?.jsonPrimitive?.content == "sf_name") {
+                                    title = dObj["cd_value"]?.jsonPrimitive?.content ?: ""
+                                    break
+                                }
+                            }
+                        }
+                        val tagsArr = jsonEl["tags"] as? kotlinx.serialization.json.JsonArray
+                        val tagNames = tagsArr?.mapNotNull { (it as? kotlinx.serialization.json.JsonObject)?.get("tg_name")?.jsonPrimitive?.content } ?: emptyList()
+                        if (title.isBlank()) {
+                            title = if (tagNames.isNotEmpty()) tagNames.take(2).joinToString(" - ") else "Beeg Video $fileId"
+                        }
+                        val durationSec = fileObj?.get("fl_duration")?.jsonPrimitive?.content?.toLongOrNull()
+                        val factsArr = jsonEl["fc_facts"] as? kotlinx.serialization.json.JsonArray
+                        val firstFact = factsArr?.firstOrNull() as? kotlinx.serialization.json.JsonObject
+                        val thumbsArr = firstFact?.get("fc_thumbs") as? kotlinx.serialization.json.JsonArray
+                        val thumbOffset = thumbsArr?.firstOrNull()?.jsonPrimitive?.content ?: "0"
+                        val thumbUrl = "https://thumbs.externulls.com/videos/$fileId/$thumbOffset.webp?size=480x270"
+
+                        val downloadAvail = if (hasCapability(ProviderCapability.DOWNLOAD)) {
+                            DownloadAvailability.AUTHORIZED
+                        } else {
+                            DownloadAvailability.NOT_SUPPORTED
+                        }
+
+                        return Result.success(
+                            VideoItem(
+                                id = fileId,
+                                providerId = config.id,
+                                title = title,
+                                description = tagNames.joinToString(", "),
+                                thumbnailUrl = thumbUrl,
+                                detailUrl = detailUrl,
+                                durationSeconds = durationSec,
+                                tags = tagNames,
+                                playbackAvailability = PlaybackAvailability.AVAILABLE,
+                                downloadAvailability = downloadAvail
+                            )
+                        )
+                    }
+
                     val id = jsonEl["id"]?.jsonPrimitive?.content ?: detailUrl.hashCode().toString()
                     val title = jsonEl["title"]?.jsonPrimitive?.content ?: jsonEl["name"]?.jsonPrimitive?.content ?: "Title $id"
                     val overview = jsonEl["overview"]?.jsonPrimitive?.content ?: ""
@@ -485,10 +594,32 @@ class HtmlSelectorAdapter(
                     jsonEl["number_of_seasons"]?.jsonPrimitive?.content?.let { meta["seasonsCount"] = it }
                     jsonEl["number_of_episodes"]?.jsonPrimitive?.content?.let { meta["episodesCount"] = it }
 
-                    val downloadAvail = if (hasCapability(ProviderCapability.DOWNLOAD)) {
-                        DownloadAvailability.AUTHORIZED
-                    } else {
-                        DownloadAvailability.NOT_SUPPORTED
+                    val isTvShow = (mediaType == "tv")
+                    val parsedSeasons = mutableListOf<SeriesSeason>()
+                    if (isTvShow) {
+                        val seasonsArr = jsonEl["seasons"] as? kotlinx.serialization.json.JsonArray
+                        seasonsArr?.forEach { sItem ->
+                            val sObj = sItem as? kotlinx.serialization.json.JsonObject ?: return@forEach
+                            val sNum = sObj["season_number"]?.jsonPrimitive?.content?.toIntOrNull() ?: 1
+                            if (sNum <= 0) return@forEach
+                            val sName = sObj["name"]?.jsonPrimitive?.content ?: "Season $sNum"
+                            val epCount = sObj["episode_count"]?.jsonPrimitive?.content?.toIntOrNull() ?: 0
+                            val episodes = (1..epCount).map { epIdx ->
+                                val epStreamUrl = when (config.id) {
+                                    "movienerds" -> "https://api.movienerds.online/api/stream?tmdbId=$id&type=tv&season=$sNum&episode=$epIdx"
+                                    "cineapse" -> "https://cineapse.net/stream/tv/$id/$sNum/$epIdx"
+                                    else -> "$detailUrl?season=$sNum&episode=$epIdx"
+                                }
+                                EpisodeItem(
+                                    id = "${id}_s${sNum}_e${epIdx}",
+                                    episodeNumber = epIdx,
+                                    title = "Episode $epIdx",
+                                    detailUrl = "$detailUrl?season=$sNum&episode=$epIdx",
+                                    streamUrl = epStreamUrl
+                                )
+                            }
+                            parsedSeasons.add(SeriesSeason(seasonNumber = sNum, name = sName, episodes = episodes))
+                        }
                     }
 
                     return Result.success(
@@ -501,7 +632,12 @@ class HtmlSelectorAdapter(
                             detailUrl = detailUrl,
                             playbackAvailability = PlaybackAvailability.AVAILABLE,
                             downloadAvailability = downloadAvail,
-                            metadata = meta
+                            metadata = meta,
+                            seasons = parsedSeasons,
+                            isSeries = isTvShow && parsedSeasons.isNotEmpty(),
+                            languages = emptyList(),
+                            qualities = emptyList(),
+                            formats = emptyList()
                         )
                     )
                 }
@@ -562,10 +698,72 @@ class HtmlSelectorAdapter(
                 }
             }
 
-            val downloadAvail = if (hasCapability(ProviderCapability.DOWNLOAD)) {
-                DownloadAvailability.AUTHORIZED
+            // Series, Season & Episode detection from HTML markup: ONLY for the 3 authorized series sites (movienerds, cineapse, prmovies_church)
+            val isSeriesSite = (config.id == "movienerds" || config.id == "cineapse" || config.id == "prmovies_church")
+            val parsedHtmlSeasons = mutableListOf<SeriesSeason>()
+            if (isSeriesSite) {
+                val epContainers = doc.select("div#seasons, div.seasons, ul.episodios, div.les-content, #episodes")
+                if (epContainers.isNotEmpty()) {
+                    val epLinks = epContainers.select("a[href]")
+                    val epMap = mutableMapOf<Int, MutableList<EpisodeItem>>()
+                    epLinks.forEach { epLink ->
+                        val epText = epLink.text().trim()
+                        val epHref = epLink.attr("href").trim()
+                        if (epHref.isBlank() || epHref.startsWith("#") || epHref.startsWith("javascript")) return@forEach
+
+                        val combined = "$epHref $epText"
+                        val sMatch = Regex("""(?:season|s)[\s_-]?(\d+)""", RegexOption.IGNORE_CASE).find(combined)
+                        val epMatch = Regex("""(?:episode|ep|e)[\s_-]?(\d+)""", RegexOption.IGNORE_CASE).find(combined)
+
+                        if (sMatch != null || epMatch != null) {
+                            val sNum = sMatch?.groupValues?.get(1)?.toIntOrNull() ?: 1
+                            val epNum = epMatch?.groupValues?.get(1)?.toIntOrNull() ?: 1
+                            val epTitle = if (epText.isNotBlank()) epText else "Episode $epNum"
+                            val resolvedHref = resolveUrl(epHref)
+                            val epItem = EpisodeItem(
+                                id = "${sNum}_${epNum}_${epHref.hashCode()}",
+                                episodeNumber = epNum,
+                                title = epTitle,
+                                detailUrl = resolvedHref,
+                                streamUrl = resolvedHref
+                            )
+                            epMap.getOrPut(sNum) { mutableListOf() }.add(epItem)
+                        }
+                    }
+                    epMap.keys.sorted().forEach { sNum ->
+                        val epList = epMap[sNum]?.distinctBy { it.streamUrl } ?: emptyList()
+                        if (epList.isNotEmpty()) {
+                            parsedHtmlSeasons.add(SeriesSeason(seasonNumber = sNum, name = "Season $sNum", episodes = epList))
+                        }
+                    }
+                }
+            }
+
+            val isSeriesDetected = isSeriesSite && parsedHtmlSeasons.isNotEmpty()
+
+            val durText = selectors?.duration?.let { sel ->
+                doc.select(sel).firstOrNull()?.text()?.trim()?.ifEmpty { null }
+            } ?: doc.select("span.duration, .duration, meta[property='video:duration']").firstOrNull()?.let {
+                if (it.tagName().equals("meta", ignoreCase = true)) it.attr("content") else it.text()
+            }?.trim()?.ifEmpty { null }
+            val durSecs = parseDurationToSeconds(durText)
+
+            val tagElements = doc.select("div.tags-list a, div.tags a, .tag-list a, .video-tags a")
+            val tags = tagElements.map { it.text().trim() }.filter { it.isNotBlank() }
+
+            val detectedDetailQualities = mutableListOf<String>()
+            val hasDetailHdBadge = doc.select("span.hd-video, span.is-hd, span.hd, .label-hd, .badge-hd, span.quality").isNotEmpty()
+            val detailQualityText = "$title ${doc.select(".video-details, .entry-meta, .tags, header").text()}"
+            when {
+                detailQualityText.contains("4K", ignoreCase = true) || detailQualityText.contains("2160p", ignoreCase = true) -> detectedDetailQualities.add("4K")
+                detailQualityText.contains("1080p", ignoreCase = true) || detailQualityText.contains("FHD", ignoreCase = true) -> detectedDetailQualities.add("1080p FHD")
+                detailQualityText.contains("720p", ignoreCase = true) || hasDetailHdBadge || detailQualityText.contains("HD", ignoreCase = true) -> detectedDetailQualities.add("720p HD")
+            }
+
+            val formats = if (doc.select("iframe[src*='playmate'], iframe[src*='lulust'], iframe[src*='lulu'], video, iframe").isNotEmpty()) {
+                listOf("HLS", "MP4")
             } else {
-                DownloadAvailability.NOT_SUPPORTED
+                emptyList()
             }
 
             val item = VideoItem(
@@ -575,8 +773,15 @@ class HtmlSelectorAdapter(
                 description = desc,
                 thumbnailUrl = resolveUrl(thumb),
                 detailUrl = detailUrl,
+                durationSeconds = durSecs,
+                tags = tags,
                 playbackAvailability = PlaybackAvailability.AVAILABLE,
-                downloadAvailability = downloadAvail
+                downloadAvailability = downloadAvail,
+                seasons = parsedHtmlSeasons,
+                isSeries = isSeriesDetected,
+                languages = emptyList(),
+                qualities = detectedDetailQualities,
+                formats = formats
             )
             return Result.success(item)
         } catch (e: Exception) {
@@ -591,10 +796,44 @@ class HtmlSelectorAdapter(
         if (config.id == "cineapse" || activeBaseUrl.contains("cineapse.net")) {
             return@withContext resolveCineapseMedia(detailUrl)
         }
+        if (config.id == "beeg" || activeBaseUrl.contains("beeg.com") || activeBaseUrl.contains("externulls.com") || detailUrl.contains("beeg.com") || detailUrl.contains("externulls.com")) {
+            val targetUrl = if (detailUrl.contains("/facts/file/")) {
+                detailUrl
+            } else {
+                val id = Regex("""\d{6,}""").find(detailUrl)?.value ?: detailUrl.substringAfterLast('-').substringBefore('/')
+                "https://store.externulls.com/facts/file/$id"
+            }
+            return@withContext try {
+                val jsonStr = NetworkClient.fetchString(targetUrl, headers = mapOf("Referer" to "https://beeg.com/", "Origin" to "https://beeg.com"))
+                parsePlayableMediaHtml(jsonStr, targetUrl)
+            } catch (e: Exception) {
+                Result.failure(StreamHubError.PlaybackError(500, "Failed to resolve Beeg media: ${e.message}", e))
+            }
+        }
+        if (config.id == "nuvid" || activeBaseUrl.contains("nuvid") || detailUrl.contains("nuvid")) {
+            return@withContext resolveNuVidMedia(detailUrl)
+        }
+        if (config.id == "drtuber" || activeBaseUrl.contains("drtuber") || detailUrl.contains("drtuber")) {
+            return@withContext resolveDrTuberMedia(detailUrl)
+        }
+        if (config.id == "youporn" || activeBaseUrl.contains("youporn.com") || detailUrl.contains("youporn.com") ||
+            config.id == "redtube" || activeBaseUrl.contains("redtube") || detailUrl.contains("redtube") ||
+            config.id == "pornhub" || activeBaseUrl.contains("pornhub") || detailUrl.contains("pornhub")) {
+            return@withContext resolveAyloMedia(detailUrl)
+        }
+        if (config.id == "xhamster" || activeBaseUrl.contains("xhamster") || detailUrl.contains("xhamster")) {
+            return@withContext resolveXhamsterMedia(detailUrl)
+        }
+        if (config.id == "spankbang" || activeBaseUrl.contains("spankbang") || detailUrl.contains("spankbang")) {
+            return@withContext resolveSpankBangMedia(detailUrl)
+        }
+        if (config.id == "freeonestube" || activeBaseUrl.contains("freeonestube") || detailUrl.contains("freeonestube")) {
+            return@withContext resolveFreeonesMedia(detailUrl)
+        }
         try {
             getEffectiveBaseUrl()
             val fullUrl = resolveUrl(detailUrl)
-            val html = NetworkClient.fetchString(fullUrl)
+            val html = fetchHtml(fullUrl)
             if (isCloudflareChallenge(html)) {
                 return@withContext Result.failure(CloudflareChallengeException(
                     url = fullUrl,
@@ -606,8 +845,11 @@ class HtmlSelectorAdapter(
 
             // 1. Direct/Internal Media: Inspect page for native video, HLS/MP4 streams, KVS/proprietary players
             val directMediaResult = parsePlayableMediaHtml(html, fullUrl)
-            if (directMediaResult.isSuccess && directMediaResult.getOrThrow().isNotEmpty()) {
-                return@withContext directMediaResult
+            if (directMediaResult.isSuccess) {
+                val playableSources = directMediaResult.getOrThrow().filter { it.type != MediaSourceType.EMBEDDED_WEB }
+                if (playableSources.isNotEmpty()) {
+                    return@withContext Result.success(playableSources)
+                }
             }
 
             // 2. External Video Hosting: If no direct media found, check registered host plugins (Firestream, Luluvdo, Vixeo)
@@ -645,6 +887,66 @@ class HtmlSelectorAdapter(
         if (config.id == "cineapse" || fullUrl.contains("cineapse.net")) {
             return Result.success(buildCineapseMediaSources(fullUrl))
         }
+        if (config.id == "nuvid" || fullUrl.contains("nuvid") || html.contains("nuvid.org/mp4/") || html.contains("id=\"download_page\"")) {
+            val nuvidSources = extractNuVidMediaSources(html, fullUrl)
+            if (nuvidSources.isNotEmpty()) {
+                return Result.success(nuvidSources)
+            }
+        }
+        if (config.id == "drtuber" || fullUrl.contains("drtuber") || html.contains("drtuber.desi/mp4/") || html.contains("drtuber.com/mp4/")) {
+            val drtuberSources = extractDrTuberMediaSources(html, fullUrl)
+            if (drtuberSources.isNotEmpty()) {
+                return Result.success(drtuberSources)
+            }
+        }
+        val trimmed = html.trim()
+        if (trimmed.startsWith("{") && (config.id == "beeg" || fullUrl.contains("externulls.com") || fullUrl.contains("beeg.com") || trimmed.contains("fl_cdn_multi") || trimmed.contains("hls_resources"))) {
+            try {
+                val jsonEl = Json.parseToJsonElement(trimmed)
+                if (jsonEl is kotlinx.serialization.json.JsonObject) {
+                    val fileObj = jsonEl["file"] as? kotlinx.serialization.json.JsonObject
+                    if (fileObj != null) {
+                        val beegSources = mutableListOf<MediaSource>()
+                        val beegHeaders = mapOf(
+                            "User-Agent" to NetworkClient.DEFAULT_USER_AGENT,
+                            "Referer" to "https://beeg.com/",
+                            "Origin" to "https://beeg.com"
+                        )
+                        val hlsMulti = (fileObj["hls_resources"] as? kotlinx.serialization.json.JsonObject)?.get("fl_cdn_multi")?.jsonPrimitive?.content
+                        if (!hlsMulti.isNullOrBlank()) {
+                            val hlsUrl = "https://video.beeg.com/$hlsMulti"
+                            beegSources.add(
+                                MediaSource(
+                                    url = hlsUrl,
+                                    type = MediaSourceType.HLS,
+                                    mimeType = "application/x-mpegURL",
+                                    quality = "Adaptive",
+                                    headersRequired = beegHeaders
+                                )
+                            )
+                        }
+                        val fallback = fileObj["fallback"]?.jsonPrimitive?.content
+                        if (!fallback.isNullOrBlank()) {
+                            val mp4Url = "https://video.beeg.com/$fallback"
+                            beegSources.add(
+                                MediaSource(
+                                    url = mp4Url,
+                                    type = MediaSourceType.PROGRESSIVE_MP4,
+                                    mimeType = "video/mp4",
+                                    quality = "480p",
+                                    headersRequired = beegHeaders
+                                )
+                            )
+                        }
+                        if (beegSources.isNotEmpty()) {
+                            return Result.success(beegSources)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                StreamHubLogger.w("HtmlSelectorAdapter", "Failed to parse Beeg stream JSON: ${e.message}")
+            }
+        }
         if (isCloudflareChallenge(html)) {
             return Result.failure(CloudflareChallengeException(
                 url = fullUrl,
@@ -659,7 +961,7 @@ class HtmlSelectorAdapter(
             val sources = mutableListOf<MediaSource>()
             val defaultHeaders = mapOf(
                 "User-Agent" to NetworkClient.DEFAULT_USER_AGENT,
-                "Referer" to "$activeBaseUrl/",
+                "Referer" to if (fullUrl.isNotBlank() && (config.id == "definebabe" || activeBaseUrl.contains("definebabe.com") || fullUrl.contains("definebabe.com"))) fullUrl else "$activeBaseUrl/",
                 "Origin" to activeBaseUrl
             )
 
@@ -675,14 +977,52 @@ class HtmlSelectorAdapter(
                 if (isTeaserPreview) {
                     continue
                 }
+                val rawSrc = el.attr("src").trim()
+                val isPlaceholder = rawSrc.isBlank() || rawSrc.equals("about:blank", ignoreCase = true) || rawSrc.startsWith("data:", ignoreCase = true) || rawSrc.startsWith("javascript:", ignoreCase = true)
+                val effectiveSrc = if (!isPlaceholder) rawSrc else {
+                    el.attr("data-lazy-src")
+                        .ifEmpty { el.attr("data-src") }
+                        .ifEmpty { el.attr("data-url") }
+                        .ifEmpty { el.attr("data-original") }
+                        .ifEmpty { el.attr("content") }
+                        .ifEmpty { if (el.tagName().equals("a", ignoreCase = true) || el.tagName().equals("link", ignoreCase = true)) el.attr("href") else "" }
+                }.trim()
+
                 if (el.tagName().equals("iframe", ignoreCase = true)) {
-                    val iframeSrc = el.attr("src")
-                    if (!iframeSrc.contains(".mp4") && !iframeSrc.contains(".m3u8")) {
+                    if (HostResolverEngine.canHandle(effectiveSrc)) {
+                        val hostPlugin = HostResolverEngine.findPluginForUrl(effectiveSrc)
+                        if (hostPlugin != null) {
+                            try {
+                                val hostRes = kotlinx.coroutines.runBlocking { hostPlugin.resolve(effectiveSrc, fullUrl) }
+                                if (hostRes.isSuccess) {
+                                    sources.add(hostRes.getOrThrow())
+                                    continue
+                                }
+                            } catch (e: Exception) {
+                                StreamHubLogger.w("HtmlSelectorAdapter", "Plugin failed to resolve $effectiveSrc: ${e.message}")
+                            }
+                        }
+                    }
+                    if (!effectiveSrc.contains(".mp4") && !effectiveSrc.contains(".m3u8")) {
                         continue
                     }
                 }
                 if (el.tagName().equals("a", ignoreCase = true)) {
                     val href = el.attr("href")
+                    if (HostResolverEngine.canHandle(href)) {
+                        val hostPlugin = HostResolverEngine.findPluginForUrl(href)
+                        if (hostPlugin != null) {
+                            try {
+                                val hostRes = kotlinx.coroutines.runBlocking { hostPlugin.resolve(href, fullUrl) }
+                                if (hostRes.isSuccess) {
+                                    sources.add(hostRes.getOrThrow())
+                                    continue
+                                }
+                            } catch (e: Exception) {
+                                StreamHubLogger.w("HtmlSelectorAdapter", "Plugin failed to resolve $href: ${e.message}")
+                            }
+                        }
+                    }
                     if (!href.contains(".mp4") && !href.contains(".m3u8") && !href.contains(".vid")) {
                         continue
                     }
@@ -690,19 +1030,33 @@ class HtmlSelectorAdapter(
                 if (el.tagName().equals("script", ignoreCase = true)) {
                     continue
                 }
-                val src = el.attr("src")
-                    .ifEmpty { el.attr("data-src") }
-                    .ifEmpty { el.attr("data-url") }
-                    .ifEmpty { el.attr("content") }
-                    .ifEmpty { if (el.tagName().equals("a", ignoreCase = true) || el.tagName().equals("link", ignoreCase = true)) el.attr("href") else "" }
+                val src = effectiveSrc
                 if (src.isNotBlank()) {
                     val rawSrcTrim = src.trim()
-                    if (rawSrcTrim.startsWith("blob:", ignoreCase = true) || rawSrcTrim.startsWith("data:", ignoreCase = true) || rawSrcTrim.startsWith("javascript:", ignoreCase = true)) {
+                    if (rawSrcTrim.startsWith("blob:", ignoreCase = true) || rawSrcTrim.startsWith("data:", ignoreCase = true) || rawSrcTrim.startsWith("javascript:", ignoreCase = true) || rawSrcTrim.equals("about:blank", ignoreCase = true)) {
                         continue
                     }
                     val resolved = resolveUrl(rawSrcTrim)
                     val lower = resolved.lowercase()
                     if (lower.startsWith("blob:") || lower.startsWith("data:") || lower.contains(".jpg") || lower.contains(".jpeg") || lower.contains(".png") || lower.contains(".webp") || lower.contains("/screenshots/")) {
+                        continue
+                    }
+                    if (lower.contains("nvdst.com/media/videos/tmb/") || lower.contains("/videos/tmb/") || (lower.contains("/tmb/") && lower.contains(".mp4"))) {
+                        continue
+                    }
+                    if (HostResolverEngine.canHandle(resolved)) {
+                        val hostPlugin = HostResolverEngine.findPluginForUrl(resolved)
+                        if (hostPlugin != null) {
+                            try {
+                                val hostRes = kotlinx.coroutines.runBlocking { hostPlugin.resolve(resolved, fullUrl) }
+                                if (hostRes.isSuccess) {
+                                    sources.add(hostRes.getOrThrow())
+                                    continue
+                                }
+                            } catch (e: Exception) {
+                                StreamHubLogger.w("HtmlSelectorAdapter", "Plugin failed to resolve $resolved: ${e.message}")
+                            }
+                        }
                         continue
                     }
                     if (lower.endsWith(".js") || lower.contains(".js?") || lower.contains("/smartpop/") || lower.contains("whitetrafsa") || lower.contains("hipodi")
@@ -829,10 +1183,10 @@ class HtmlSelectorAdapter(
                 val ayloMediaRegex = Regex(""""videoUrl"\s*:\s*"([^"]+)"""")
                 for (match in ayloMediaRegex.findAll(html)) {
                     val rawUrl = match.groupValues[1].replace("\\/", "/")
-                    if (rawUrl.contains(".m3u8") || rawUrl.contains(".mp4")) {
+                    if (rawUrl.contains(".m3u8") || rawUrl.contains(".mp4") || rawUrl.contains("/media/hls") || rawUrl.contains("/media/mp4")) {
                         val streamUrl = resolveUrl(rawUrl)
                         if (sources.none { it.url == streamUrl }) {
-                            val isHls = isHlsStream(streamUrl)
+                            val isHls = isHlsStream(streamUrl) || streamUrl.contains("/media/hls")
                             val type = if (isHls) MediaSourceType.HLS else MediaSourceType.PROGRESSIVE_MP4
                             val qual = when {
                                 streamUrl.contains("1080P") || streamUrl.contains("1080p") -> "1080p"
@@ -895,26 +1249,33 @@ class HtmlSelectorAdapter(
 
             // 3.1 YouJizz dataEncodings / mp4Encodings JSON array extractor
             if (sources.isEmpty() && (config.id == "youjizz" || activeBaseUrl.contains("youjizz") || html.contains("dataEncodings"))) {
-                val yjRegex = Regex("""["']filename["']\s*:\s*["'](\\?/[^"']+\.mp4[^"']*)["']""")
+                val yjRegex = Regex("""["'](?:filename|videoUrl|file|src)["']\s*:\s*["']((?:https?:)?\\?/[^"']+\.(?:mp4|m3u8)[^"']*)["']""", RegexOption.IGNORE_CASE)
                 val yjMatches = yjRegex.findAll(html)
                 for (match in yjMatches) {
                     var raw = match.groupValues[1].replace("\\/", "/")
                     if (raw.startsWith("//")) raw = "https:$raw"
                     val qualMatch = Regex("""-(\d{3,4})-(?:h264|hevc)""").find(raw) ?: Regex("""(?i)[/_.-]?(1080|720|480|360|240)p""").find(raw)
                     val quality = qualMatch?.groupValues?.get(1)?.let { "${it}p" } ?: "360p"
+                    val isHls = raw.contains(".m3u8")
+                    val yjHeaders = mapOf(
+                        "User-Agent" to NetworkClient.DEFAULT_USER_AGENT,
+                        "Referer" to "https://www.youjizz.com/",
+                        "Origin" to "https://www.youjizz.com"
+                    )
                     sources.add(MediaSource(
                         url = raw,
-                        type = MediaSourceType.PROGRESSIVE_MP4,
-                        mimeType = "video/mp4",
+                        type = if (isHls) MediaSourceType.HLS else MediaSourceType.PROGRESSIVE_MP4,
+                        mimeType = if (isHls) "application/x-mpegURL" else "video/mp4",
                         quality = quality,
-                        headersRequired = defaultHeaders
+                        resolution = quality,
+                        headersRequired = yjHeaders
                     ))
                 }
             }
 
-            // 3.2 DrTuber & NuVid CDN poster/ID stream reconstructor
-            if (sources.isEmpty() && (config.id in listOf("drtuber", "nuvid") || activeBaseUrl.contains("drtuber") || activeBaseUrl.contains("nuvid"))) {
-                val cdnPosterRegex = Regex("""(?:poster|src)=["'](https?://[a-zA-Z0-9_\-\.]+(?:drtst|nvdst)\.com/media/videos/tmb/(\d+))/player/\d+\.jpg["']""")
+            // 3.2 DrTuber CDN poster/ID stream reconstructor
+            if (sources.isEmpty() && (config.id == "drtuber" || activeBaseUrl.contains("drtuber"))) {
+                val cdnPosterRegex = Regex("""(?:poster|src)=["'](https?://[a-zA-Z0-9_\-\.]+drtst\.com/media/videos/tmb/(\d+))/player/\d+\.jpg["']""")
                 val cdnMatch = cdnPosterRegex.find(html)
                 if (cdnMatch != null) {
                     val baseMedia = cdnMatch.groupValues[1]
@@ -967,8 +1328,8 @@ class HtmlSelectorAdapter(
                     if (src.isNotBlank()) candidateUrls.add(src)
                 }
 
-                // Also check meta embed tags (e.g. PornX11 meta itemprop="embedURL")
-                val metaEmbeds = doc.select("meta[itemprop*='embedURL'], meta[itemprop*='embedUrl'], meta[itemprop*='embedurl'], meta[property='og:video'], meta[name='twitter:player']")
+                // Also check meta embed tags (e.g. PornX11 meta itemprop="embedURL", Tube8 meta property="og:video:url")
+                val metaEmbeds = doc.select("meta[itemprop*='embedURL'], meta[itemprop*='embedUrl'], meta[itemprop*='embedurl'], meta[property*='og:video'], meta[property='og:video:url'], meta[name='twitter:player']")
                 for (m in metaEmbeds) {
                     val content = resolveUrl(m.attr("content"))
                     if (content.isNotBlank()) candidateUrls.add(content)
@@ -992,6 +1353,7 @@ class HtmlSelectorAdapter(
                     !(lowerUrl.contains("whitetrafsa") || lowerUrl.contains("mavrtracktor") || lowerUrl.contains("hipodi")
                         || lowerUrl.contains("google") || lowerUrl.contains("doubleclick") || lowerUrl.contains("recaptcha")
                         || lowerUrl.contains("adservice") || lowerUrl.contains("smartpop") || lowerUrl.contains("videobaba")
+                        || lowerUrl.contains("dscgirls") || lowerUrl.contains("affid=") || lowerUrl.contains("spot=") || lowerUrl.contains("sub1=")
                         || lowerUrl.contains("revive") || lowerUrl.contains("javascript:")
                         || lowerUrl.contains("a-ads") || lowerUrl.contains("ad.a-ads") || lowerUrl.contains("banner")
                         || lowerUrl.contains("popunder") || lowerUrl.contains("syndication") || lowerUrl.contains("adsterra")
@@ -1034,6 +1396,22 @@ class HtmlSelectorAdapter(
                     }
 
                     for (iframeSrc in urlsToTry) {
+                        // Check if registered host plugin handles this embed directly (e.g. Playmate on masahub.net.im)
+                        if (HostResolverEngine.canHandle(iframeSrc)) {
+                            val hostPlugin = HostResolverEngine.findPluginForUrl(iframeSrc)
+                            if (hostPlugin != null) {
+                                try {
+                                    val hostRes = kotlinx.coroutines.runBlocking { hostPlugin.resolve(iframeSrc, fullUrl) }
+                                    if (hostRes.isSuccess) {
+                                        sources.add(hostRes.getOrThrow())
+                                        break
+                                    }
+                                } catch (e: Exception) {
+                                    StreamHubLogger.w("HtmlSelectorAdapter", "Plugin failed to resolve $iframeSrc: ${e.message}")
+                                }
+                            }
+                        }
+
                         val iframeHost = try { URI(iframeSrc).host } catch (e: Exception) { null }
                         val embedHeaders = if (!iframeHost.isNullOrBlank()) {
                             mapOf(
@@ -1114,7 +1492,7 @@ class HtmlSelectorAdapter(
                                     break
                                 }
                             } catch (e: CloudflareChallengeException) {
-                                throw e
+                                StreamHubLogger.w("HtmlSelectorAdapter", "Nested player iframe ($iframeSrc) encountered challenge: ${e.message}")
                             } catch (e: Exception) {
                                 StreamHubLogger.w("HtmlSelectorAdapter", "Could not fetch nested player iframe ($iframeSrc): ${e.message}")
                             }
@@ -1233,8 +1611,12 @@ class HtmlSelectorAdapter(
             // 7. Fallback: Direct regex scan in page HTML for public progressive MP4 / HLS streams
             if (sources.isEmpty()) {
                 val mp4Regex = Regex("""https?://[^\s"'<>]+\.(?:mp4|m3u8)[^\s"'<>]*""")
-                val match = mp4Regex.find(html)
-                if (match != null && !match.value.contains("wp-content") && !match.value.contains("preview")) {
+                val match = mp4Regex.findAll(html).firstOrNull { m ->
+                    val v = m.value.lowercase()
+                    !v.contains("wp-content") && !v.contains("preview") && !v.contains("/trailer") &&
+                    !v.contains("/media/videos/tmb/") && !v.contains("/videos/tmb/") && !v.contains("/tmb/")
+                }
+                if (match != null) {
                     val streamUrl = match.value.replace(" ", "%20")
                     val isHls = isHlsStream(streamUrl)
                     val type = if (isHls) MediaSourceType.HLS else MediaSourceType.PROGRESSIVE_MP4
@@ -1301,6 +1683,28 @@ class HtmlSelectorAdapter(
             }
         }
         if (sources.isEmpty()) {
+            val ayloMediaRegex = Regex(""""videoUrl"\s*:\s*"([^"]+)"""")
+            for (match in ayloMediaRegex.findAll(unpacked)) {
+                val rawUrl = match.groupValues[1].replace("\\/", "/")
+                if (rawUrl.contains(".m3u8") || rawUrl.contains(".mp4") || rawUrl.contains("/media/hls") || rawUrl.contains("/media/mp4")) {
+                    val streamUrl = resolveUrl(rawUrl, iframeSrc)
+                    if (sources.none { it.url == streamUrl }) {
+                        val isHls = isHlsStream(streamUrl) || streamUrl.contains("/media/hls")
+                        val type = if (isHls) MediaSourceType.HLS else MediaSourceType.PROGRESSIVE_MP4
+                        val qual = when {
+                            streamUrl.contains("1080P") || streamUrl.contains("1080p") -> "1080p"
+                            streamUrl.contains("720P") || streamUrl.contains("720p") -> "720p"
+                            streamUrl.contains("480P") || streamUrl.contains("480p") -> "480p"
+                            streamUrl.contains("360P") || streamUrl.contains("360p") -> "360p"
+                            streamUrl.contains("240P") || streamUrl.contains("240p") -> "240p"
+                            else -> "auto"
+                        }
+                        sources.add(MediaSource(url = streamUrl, type = type, mimeType = if (isHls) "application/x-mpegURL" else "video/mp4", quality = qual, headersRequired = embedHeaders))
+                    }
+                }
+            }
+        }
+        if (sources.isEmpty()) {
             val jwRegex = Regex("""(?:sources|file|src):\s*(?:\[\s*\{\s*(?:file|src)\s*:\s*["']([^"']+)["']|["']([^"']+\.(?:mp4|m3u8)[^"']*)["'])""")
             val jwMatch = jwRegex.find(unpacked)
             if (jwMatch != null) {
@@ -1340,23 +1744,48 @@ class HtmlSelectorAdapter(
             val html = NetworkClient.fetchString(fullUrl)
             val doc = Jsoup.parse(html, activeBaseUrl)
 
-            val relatedSelector = selectors?.relatedItems ?: ".related-videos article, .related article, .video-sidebar article"
+            val relatedSelector = selectors?.relatedItems ?: ".related-videos article, .related article, .video-sidebar article, .related-posts article, .related-posts li, .related_posts li, .yarpp-related a, .rel-video, #related_videos li, #related_videos article, .item-video"
             val elements = doc.select(relatedSelector)
             val items = elements.mapNotNull { el ->
                 val linkEl = el.select("a").firstOrNull() ?: return@mapNotNull null
                 val href = linkEl.attr("href").trim()
-                val title = el.select(selectors?.title ?: "h2, .title, a").text().trim()
+                val resolvedHref = resolveUrl(href)
+                if (href.isBlank() || href.startsWith("#") || href.startsWith("javascript") ||
+                    href.contains("twitter.com") || href.contains("whatsapp.com") ||
+                    href.contains("facebook.com") || href.contains("telegram") ||
+                    href.contains("ottlinks.top") ||
+                    href.contains("/category/") || href.contains("/tag/") ||
+                    href.contains("respond") || href.contains("comment") ||
+                    resolvedHref.trimEnd('/') == fullUrl.trimEnd('/')
+                ) return@mapNotNull null
+
+                var rawTitle = el.select(selectors?.title ?: "header.entry-header span, a[title], h2, .title, a").text().trim()
+                if (rawTitle.isBlank()) {
+                    rawTitle = linkEl.attr("title").trim()
+                }
+                val cleanedTitle = rawTitle.replace(Regex("""^(?:HD|FHD|4K|3K|2K|SD|\d+:\d+|\d+%\s*)+\s*"""), "").trim().ifEmpty { rawTitle }
                 val thumbAttrRelated = selectors?.thumbnailAttr
                 val imgElRelated = el.select(selectors?.thumbnail ?: "img").firstOrNull()
                 val thumb = extractValidThumbnail(el, imgElRelated, thumbAttrRelated)
+                val durText = el.select("span.duration, .duration").firstOrNull()?.text()?.trim()
+                val durSecs = parseDurationToSeconds(durText)
 
-                if (href.isNotBlank() && title.isNotBlank()) {
+                val detectedRelatedQualities = mutableListOf<String>()
+                val hasHdBadge = el.select("span.hd-video, span.is-hd, span.hd, .label-hd, .badge-hd").isNotEmpty()
+                if (hasHdBadge || el.text().contains("HD", ignoreCase = true)) {
+                    detectedRelatedQualities.add("720p HD")
+                }
+
+                if (cleanedTitle.isNotBlank() && !isNonContentLink(cleanedTitle, href)) {
                     VideoItem(
                         id = href.hashCode().toString(),
                         providerId = config.id,
-                        title = title,
+                        title = cleanedTitle,
                         thumbnailUrl = resolveUrl(thumb),
-                        detailUrl = resolveUrl(href)
+                        detailUrl = resolvedHref,
+                        durationSeconds = durSecs,
+                        qualities = detectedRelatedQualities,
+                        formats = if (detectedRelatedQualities.isNotEmpty()) listOf("HLS", "MP4") else emptyList()
                     )
                 } else null
             }
@@ -1434,13 +1863,29 @@ class HtmlSelectorAdapter(
                         if (cats.isNotEmpty()) return cats.distinctBy { it.id }
                     }
                 }
+                if (jsonEl is kotlinx.serialization.json.JsonArray) {
+                    val beegCats = jsonEl.mapNotNull { itemEl ->
+                        val obj = itemEl as? kotlinx.serialization.json.JsonObject ?: return@mapNotNull null
+                        val slug = obj["tg_slug"]?.jsonPrimitive?.content ?: return@mapNotNull null
+                        val rawName = obj["tg_name"]?.jsonPrimitive?.content ?: slug
+                        val name = rawName.replace("{", "").replace("}", "").trim()
+                        if (slug.isNotBlank() && name.isNotBlank()) {
+                            Category(
+                                id = slug,
+                                name = name,
+                                url = "https://store.externulls.com/tag/videos/${slug.lowercase()}?limit=48&offset=0"
+                            )
+                        } else null
+                    }.distinctBy { it.id }
+                    if (beegCats.isNotEmpty()) return beegCats
+                }
             } catch (e: Exception) {
                 StreamHubLogger.w("HtmlSelectorAdapter", "Failed to parse JSON categories: ${e.message}")
             }
         }
         val doc = Jsoup.parse(html, activeBaseUrl)
         val categoryElements = doc.select(
-            "#menu a, ul.top-menu a, a[href*='/category/'], a[href*='/categories/'], a[href*='/channels/'], a[href*='/models/'], a[href*='/pornstars/'], a[href*='/sites/'], a[href*='/studios/'], a[href*='/studio/'], a[href*='/tags/'], a[href*='/tag/'], a[href*='/genre/'], a[href*='/genres/'], a[href*='/ott/'], a[href*='/series/'], a[href*='/paysite/'], a[href*='/girls'], a[href*='/actress/'], a[href*='/actresses/'], a[href*='/view/'], a[href*='?cat='], a[href*='search/?s='], a[href*='search?s='], .category-list a, .categories a, div.thumb-cat p.title a, .thumb-block.thumb-cat p.title a, a.taxonomy-item-card, div.cat-thumb a, div.alphabet a, .alphabet a, a.btn[href*='pornstars.tube']"
+            "#menu a, ul.top-menu a, #nav-categories a, #nav-camsites a, a[href*='/category/'], a[href*='/categories/'], a[href*='/categories'], a[href*='/website/'], a[href*='/websites/'], a[href*='/channels/'], a[href*='/models/'], a[href$='/models'], a[href*='/pornstars/'], a[href*='/sites/'], a[href*='/studios/'], a[href*='/studio/'], a[href*='/tags/'], a[href*='/tag/'], a[href*='/tags'], a[href*='/tag'], a[href*='/c/'], #header a[href*='/search/'], #menu a[href*='/search/'], #h-menu a[href*='/search/'], .header a[href*='/search/'], a[href*='/genre/'], a[href*='/genres/'], a[href*='/ott/'], a[href*='/series/'], a[href*='/paysite/'], a[href*='/girls'], a[href*='/actress/'], a[href*='/actresses/'], a[href*='/view/'], a[href*='?cat='], a[href*='search/?s='], a[href*='search?s='], .category-list a, .categories a, div.thumb-cat p.title a, .thumb-block.thumb-cat p.title a, a.taxonomy-item-card, div.cat-thumb a, div.alphabet a, .alphabet a, a.btn[href*='pornstars.tube'], a[href$='-porn/'], a[href$='-porn'], a[href*='-porn/'], .category-item a, .cat-box a, .categories-list a, .category-box a, .main-nav a, nav.menu a"
         )
         return categoryElements.mapNotNull { el ->
             // Filter out pagination container items and page number links
@@ -1451,9 +1896,22 @@ class HtmlSelectorAdapter(
             } || el.hasClass("page-numbers") || el.hasClass("inactive") || el.hasClass("current") || el.hasClass("page-link")
             if (isPagination) return@mapNotNull null
 
-            var rawName = el.select(".taxonomy-name, .cat-name, span.title, p.title").firstOrNull()?.text()?.trim()
+            var rawName = el.select(".taxonomy-name, .cat-name, .cat-title, span.cat-title, span.title, p.title").firstOrNull()?.text()?.trim()
                 ?.ifEmpty { null }
                 ?: el.text().substringBefore("\n").trim()
+            if (rawName.isBlank() || (rawName.length > 25 && rawName.contains(Regex("""[0-9a-f]{10,}""")))) {
+                val parentCol = el.closest(".models-wost__col, .cat-item, .thumb-cat, .category-item, .cat-col, .col")
+                val pTitle = parentCol?.select(".models-footer p, p.title, p.name, p, .title")?.firstOrNull()?.text()?.trim()
+                if (!pTitle.isNullOrBlank() && !pTitle.contains(Regex("""[0-9a-f]{10,}"""))) {
+                    rawName = pTitle
+                }
+            }
+            if (rawName.isBlank()) {
+                val titleAttr = el.attr("title").trim()
+                if (titleAttr.isNotBlank() && !isNonContentLink(titleAttr, el.attr("href"))) {
+                    rawName = titleAttr
+                }
+            }
             if (rawName.isBlank()) {
                 val img = el.select("img").firstOrNull()
                 rawName = img?.attr("alt")?.trim()?.ifEmpty { null }
@@ -1469,8 +1927,9 @@ class HtmlSelectorAdapter(
                 val isAlphabetLetter = (name.length == 1 && name[0].isLetter()) ||
                         (name.equals("All", ignoreCase = true) && (href.contains("pornstars.tube") || activeBaseUrl.contains("pornstars.tube") || href.endsWith(".tube/")))
 
-                // Reject pure digits, pagination labels, self index links, photos/gallery, and non-content
+                // Reject pure digits, pagination labels, self index links, photos/gallery, templates, and non-content
                 if (name.matches(Regex("""^\d+$""")) || (!isAlphabetLetter && name.length <= 1) ||
+                    name.startsWith("\${") || href.contains("\${") ||
                     (!isAlphabetLetter && lowerName in listOf("next", "prev", "previous", "first", "last", "end", "»", "«", "next »", "« prev", "more")) ||
                     lowerName == "all categories" || lowerHref.trimEnd('/').endsWith("/categories") ||
                     lowerHref.contains("/page/") || lowerHref.contains("/photos/") || lowerHref.contains("/gallery/") ||
@@ -1480,6 +1939,8 @@ class HtmlSelectorAdapter(
                 val pathSegments = href.substringBefore('?').trimEnd('/').split("/").filter { it.isNotBlank() }
                 val id = if (href.contains("?s=")) {
                     href.substringAfter("?s=").trimEnd('/')
+                } else if (href.contains("/search/")) {
+                    href.substringAfter("/search/").substringBefore('?').trimEnd('/')
                 } else if (isAlphabetLetter) {
                     name.uppercase()
                 } else if (pathSegments.size >= 2 && (pathSegments.last().contains("-new-") || pathSegments.last().contains("free-brazz") || pathSegments.last().length > 20)) {
@@ -1515,19 +1976,25 @@ class HtmlSelectorAdapter(
                     if (vidsArray != null) {
                         val items = vidsArray.mapNotNull { vidItem ->
                             val obj = vidItem as? kotlinx.serialization.json.JsonObject ?: return@mapNotNull null
-                            val id = obj["video_id"]?.jsonPrimitive?.content ?: return@mapNotNull null
+                            val id = obj["video_id"]?.jsonPrimitive?.content
+                                ?: obj["id"]?.jsonPrimitive?.content
+                                ?: return@mapNotNull null
                             val title = obj["title"]?.jsonPrimitive?.content ?: "Video $id"
                             val dir = obj["dir"]?.jsonPrimitive?.content ?: ""
-                            val scr = obj["scr"]?.jsonPrimitive?.content
+                            val defaultThumbObj = obj["default_thumb"] as? kotlinx.serialization.json.JsonObject
+                            val scr = defaultThumbObj?.get("src")?.jsonPrimitive?.content
+                                ?: obj["scr"]?.jsonPrimitive?.content
                                 ?: obj["thumb"]?.jsonPrimitive?.content
                                 ?: ""
                             val duration = obj["duration"]?.jsonPrimitive?.content
-                            val durationSec = parseDurationToSeconds(duration)
+                                ?: obj["length_sec"]?.jsonPrimitive?.content
+                            val durationSec = duration?.toLongOrNull() ?: parseDurationToSeconds(duration)
                             val pv = obj["pv"]?.jsonPrimitive?.content
                             val previewUrl = if (!pv.isNullOrBlank()) {
                                 if (pv.startsWith("http")) pv else "https://$pv"
                             } else null
-                            val detailUrl = resolveUrl("/videos/$id/$dir/")
+                            val explicitUrl = obj["url"]?.jsonPrimitive?.content
+                            val detailUrl = if (!explicitUrl.isNullOrBlank()) resolveUrl(explicitUrl) else resolveUrl("/videos/$id/$dir/")
                             VideoItem(
                                 id = id,
                                 providerId = config.id,
@@ -1538,7 +2005,9 @@ class HtmlSelectorAdapter(
                                 metadata = if (previewUrl != null) mapOf("previewUrl" to previewUrl) else emptyMap()
                             )
                         }
-                        return Result.success(FeedPage(items = items, page = page, hasNextPage = items.size >= 60))
+                        val totalPages = jsonEl["total_pages"]?.jsonPrimitive?.content?.toIntOrNull()
+                            ?: if (jsonEl.containsKey("total_count")) ((jsonEl["total_count"]?.jsonPrimitive?.content?.toIntOrNull() ?: 0) + 29) / 30 else null
+                        return Result.success(FeedPage(items = items, page = page, hasNextPage = if (totalPages != null) page < totalPages else items.size >= 24))
                     }
 
                     val resultsArray = jsonEl["results"]?.let { if (it is kotlinx.serialization.json.JsonArray) it else null }
@@ -1622,6 +2091,60 @@ class HtmlSelectorAdapter(
                         return Result.success(FeedPage(items = items, page = page, hasNextPage = false))
                     }
                 }
+                if (jsonEl is kotlinx.serialization.json.JsonArray) {
+                    val beegItems = jsonEl.mapNotNull { itemEl ->
+                        val obj = itemEl as? kotlinx.serialization.json.JsonObject ?: return@mapNotNull null
+                        val fileObj = obj["file"] as? kotlinx.serialization.json.JsonObject ?: return@mapNotNull null
+                        val fileId = fileObj["id"]?.jsonPrimitive?.content ?: return@mapNotNull null
+
+                        var title = ""
+                        val dataArr = fileObj["data"] as? kotlinx.serialization.json.JsonArray
+                        if (dataArr != null) {
+                            for (dEl in dataArr) {
+                                val dObj = dEl as? kotlinx.serialization.json.JsonObject ?: continue
+                                if (dObj["cd_column"]?.jsonPrimitive?.content == "sf_name") {
+                                    title = dObj["cd_value"]?.jsonPrimitive?.content ?: ""
+                                    break
+                                }
+                            }
+                        }
+                        if (title.isBlank()) {
+                            val tagsArr = obj["tags"] as? kotlinx.serialization.json.JsonArray
+                            val tagNames = tagsArr?.mapNotNull { (it as? kotlinx.serialization.json.JsonObject)?.get("tg_name")?.jsonPrimitive?.content } ?: emptyList()
+                            title = if (tagNames.isNotEmpty()) tagNames.take(2).joinToString(" - ") else "Beeg Video $fileId"
+                        }
+
+                        val durationSec = fileObj["fl_duration"]?.jsonPrimitive?.content?.toLongOrNull()
+
+                        val factsArr = obj["fc_facts"] as? kotlinx.serialization.json.JsonArray
+                        val firstFact = factsArr?.firstOrNull() as? kotlinx.serialization.json.JsonObject
+                        val thumbsArr = firstFact?.get("fc_thumbs") as? kotlinx.serialization.json.JsonArray
+                        val thumbOffset = thumbsArr?.firstOrNull()?.jsonPrimitive?.content ?: "0"
+                        val thumbUrl = "https://thumbs.externulls.com/videos/$fileId/$thumbOffset.webp?size=480x270"
+
+                        val detailUrl = "https://store.externulls.com/facts/file/$fileId"
+
+                        val downloadAvail = if (hasCapability(ProviderCapability.DOWNLOAD)) {
+                            DownloadAvailability.AUTHORIZED
+                        } else {
+                            DownloadAvailability.NOT_SUPPORTED
+                        }
+
+                        VideoItem(
+                            id = fileId,
+                            providerId = config.id,
+                            title = title,
+                            thumbnailUrl = thumbUrl,
+                            detailUrl = detailUrl,
+                            durationSeconds = durationSec,
+                            playbackAvailability = PlaybackAvailability.AVAILABLE,
+                            downloadAvailability = downloadAvail
+                        )
+                    }
+                    if (beegItems.isNotEmpty()) {
+                        return Result.success(FeedPage(items = beegItems, page = page, hasNextPage = beegItems.size >= 48))
+                    }
+                }
             } catch (e: Exception) {
                 StreamHubLogger.w("HtmlSelectorAdapter", "Failed to parse JSON listing: ${e.message}")
             }
@@ -1636,6 +2159,7 @@ class HtmlSelectorAdapter(
             // Carousel and slider filter: omit repeating slider slides and clones
             val isInCarousel = el.hasClass("slide") || el.hasClass("bx-clone") ||
                     el.hasClass("swiper-slide") || el.hasClass("slick-slide") || el.hasClass("slick-cloned") ||
+                    el.hasClass("carousel-item") ||
                     el.parents().any { p ->
                         p.hasClass("bx-wrapper") || p.hasClass("featured-carousel") ||
                         p.hasClass("carousel") || p.hasClass("featured-slider") ||
@@ -1643,7 +2167,8 @@ class HtmlSelectorAdapter(
                         p.hasClass("swiper-container") || p.hasClass("pfb-slider-group") ||
                         p.hasClass("slider-cat") || p.hasClass("items-categories") ||
                         p.hasClass("slick-slider") || p.hasClass("navigation") ||
-                        p.hasClass("mob-nav") || p.hasClass("fluid_slider")
+                        p.hasClass("mob-nav") || p.hasClass("fluid_slider") ||
+                        p.hasClass("slider") || p.hasClass("carousel-inner")
                     }
             if (isInCarousel) {
                 return@mapNotNull null
@@ -1682,11 +2207,22 @@ class HtmlSelectorAdapter(
             var rawTitle = ""
             val titleSelector = selectors?.title
             if (!titleSelector.isNullOrBlank()) {
-                val foundEl = el.select(titleSelector).firstOrNull()
-                if (foundEl != null) {
-                    rawTitle = foundEl.attr("data-title").ifEmpty {
-                        foundEl.attr("title").ifEmpty { foundEl.text() }
-                    }.trim()
+                val parts = titleSelector.split(",")
+                for (part in parts) {
+                    val p = part.trim()
+                    if (p.isEmpty()) continue
+                    val foundEl = el.select(p).firstOrNull()
+                    if (foundEl != null) {
+                        val t = foundEl.attr("data-title").ifEmpty {
+                            foundEl.attr("title").ifEmpty {
+                                foundEl.attr("alt").ifEmpty { foundEl.text() }
+                            }
+                        }.trim()
+                        if (t.isNotBlank()) {
+                            rawTitle = t
+                            break
+                        }
+                    }
                 }
             }
             if (rawTitle.isBlank()) {
@@ -1736,6 +2272,15 @@ class HtmlSelectorAdapter(
             }
             val durSecs = parseDurationToSeconds(durText)
 
+            val detectedListingQualities = mutableListOf<String>()
+            val hasHdBadge = el.select("span.hd-video, span.is-hd, span.hd, .label-hd, .badge-hd, span.quality").isNotEmpty()
+            val fullTextForQuality = "$rawTitle ${el.text()}"
+            when {
+                fullTextForQuality.contains("4K", ignoreCase = true) || fullTextForQuality.contains("2160p", ignoreCase = true) -> detectedListingQualities.add("4K")
+                fullTextForQuality.contains("1080p", ignoreCase = true) || fullTextForQuality.contains("FHD", ignoreCase = true) -> detectedListingQualities.add("1080p FHD")
+                fullTextForQuality.contains("720p", ignoreCase = true) || hasHdBadge || fullTextForQuality.contains("HD", ignoreCase = true) -> detectedListingQualities.add("720p HD")
+            }
+
             if (href.isNotBlank() && cleanedTitle.isNotBlank() && !isNonContentLink(cleanedTitle, href)) {
                 VideoItem(
                     id = href.hashCode().toString(),
@@ -1744,17 +2289,41 @@ class HtmlSelectorAdapter(
                     thumbnailUrl = resolveUrl(thumb),
                     detailUrl = resolveUrl(href),
                     durationSeconds = durSecs,
-                    isCategory = isCat
+                    isCategory = isCat,
+                    qualities = detectedListingQualities,
+                    formats = if (detectedListingQualities.isNotEmpty()) listOf("HLS", "MP4") else emptyList()
                 )
             } else null
 
         }.distinctBy { it.detailUrl }
 
-        val hasNextPage = doc.select("a.next, .pagination .next, a[rel='next'], .vp-pagi-bar a.next, .vp-pagi-bar a:contains(Next)").isNotEmpty() || items.size >= 10
+        val finalItems = if (items.isEmpty()) {
+            val catElements = doc.select(
+                "ul.tags-list a, .tags a, .tag-list a, .categories-list a, a.tag, a[href*='/search/'], a[href*='/c/'], a[href*='/tags/'], a[href*='/category/'], a[href*='/channels/'], a.categoryBox"
+            )
+            catElements.mapNotNull { el ->
+                val title = el.text().trim()
+                val href = el.attr("href").trim()
+                if (title.isNotBlank() && href.isNotBlank() && !isNonContentLink(title, href) && title.length > 1) {
+                    VideoItem(
+                        id = href.hashCode().toString(),
+                        providerId = config.id,
+                        title = title,
+                        thumbnailUrl = "",
+                        detailUrl = resolveUrl(href),
+                        isCategory = true
+                    )
+                } else null
+            }.distinctBy { it.detailUrl }
+        } else {
+            items
+        }
+
+        val hasNextPage = doc.select("a.next, .pagination .next, a[rel='next'], .vp-pagi-bar a.next, .vp-pagi-bar a:contains(Next), a.tm-btn-next:not(.disabled), a:contains(Next Page):not(.disabled)").isNotEmpty() || (finalItems.size >= 10 && doc.select("a.tm-btn-next.disabled").isEmpty())
 
         return Result.success(
             FeedPage(
-                items = items,
+                items = finalItems,
                 page = page,
                 hasNextPage = hasNextPage
             )
@@ -1849,6 +2418,11 @@ class HtmlSelectorAdapter(
                lower.contains("default-thumb") ||
                lower.contains("site-icon") ||
                lower.contains("header-icon") ||
+               lower.contains("/images/bg.") ||
+               lower.contains("/bg.jpg") ||
+               lower.contains("/bg.png") ||
+               lower.contains("blank.gif") ||
+               lower.contains("spacer.gif") ||
                lower.startsWith("data:")
     }
 
@@ -1917,9 +2491,10 @@ class HtmlSelectorAdapter(
             lower.contains("pornstars.tube") -> "https://pornstars.tube/"
             lower.contains("sxyprn.com") || lower.contains("trafficdeposit.com") || lower.contains("bxcdn.net") || lower.contains("bkcdn.net") -> "https://sxyprn.com/"
             lower.contains("tube279.com") || lower.contains("siesta583") -> "https://tube279.com/"
-            lower.contains("tnmr.org") || lower.contains("lulucdn") || lower.contains("lulustream") || lower.contains("luluvdo") -> "https://luluvdo.com/"
+            lower.contains("tnmr.org") || lower.contains("lulucdn") || lower.contains("lulustream") || lower.contains("luluvdo") || lower.contains("lulust") -> "https://luluvdo.com/"
             lower.contains("tpead.net") || lower.contains("streamtape.com") || lower.contains("tapecontent.net") -> "https://streamtape.com/"
             lower.contains("xhpingcdn") || lower.contains("xhcdn") || lower.contains("xhamster") -> "https://xhamster.desi/"
+            lower.contains("pornstars.tube") || (activeBaseUrl.contains("pornstars.tube") && lower.contains("privatehost.com")) -> "https://pornstars.tube/"
             lower.contains("max.porn") || (activeBaseUrl.contains("max.porn") && lower.contains("privatehost.com")) -> "https://max.porn/"
             lower.contains("ok.porn") || (activeBaseUrl.contains("ok.porn") && lower.contains("privatehost.com")) -> "https://ok.porn/"
             lower.contains("ok.xxx") || (activeBaseUrl.contains("ok.xxx") && lower.contains("privatehost.com")) -> "https://ok.xxx/"
@@ -1931,12 +2506,21 @@ class HtmlSelectorAdapter(
             lower.contains("netfapx.com") || lower.contains("videos.netfapx.com") -> "https://netfapx.com/"
             lower.contains("porn4days.pw") || lower.contains("iceyfile.net") -> "https://porn4days.pw/"
             lower.contains("kamababa") -> "https://www.mykamababa.com/"
-            lower.contains("chiggywiggy") -> "https://chiggywiggy.com/"
-            lower.contains("definebabe.com") -> "https://www.definebabe.com/"
+            lower.contains("chiggywiggy") -> if (lower.contains("int.in") || activeBaseUrl.contains("int.in")) "https://chiggywiggy.int.in/" else "https://chiggywiggy.com/"
+            lower.contains("definebabe.com") -> baseHeaders["Referer"] ?: "https://www.definebabe.com/"
+            lower.contains("3movs.xxx") -> "https://www.3movs.xxx/"
             lower.contains("3movs.com") -> "https://www.3movs.com/"
+            lower.contains("antarvasna") -> "https://www.antarvasnabf.com/"
+            lower.contains("uncutmaza") || lower.contains("azmaal.com") -> "https://uncutmaza.movie/"
+            lower.contains("eporner.com") -> "https://www.eporner.com/"
+            lower.contains("nuvid") || lower.contains("nvdst.com") -> "https://m.nuvid.org/"
+            lower.contains("drtuber.com") || lower.contains("drtst.com") -> "https://www.drtuber.com/"
+            lower.contains("empflix.com") -> "https://www.empflix.com/"
             lower.contains("txxx.com") || lower.contains("txxx.tube") -> "https://txxx.com/"
             lower.contains("upornia.com") -> "https://upornia.com/"
             lower.contains("hdzog.com") -> "https://hdzog.com/"
+            lower.contains("playmate.to") || lower.contains("plauymito.live") -> "https://playmate.to/"
+            lower.contains("masahub.net.im") -> "https://masahub.net.im/"
             else -> baseHeaders["Referer"] ?: if (activeBaseUrl.isNotBlank()) "$activeBaseUrl/" else null
         }
         return if (targetReferer != null) {
@@ -1957,15 +2541,14 @@ class HtmlSelectorAdapter(
                (lower.contains("just a moment...") && (lower.contains("cloudflare") || lower.contains("turnstile") || lower.contains("challenge"))) ||
                lower.contains("attention required! | cloudflare") ||
                lower.contains("cf-browser-verification") ||
-               lower.contains("id=\"challenge-stage\"") ||
-               lower.contains("id=\"challenge-form\"") ||
-               lower.contains("id=\"challenge-running\"") ||
-               (lower.contains("challenge-platform") && (lower.contains("/turnstile/") || lower.contains("orchestrate/chl_api")))
+               (lower.contains("id=\"challenge-stage\"") && (lower.contains("id=\"challenge-form\"") || lower.contains("id=\"challenge-running\""))) ||
+               (lower.contains("challenge-platform") && lower.contains("orchestrate/chl_api") && lower.contains("id=\"challenge-running\""))
     }
 
     internal fun resolveUrl(path: String, baseUri: String = activeBaseUrl): String {
         return try {
-            val trimmed = path.trim()
+            val unwrapped = com.thedesitadka.core.network.HideProxyEngine.unwrapProxiedUrl(path.trim())
+            val trimmed = unwrapped
             if (trimmed.startsWith("//")) {
                 "https:$trimmed"
             } else if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
@@ -2181,32 +2764,68 @@ class HtmlSelectorAdapter(
         val videoFileUrl = "$base/api/videofile.php?video_id=$vidId&lifetime=8640000"
         val headers = mapOf(
             "User-Agent" to NetworkClient.DEFAULT_USER_AGENT,
-            "Referer" to "$base/"
+            "Referer" to fullUrl,
+            "X-Requested-With" to "XMLHttpRequest",
+            "Cookie" to "age_verified=1; user_country=US"
         )
-        val jsonResp = NetworkClient.fetchString(videoFileUrl, headers = headers)
-        val jsonEl = Json.parseToJsonElement(jsonResp)
         val results = mutableListOf<MediaSource>()
-        if (jsonEl is kotlinx.serialization.json.JsonArray && jsonEl.isNotEmpty()) {
-            for (item in jsonEl) {
-                val itemObj = item as? kotlinx.serialization.json.JsonObject ?: continue
-                val encUrl = itemObj["video_url"]?.jsonPrimitive?.content
-                if (!encUrl.isNullOrBlank()) {
-                    val decodedPath = base164Decode(encUrl)
-                    if (decodedPath.isNotBlank()) {
-                        val streamUrl = if (decodedPath.startsWith("http")) decodedPath else "$base$decodedPath"
-                        val isHls = streamUrl.contains(".m3u8")
-                        val qual = itemObj["format"]?.jsonPrimitive?.content ?: if (decodedPath.contains("_hq")) "HQ" else "auto"
-                        results.add(
-                            MediaSource(
-                                url = streamUrl,
-                                type = if (isHls) MediaSourceType.HLS else MediaSourceType.PROGRESSIVE_MP4,
-                                mimeType = if (isHls) "application/x-mpegURL" else "video/mp4",
-                                quality = qual,
-                                headersRequired = mapOf("Referer" to "$base/", "User-Agent" to NetworkClient.DEFAULT_USER_AGENT)
+        try {
+            val jsonResp = NetworkClient.fetchString(videoFileUrl, headers = headers)
+            val jsonEl = Json.parseToJsonElement(jsonResp)
+            if (jsonEl is kotlinx.serialization.json.JsonArray && jsonEl.isNotEmpty()) {
+                for (item in jsonEl) {
+                    val itemObj = item as? kotlinx.serialization.json.JsonObject ?: continue
+                    val encUrl = itemObj["video_url"]?.jsonPrimitive?.content
+                    if (!encUrl.isNullOrBlank()) {
+                        val decodedPath = base164Decode(encUrl)
+                        if (decodedPath.isNotBlank()) {
+                            val streamUrl = if (decodedPath.startsWith("http")) decodedPath else "$base$decodedPath"
+                            val isHls = streamUrl.contains(".m3u8")
+                            val qual = itemObj["format"]?.jsonPrimitive?.content ?: if (decodedPath.contains("_hq")) "HQ" else "auto"
+                            results.add(
+                                MediaSource(
+                                    url = streamUrl,
+                                    type = if (isHls) MediaSourceType.HLS else MediaSourceType.PROGRESSIVE_MP4,
+                                    mimeType = if (isHls) "application/x-mpegURL" else "video/mp4",
+                                    quality = qual,
+                                    resolution = qual,
+                                    headersRequired = mapOf("Referer" to "$base/", "User-Agent" to NetworkClient.DEFAULT_USER_AGENT)
+                                )
                             )
-                        )
+                        }
                     }
                 }
+            }
+        } catch (e: Exception) {
+            StreamHubLogger.w("HtmlSelectorAdapter", "AVS videofile.php failed for vid $vidId: ${e.message}")
+        }
+
+        // Embed fallback if videofile.php returns empty or 404
+        if (results.isEmpty()) {
+            try {
+                val embedUrl = "$base/embed/$vidId"
+                val embedHtml = NetworkClient.fetchString(embedUrl, headers = mapOf(
+                    "Referer" to fullUrl,
+                    "User-Agent" to NetworkClient.DEFAULT_USER_AGENT,
+                    "Cookie" to "age_verified=1"
+                ))
+                val embedSrc = Regex("""(?:video_url|file|src)\s*[:=]\s*["']([^"']+\.(?:mp4|m3u8)[^"']*)["']""").find(embedHtml)?.groupValues?.get(1)
+                if (!embedSrc.isNullOrBlank()) {
+                    val streamUrl = resolveUrl(embedSrc, base)
+                    val isHls = streamUrl.contains(".m3u8")
+                    results.add(
+                        MediaSource(
+                            url = streamUrl,
+                            type = if (isHls) MediaSourceType.HLS else MediaSourceType.PROGRESSIVE_MP4,
+                            mimeType = if (isHls) "application/x-mpegURL" else "video/mp4",
+                            quality = "720p",
+                            resolution = "720p",
+                            headersRequired = mapOf("Referer" to "$base/", "User-Agent" to NetworkClient.DEFAULT_USER_AGENT)
+                        )
+                    )
+                }
+            } catch (e: Exception) {
+                StreamHubLogger.w("HtmlSelectorAdapter", "AVS embed fallback failed for vid $vidId: ${e.message}")
             }
         }
         return results
@@ -2280,18 +2899,31 @@ class HtmlSelectorAdapter(
         )
         val jsonEl = try { Json.parseToJsonElement(streamJson) } catch (e: Exception) { return Result.failure(e) }
         val rootObj = jsonEl as? kotlinx.serialization.json.JsonObject ?: return Result.failure(StreamHubError.ParsingError(config.id, "Invalid JSON root"))
-        val streamsArray = rootObj["streams"] as? kotlinx.serialization.json.JsonArray ?: return Result.failure(StreamHubError.ParsingError(config.id, "No streams found in response"))
+        val streamsArray = (rootObj["sources"] ?: rootObj["streams"]) as? kotlinx.serialization.json.JsonArray
+            ?: return Result.failure(StreamHubError.ParsingError(config.id, "No streams found in response"))
 
         val subtitleUrls = mutableListOf<String>()
+        val subsArray = (rootObj["subtitles"] as? kotlinx.serialization.json.JsonArray)
+        subsArray?.forEach { subItem ->
+            val sObj = subItem as? kotlinx.serialization.json.JsonObject ?: return@forEach
+            val sUrl = sObj["url"]?.jsonPrimitive?.content ?: return@forEach
+            val sLang = sObj["label"]?.jsonPrimitive?.content ?: sObj["language"]?.jsonPrimitive?.content ?: sObj["lang"]?.jsonPrimitive?.content ?: "English"
+            val resolvedSubUrl = if (sUrl.startsWith("http")) sUrl else "https://api.movienerds.online$sUrl"
+            subtitleUrls.add("$sLang::$resolvedSubUrl")
+        }
+
         if (!subJson.isNullOrBlank()) {
             try {
                 val subEl = Json.parseToJsonElement(subJson) as? kotlinx.serialization.json.JsonObject
-                val subsArray = subEl?.get("subtitles") as? kotlinx.serialization.json.JsonArray
-                subsArray?.forEach { subItem ->
+                val extSubsArray = subEl?.get("subtitles") as? kotlinx.serialization.json.JsonArray
+                extSubsArray?.forEach { subItem ->
                     val sObj = subItem as? kotlinx.serialization.json.JsonObject ?: return@forEach
                     val sUrl = sObj["url"]?.jsonPrimitive?.content ?: return@forEach
-                    val sLang = sObj["language"]?.jsonPrimitive?.content ?: sObj["lang"]?.jsonPrimitive?.content ?: "en"
-                    subtitleUrls.add("$sLang::$sUrl")
+                    val sLang = sObj["language"]?.jsonPrimitive?.content ?: sObj["lang"]?.jsonPrimitive?.content ?: "English"
+                    val resolvedSubUrl = if (sUrl.startsWith("http")) sUrl else "https://api.movienerds.online$sUrl"
+                    if (subtitleUrls.none { it.endsWith(resolvedSubUrl) }) {
+                        subtitleUrls.add("$sLang::$resolvedSubUrl")
+                    }
                 }
             } catch (e: Exception) {
                 // non-fatal
@@ -2302,18 +2934,37 @@ class HtmlSelectorAdapter(
         for (item in streamsArray) {
             val sObj = item as? kotlinx.serialization.json.JsonObject ?: continue
             val rawUrl = sObj["url"]?.jsonPrimitive?.content ?: continue
-            val server = sObj["server"]?.jsonPrimitive?.content ?: "Stream"
+            val server = sObj["providerName"]?.jsonPrimitive?.content
+                ?: sObj["name"]?.jsonPrimitive?.content
+                ?: sObj["server"]?.jsonPrimitive?.content
+                ?: "Stream"
             val quality = sObj["quality"]?.jsonPrimitive?.content ?: "1080p"
             val typeStr = sObj["type"]?.jsonPrimitive?.content ?: "hls"
-            val audio = sObj["audio"]?.jsonPrimitive?.content ?: ""
+            val audio = sObj["language"]?.jsonPrimitive?.content
+                ?: sObj["audio"]?.jsonPrimitive?.content
+                ?: ""
             val isHls = typeStr.equals("hls", ignoreCase = true) || rawUrl.contains(".m3u8")
             val mediaType = if (isHls) MediaSourceType.HLS else MediaSourceType.PROGRESSIVE_MP4
             val mime = if (isHls) "application/x-mpegURL" else "video/mp4"
-            val label = if (audio.isNotBlank()) "$server ($quality - $audio)" else "$server ($quality)"
+
+            val res = when {
+                quality.contains("4k", ignoreCase = true) || quality.contains("2160", ignoreCase = true) -> "2160p"
+                quality.contains("1080", ignoreCase = true) -> "1080p"
+                quality.contains("720", ignoreCase = true) -> "720p"
+                quality.contains("480", ignoreCase = true) -> "480p"
+                quality.contains("360", ignoreCase = true) -> "360p"
+                else -> quality
+            }
+            val label = if (audio.isNotBlank() && !audio.equals("Default", ignoreCase = true) && !audio.equals("English", ignoreCase = true)) {
+                "$server ($res - $audio)"
+            } else {
+                "$server ($res)"
+            }
 
             val meta = mutableMapOf<String, String>()
             meta["server"] = server
             if (audio.isNotBlank()) meta["audio"] = audio
+            meta["resolution"] = res
             if (subtitleUrls.isNotEmpty()) {
                 meta["subtitles"] = subtitleUrls.joinToString("||")
             }
@@ -2324,6 +2975,9 @@ class HtmlSelectorAdapter(
                     type = mediaType,
                     mimeType = mime,
                     quality = label,
+                    resolution = res,
+                    language = audio.ifBlank { "English" },
+                    format = if (isHls) "HLS" else "MP4",
                     headersRequired = mnHeaders,
                     metadata = meta
                 )
@@ -2332,7 +2986,11 @@ class HtmlSelectorAdapter(
         return if (sources.isNotEmpty()) Result.success(sources) else Result.failure(StreamHubError.PlaybackError(404, "No playable streams returned from MovieNerds"))
     }
 
-    private fun resolveCineapseMedia(detailUrl: String): Result<List<MediaSource>> {
+    private suspend fun resolveCineapseMedia(detailUrl: String): Result<List<MediaSource>> {
+        val mnRes = resolveMovieNerdsMedia(detailUrl)
+        if (mnRes.isSuccess && !mnRes.getOrNull().isNullOrEmpty()) {
+            return mnRes
+        }
         return Result.success(buildCineapseMediaSources(detailUrl))
     }
 
@@ -2433,4 +3091,444 @@ class HtmlSelectorAdapter(
 
         return sources
     }
+
+    private suspend fun resolveNuVidMedia(detailUrl: String): Result<List<MediaSource>> {
+        val vidId = Regex("""(?:/video/|/play/)(\d+)""").find(detailUrl)?.groupValues?.get(1)
+            ?: Regex("""\b(\d{5,})\b""").find(detailUrl)?.groupValues?.get(1)
+
+        val fullUrl = resolveUrl(detailUrl)
+        val playUrl = if (vidId != null) "https://m.nuvid.org/play/$vidId" else if (fullUrl.contains("?")) "$fullUrl&play=mp4" else "$fullUrl?play=mp4"
+
+        try {
+            val playHeaders = mapOf(
+                "User-Agent" to NetworkClient.DEFAULT_USER_AGENT,
+                "Referer" to fullUrl
+            )
+            val playHtml = NetworkClient.fetchString(playUrl, headers = playHeaders)
+            val sources = extractNuVidMediaSources(playHtml, playUrl)
+            if (sources.isNotEmpty()) {
+                return Result.success(sources)
+            }
+        } catch (e: Exception) {
+            StreamHubLogger.w("HtmlSelectorAdapter", "NuVid /play/ fetch failed: ${e.message}")
+        }
+
+        // Fallback: try fetching video page with ?play=mp4 if different
+        try {
+            val pageUrl = if (fullUrl.contains("?")) "$fullUrl&play=mp4" else "$fullUrl?play=mp4"
+            if (pageUrl != playUrl) {
+                val html = NetworkClient.fetchString(pageUrl, headers = mapOf("Referer" to fullUrl))
+                val sources = extractNuVidMediaSources(html, pageUrl)
+                if (sources.isNotEmpty()) {
+                    return Result.success(sources)
+                }
+            }
+        } catch (e: Exception) {
+            StreamHubLogger.w("HtmlSelectorAdapter", "NuVid ?play=mp4 fallback failed: ${e.message}")
+        }
+
+        return Result.failure(StreamHubError.PlaybackError(404, "Failed to resolve full NuVid stream for $detailUrl"))
+    }
+
+    internal fun extractNuVidMediaSources(html: String, pageUrl: String): List<MediaSource> {
+        val doc = Jsoup.parse(html, "https://m.nuvid.org")
+        val defaultHeaders = mapOf(
+            "User-Agent" to NetworkClient.DEFAULT_USER_AGENT,
+            "Referer" to "https://m.nuvid.org/",
+            "Origin" to "https://m.nuvid.org"
+        )
+
+        val sources = mutableListOf<MediaSource>()
+
+        // 1. Check direct link in #download_page or a.b_link
+        val downloadLink = doc.select("#download_page a[href*='.mp4'], a.b_link[href*='.mp4'], a[href*='nuvid.org/mp4/']").firstOrNull()?.attr("href")
+        val streamUrl = downloadLink?.ifBlank { null }
+            ?: Regex("""https?://[a-zA-Z0-9_\-\.]*nuvid\.org/mp4/[^\s"'<>]+""").find(html)?.value
+            ?: Regex("""https?://[^\s"'<>]+\.mp4\?[^\s"'<>]*""").findAll(html)
+                .map { it.value }
+                .firstOrNull { !it.contains("/media/videos/tmb/") && !it.contains("/videos/tmb/") && !it.contains("/tmb/") }
+
+        if (!streamUrl.isNullOrBlank()) {
+            val resolved = resolveUrl(streamUrl, "https://m.nuvid.org")
+            val headers = resolveHeadersForStream(resolved, defaultHeaders)
+            sources.add(
+                MediaSource(
+                    url = resolved,
+                    type = MediaSourceType.PROGRESSIVE_MP4,
+                    mimeType = "video/mp4",
+                    quality = "720p",
+                    headersRequired = headers
+                )
+            )
+        }
+        return sources
+    }
+
+    private suspend fun resolveDrTuberMedia(detailUrl: String): Result<List<MediaSource>> {
+        val vidId = Regex("""(?:/video/|/play/|/download/)(\d+)""").find(detailUrl)?.groupValues?.get(1)
+            ?: Regex("""\b(\d{5,})\b""").find(detailUrl)?.groupValues?.get(1)
+
+        val fullUrl = resolveUrl(detailUrl)
+        val host = try { URI(activeBaseUrl).host ?: "m.drtuber.desi" } catch (e: Exception) { "m.drtuber.desi" }
+        val effectiveHost = if (host.startsWith("m.")) host else if (host.contains("drtuber")) "m.$host" else "m.drtuber.desi"
+        val playUrl = if (vidId != null) "https://$effectiveHost/play/$vidId" else if (fullUrl.contains("?")) "$fullUrl&play=mp4" else "$fullUrl?play=mp4"
+
+        try {
+            val playHeaders = mapOf(
+                "User-Agent" to NetworkClient.DEFAULT_USER_AGENT,
+                "Referer" to fullUrl
+            )
+            val playHtml = NetworkClient.fetchString(playUrl, headers = playHeaders)
+            val sources = extractDrTuberMediaSources(playHtml, playUrl)
+            if (sources.isNotEmpty()) {
+                return Result.success(sources)
+            }
+        } catch (e: Exception) {
+            StreamHubLogger.w("HtmlSelectorAdapter", "DrTuber /play/ fetch failed: ${e.message}")
+        }
+
+        if (vidId != null) {
+            try {
+                val dlUrl = "https://$effectiveHost/download/$vidId"
+                val dlHtml = NetworkClient.fetchString(dlUrl, headers = mapOf("Referer" to fullUrl))
+                val sources = extractDrTuberMediaSources(dlHtml, dlUrl)
+                if (sources.isNotEmpty()) {
+                    return Result.success(sources)
+                }
+            } catch (e: Exception) {
+                StreamHubLogger.w("HtmlSelectorAdapter", "DrTuber /download/ fetch failed: ${e.message}")
+            }
+        }
+
+        return Result.failure(StreamHubError.PlaybackError(404, "Failed to resolve full DrTuber stream for $detailUrl"))
+    }
+
+    internal fun extractDrTuberMediaSources(html: String, pageUrl: String): List<MediaSource> {
+        val doc = Jsoup.parse(html, "https://m.drtuber.desi")
+        val defaultHeaders = mapOf(
+            "User-Agent" to NetworkClient.DEFAULT_USER_AGENT,
+            "Referer" to "https://m.drtuber.desi/",
+            "Origin" to "https://m.drtuber.desi"
+        )
+
+        val sources = mutableListOf<MediaSource>()
+
+        val directLink = doc.select("a[data-adv_play][href*='.mp4'], #download_page a[href*='.mp4'], a.b_link[href*='.mp4'], a[href*='drtuber.desi/mp4/'], a[href*='drtuber.com/mp4/'], a[href*='.mp4']").firstOrNull { el ->
+            val href = el.attr("href")
+            href.contains(".mp4") && !href.contains("/media/videos/tmb/") && !href.contains("/videos/tmb/") && !href.contains("/tmb/")
+        }?.attr("href")
+
+        val streamUrl = directLink?.ifBlank { null }
+            ?: Regex("""https?://[a-zA-Z0-9_\-\.]*drtuber\.[a-z0-9]+/mp4/[^\s"'<>]+""").find(html)?.value
+            ?: Regex("""https?://[^\s"'<>]+\.mp4\?[^\s"'<>]*""").findAll(html)
+                .map { it.value }
+                .firstOrNull { !it.contains("/media/videos/tmb/") && !it.contains("/videos/tmb/") && !it.contains("/tmb/") }
+
+        if (!streamUrl.isNullOrBlank()) {
+            val resolved = resolveUrl(streamUrl, "https://m.drtuber.desi")
+            val headers = resolveHeadersForStream(resolved, defaultHeaders)
+            sources.add(
+                MediaSource(
+                    url = resolved,
+                    type = MediaSourceType.PROGRESSIVE_MP4,
+                    mimeType = "video/mp4",
+                    quality = "720p",
+                    headersRequired = headers
+                )
+            )
+        }
+
+        return sources
+    }
+
+    private suspend fun resolveAyloMedia(detailUrl: String): Result<List<MediaSource>> {
+        val fullUrl = resolveUrl(detailUrl)
+        val hostBaseUrl = try {
+            val uri = java.net.URI(fullUrl)
+            "${uri.scheme}://${uri.host}"
+        } catch (_: Exception) { activeBaseUrl }
+        return try {
+            val ayloCookies = "age_verified=1; age_verified2=1; yp_verified=1; tube8_verified=1; accessAgeDisclaimerPH=1; platform=pc"
+            val html = NetworkClient.fetchString(fullUrl, headers = mapOf(
+                "Cookie" to ayloCookies,
+                "User-Agent" to NetworkClient.DESKTOP_USER_AGENT
+            ))
+            
+            val sources = mutableListOf<MediaSource>()
+            
+            // Extract mediaDefinitions JSON array from inline script
+            val mediaDefsRegex = Regex(""""mediaDefinitions"\s*:\s*(\[\{.*?\}\])""")
+            val mediaDefsMatch = mediaDefsRegex.find(html)
+            
+            if (mediaDefsMatch != null) {
+                val mediaDefsJson = mediaDefsMatch.groupValues[1]
+                
+                // 1. Direct HLS streams
+                val hlsFormatRegex = Regex("""\{[^}]*"format"\s*:\s*"hls"[^}]*"videoUrl"\s*:\s*"([^"]+)"""")
+                hlsFormatRegex.findAll(mediaDefsJson).forEach { match ->
+                    val rawHls = match.groupValues[1].replace("\\/", "/")
+                    if (rawHls.isNotBlank()) {
+                        val resolvedHls = resolveUrl(rawHls, hostBaseUrl)
+                        sources.add(
+                            MediaSource(
+                                url = resolvedHls,
+                                type = MediaSourceType.HLS,
+                                mimeType = "application/x-mpegURL",
+                                quality = "720p HLS",
+                                resolution = "720p",
+                                format = "HLS",
+                                headersRequired = mapOf(
+                                    "Referer" to fullUrl,
+                                    "Cookie" to ayloCookies,
+                                    "User-Agent" to NetworkClient.DESKTOP_USER_AGENT
+                                )
+                            )
+                        )
+                    }
+                }
+
+                // 2. Progressive MP4 endpoints
+                val mp4FormatRegex = Regex("""\{[^}]*"format"\s*:\s*"mp4"[^}]*"videoUrl"\s*:\s*"([^"]+)"""")
+                val mp4Url = mp4FormatRegex.find(mediaDefsJson)?.groupValues?.get(1)?.replace("\\/", "/")
+                if (mp4Url != null) {
+                    try {
+                        val resolvedMp4Endpoint = resolveUrl(mp4Url, hostBaseUrl)
+                        val mp4JsonStr = NetworkClient.fetchString(resolvedMp4Endpoint, headers = mapOf(
+                            "Cookie" to ayloCookies,
+                            "Referer" to fullUrl,
+                            "User-Agent" to NetworkClient.DESKTOP_USER_AGENT
+                        ))
+                        
+                        val regex = Regex(""""quality"\s*:\s*"?([\w]+)"?.*?,"videoUrl"\s*:\s*"([^"]+)"""")
+                        regex.findAll(mp4JsonStr).forEach { match ->
+                            var qLabel = match.groupValues[1]
+                            if (!qLabel.endsWith("p", ignoreCase = true)) qLabel += "p"
+                            val vUrl = match.groupValues[2].replace("\\/", "/")
+                            if (vUrl.isNotBlank()) {
+                                sources.add(
+                                    MediaSource(
+                                        url = vUrl,
+                                        type = MediaSourceType.PROGRESSIVE_MP4,
+                                        mimeType = "video/mp4",
+                                        quality = qLabel,
+                                        resolution = qLabel,
+                                        format = "MP4",
+                                        headersRequired = mapOf(
+                                            "Referer" to fullUrl,
+                                            "Cookie" to ayloCookies,
+                                            "User-Agent" to NetworkClient.DESKTOP_USER_AGENT
+                                        )
+                                    )
+                                )
+                            }
+                        }
+                    } catch (e: Exception) {
+                        StreamHubLogger.w("HtmlSelectorAdapter", "Failed to fetch secondary Aylo mp4 endpoint: ${e.message}")
+                    }
+                }
+            }
+            
+            if (sources.isNotEmpty()) {
+                sources.sortByDescending { it.quality.replace("p", "").toIntOrNull() ?: 0 }
+                Result.success(sources.distinctBy { it.quality })
+            } else {
+                // fallback to default parser
+                val parsed = parsePlayableMediaHtml(html, fullUrl).getOrNull()
+                if (!parsed.isNullOrEmpty()) {
+                    Result.success(parsed)
+                } else {
+                    Result.failure(StreamHubError.PlaybackError(404, "No Aylo media sources found for $hostBaseUrl"))
+                }
+            }
+        } catch (e: Exception) {
+            StreamHubLogger.w("HtmlSelectorAdapter", "Aylo resolver failed: ${e.message}")
+            // Final fallback to HTML parser before failing
+            val fallback = try {
+                val fallbackHtml = NetworkClient.fetchString(fullUrl)
+                parsePlayableMediaHtml(fallbackHtml, fullUrl).getOrNull()
+            } catch (_: Exception) { null }
+            if (!fallback.isNullOrEmpty()) {
+                Result.success(fallback)
+            } else {
+                Result.failure(StreamHubError.PlaybackError(500, "Failed to resolve Aylo media: ${e.message}", e))
+            }
+        }
+    }
+
+    private suspend fun resolveXhamsterMedia(detailUrl: String): Result<List<MediaSource>> {
+        val fullUrl = resolveUrl(detailUrl)
+        return try {
+            val html = NetworkClient.fetchString(fullUrl, headers = mapOf(
+                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                "Cookie" to "age_verified=1"
+            ))
+            
+            val sources = mutableListOf<MediaSource>()
+            
+            val initialsRegex = Regex("""window\.initials\s*=\s*(\{.+?\});\s*</script>""", RegexOption.DOT_MATCHES_ALL)
+            val match = initialsRegex.find(html)
+            if (match != null) {
+                val jsonStr = match.groupValues[1]
+                val urlRegex = Regex(""""(\d+p)"\s*:\s*"([^"]+\.mp4[^"]*)"""")
+                val xhHeaders = mapOf(
+                    "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+                    "Referer" to "https://xhamster.desi/",
+                    "Origin" to "https://xhamster.desi"
+                )
+                urlRegex.findAll(jsonStr).forEach { uMatch ->
+                    val cleanUrl = uMatch.groupValues[2].replace("\\/", "/").replace("\\u0026", "&").replace("\\u003D", "=")
+                    val q = uMatch.groupValues[1]
+                    sources.add(
+                        MediaSource(
+                            url = cleanUrl,
+                            type = MediaSourceType.PROGRESSIVE_MP4,
+                            mimeType = "video/mp4",
+                            quality = q,
+                            resolution = q,
+                            headersRequired = xhHeaders
+                        )
+                    )
+                }
+            }
+            
+            if (sources.isNotEmpty()) {
+                sources.sortByDescending { it.quality.replace("p", "").toIntOrNull() ?: 0 }
+                Result.success(sources.distinctBy { it.quality })
+            } else {
+                val parsed = parsePlayableMediaHtml(html, fullUrl).getOrNull()
+                if (!parsed.isNullOrEmpty()) {
+                    Result.success(parsed)
+                } else {
+                    Result.failure(StreamHubError.PlaybackError(404, "No xHamster media sources found"))
+                }
+            }
+        } catch (e: Exception) {
+            StreamHubLogger.w("HtmlSelectorAdapter", "xHamster resolver failed: ${e.message}")
+            Result.failure(StreamHubError.PlaybackError(500, "Failed to resolve xHamster media: ${e.message}", e))
+        }
+    }
+
+    private suspend fun resolveSpankBangMedia(detailUrl: String): Result<List<MediaSource>> {
+        val fullUrl = resolveUrl(detailUrl)
+        return try {
+            val html = NetworkClient.fetchString(fullUrl, headers = mapOf(
+                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                "Cookie" to "country=US"
+            ))
+            
+            val sources = mutableListOf<MediaSource>()
+            
+            // Method 1: Extract stream_data JSON
+            val streamDataRegex = Regex("""var\s+stream_data\s*=\s*(\{[^;]+\})""", RegexOption.DOT_MATCHES_ALL)
+            val sdMatch = streamDataRegex.find(html)
+            if (sdMatch != null) {
+                val sdJson = sdMatch.groupValues[1]
+                val qualityUrlRegex = Regex("""["'](\d+p)["']\s*:\s*\[?["']([^"']+\.(?:m3u8|mp4)[^"']*)["']""")
+                qualityUrlRegex.findAll(sdJson).forEach { qMatch ->
+                    val quality = qMatch.groupValues[1]
+                    val url = qMatch.groupValues[2].replace("\\/", "/")
+                    if (url.isNotBlank()) {
+                        val type = if (url.contains(".m3u8")) MediaSourceType.HLS else MediaSourceType.PROGRESSIVE_MP4
+                        val mime = if (url.contains(".m3u8")) "application/vnd.apple.mpegurl" else "video/mp4"
+                        sources.add(MediaSource(url = url, type = type, mimeType = mime, quality = quality))
+                    }
+                }
+            }
+            
+            // Method 2: Extract stream_url_<quality> variables
+            val streamUrlRegex = Regex("""stream_url_(\d+p)\s*=\s*["']([^"']+)["']""")
+            streamUrlRegex.findAll(html).forEach { sMatch ->
+                val quality = sMatch.groupValues[1]
+                val url = sMatch.groupValues[2].replace("\\/", "/")
+                if (url.isNotBlank() && sources.none { it.quality == quality }) {
+                    val type = if (url.contains(".m3u8")) MediaSourceType.HLS else MediaSourceType.PROGRESSIVE_MP4
+                    val mime = if (url.contains(".m3u8")) "application/vnd.apple.mpegurl" else "video/mp4"
+                    sources.add(MediaSource(url = url, type = type, mimeType = mime, quality = quality))
+                }
+            }
+            
+            // Method 3: Direct m3u8/mp4 from source tags or meta
+            if (sources.isEmpty()) {
+                val directRegex = Regex("""(https?://[^"'\s]+\.(?:m3u8|mp4)[^"'\s]*)""")
+                directRegex.findAll(html).forEach { dMatch ->
+                    val url = dMatch.groupValues[1]
+                    if (!url.contains("thumb") && !url.contains("preview") && !url.contains("poster")) {
+                        val type = if (url.contains(".m3u8")) MediaSourceType.HLS else MediaSourceType.PROGRESSIVE_MP4
+                        val mime = if (url.contains(".m3u8")) "application/vnd.apple.mpegurl" else "video/mp4"
+                        sources.add(MediaSource(url = url, type = type, mimeType = mime, quality = "auto"))
+                    }
+                }
+            }
+            
+            if (sources.isNotEmpty()) {
+                sources.sortByDescending { it.quality.replace("p", "").toIntOrNull() ?: 0 }
+                Result.success(sources.distinctBy { it.url })
+            } else {
+                val parsed = parsePlayableMediaHtml(html, fullUrl).getOrNull()
+                if (!parsed.isNullOrEmpty()) {
+                    Result.success(parsed)
+                } else {
+                    Result.failure(StreamHubError.PlaybackError(404, "No SpankBang media sources found"))
+                }
+            }
+        } catch (e: Exception) {
+            StreamHubLogger.w("HtmlSelectorAdapter", "SpankBang resolver failed: ${e.message}")
+            Result.failure(StreamHubError.PlaybackError(500, "Failed to resolve SpankBang media: ${e.message}", e))
+        }
+    }
+
+    private suspend fun resolveFreeonesMedia(detailUrl: String): Result<List<MediaSource>> {
+        val fullUrl = resolveUrl(detailUrl)
+        return try {
+            val html = NetworkClient.fetchString(fullUrl, headers = mapOf(
+                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            ))
+            
+            val sources = mutableListOf<MediaSource>()
+            
+            // Method 1: Extract sources array from VideoJS config in inline script
+            // Pattern: sources: [{"label":"1080p","res":1080,"src":"https:\/\/...","type":"video\/mp4"}, ...]
+            val sourcesRegex = Regex("""sources\s*:\s*(\[\{.*?\}\])""", RegexOption.DOT_MATCHES_ALL)
+            val match = sourcesRegex.find(html)
+            if (match != null) {
+                val sourcesJson = match.groupValues[1]
+                val entryRegex = Regex("""\{[^}]*"label"\s*:\s*"([^"]+)"[^}]*"src"\s*:\s*"([^"]+)"[^}]*"type"\s*:\s*"([^"]+)"[^}]*\}""")
+                entryRegex.findAll(sourcesJson).forEach { entry ->
+                    val label = entry.groupValues[1]
+                    val src = entry.groupValues[2].replace("\\/", "/")
+                    val mimeType = entry.groupValues[3].replace("\\/", "/")
+                    if (src.isNotBlank()) {
+                        val type = if (src.contains(".m3u8")) MediaSourceType.HLS else MediaSourceType.PROGRESSIVE_MP4
+                        sources.add(MediaSource(url = src, type = type, mimeType = mimeType, quality = label))
+                    }
+                }
+            }
+            
+            // Method 2: Fallback to meta[itemprop='contentURL']
+            if (sources.isEmpty()) {
+                val contentUrlRegex = Regex("""<meta\s+itemprop="contentURL"\s+content="([^"]+)"""")
+                val cuMatch = contentUrlRegex.find(html)
+                if (cuMatch != null) {
+                    val url = cuMatch.groupValues[1]
+                    sources.add(MediaSource(url = url, type = MediaSourceType.PROGRESSIVE_MP4, mimeType = "video/mp4", quality = "auto"))
+                }
+            }
+            
+            if (sources.isNotEmpty()) {
+                sources.sortByDescending { it.quality.replace("p", "").toIntOrNull() ?: 0 }
+                Result.success(sources.distinctBy { it.url })
+            } else {
+                val parsed = parsePlayableMediaHtml(html, fullUrl).getOrNull()
+                if (!parsed.isNullOrEmpty()) {
+                    Result.success(parsed)
+                } else {
+                    Result.failure(StreamHubError.PlaybackError(404, "No FreeOnesTube media sources found"))
+                }
+            }
+        } catch (e: Exception) {
+            StreamHubLogger.w("HtmlSelectorAdapter", "FreeOnesTube resolver failed: ${e.message}")
+            Result.failure(StreamHubError.PlaybackError(500, "Failed to resolve FreeOnesTube media: ${e.message}", e))
+        }
+    }
 }
+

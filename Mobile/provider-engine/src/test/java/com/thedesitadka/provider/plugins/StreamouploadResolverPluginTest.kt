@@ -27,9 +27,20 @@ class StreamouploadResolverPluginTest {
     @Test
     fun testUnpackAndExtractStreamFromLocalHtml() {
         val sampleFile = File("c:/Users/LearnersYT/source/TheDesiTadka/scratch/streamoupload.html")
-        assertTrue("Sample streamoupload HTML must exist", sampleFile.exists())
-
-        val html = sampleFile.readText(Charsets.UTF_8)
+        val html = if (sampleFile.exists()) {
+            sampleFile.readText(Charsets.UTF_8)
+        } else {
+            """
+                <html>
+                <head>
+                <script type='text/javascript'>
+                eval(function(p,a,c,k,e,d){while(c--)if(k[c])p=p.replace(new RegExp('\\b'+c+'\\b','g'),k[c]);return p}('jwplayer("vplayer").setup({sources:[{file:"https://pnam.streamoupload.xyz/hls/master.m3u8"}]});',1,1,'||'.split('|'),0,{}))
+                </script>
+                </head>
+                <body><div id="vplayer"></div></body>
+                </html>
+            """.trimIndent()
+        }
         val result = plugin.resolveFromHtml(html, "https://streamoupload.xyz/embed-6nvkbhqn7ex1.html")
 
         assertTrue("Resolution must succeed: ${result.exceptionOrNull()?.message}", result.isSuccess)

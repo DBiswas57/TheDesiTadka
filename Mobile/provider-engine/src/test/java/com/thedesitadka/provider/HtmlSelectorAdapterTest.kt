@@ -1253,6 +1253,70 @@ class HtmlSelectorAdapterTest {
         assertEquals("https://chiggywiggy.com/vfile/11002/13074/1/61f01f87855f330c0334/1789714212/mp4/11002_480p.mp4", media[0].url)
         assertEquals(MediaSourceType.PROGRESSIVE_MP4, media[0].type)
     }
+
+    @Test
+    fun testChiggyWiggyIntInLuluEmbed() {
+        val config = ProviderConfig(
+            id = "chiggywiggy",
+            name = "ChiggyWiggy",
+            baseUrl = "https://chiggywiggy.int.in",
+            adapter = "html_selector",
+            selectors = SelectorConfig(
+                item = "article.loop-video, article.thumb-block, article.video-preview-item, article",
+                title = "header.entry-header h2 a, h2.entry-title a, h2 a, a[title]",
+                thumbnail = "img[src], img[data-src]",
+                detailUrl = "a",
+                duration = "span.duration, .badge-duration",
+                detailTitle = "h1.entry-title, h1",
+                player = "iframe[src*='lulust'], iframe[src*='lulu']",
+                videoSource = "iframe[src*='lulust'], iframe[src*='lulu']"
+            )
+        )
+        val adapter = HtmlSelectorAdapter(config)
+
+        // 1. Listing test
+        val listingHtml = """
+            <div class="content-loop">
+                <article class="loop-video">
+                    <a href="https://chiggywiggy.int.in/horny-school-teacher-sex-student-bathroom-free/">
+                        <img src="https://chiggywiggy.int.in/wp-content/uploads/thumb.jpg" alt="Teacher Sex" />
+                        <span class="duration">12:34</span>
+                    </a>
+                    <header class="entry-header">
+                        <h2><a href="https://chiggywiggy.int.in/horny-school-teacher-sex-student-bathroom-free/">Teacher Sex</a></h2>
+                    </header>
+                </article>
+            </div>
+        """.trimIndent()
+        val feedPage = adapter.parseListingHtml(listingHtml, 1).getOrThrow()
+        assertEquals(1, feedPage.items.size)
+        assertEquals("Teacher Sex", feedPage.items[0].title)
+        assertEquals("https://chiggywiggy.int.in/horny-school-teacher-sex-student-bathroom-free/", feedPage.items[0].detailUrl)
+
+        // 2. Detail & HostResolverEngine candidate extraction
+        val detailHtml = """
+            <html>
+            <head><title>Teacher Sex - ChiggyWiggy</title></head>
+            <body>
+                <h1 class="entry-title">Teacher Sex</h1>
+                <iframe src="https://lulust.com/e/hjm4rt9n2i3o" frameborder="0"></iframe>
+            </body>
+            </html>
+        """.trimIndent()
+        val doc = org.jsoup.Jsoup.parse(detailHtml, "https://chiggywiggy.int.in/horny-school-teacher-sex-student-bathroom-free/")
+        val candidateHosts = com.thedesitadka.provider.plugins.HostResolverEngine.extractCandidateUrls(doc)
+        assertTrue("HostResolverEngine must detect lulust.com embed", candidateHosts.contains("https://lulust.com/e/hjm4rt9n2i3o"))
+
+        val plugin = com.thedesitadka.provider.plugins.HostResolverEngine.findPluginForUrl("https://lulust.com/e/hjm4rt9n2i3o")
+        assertNotNull(plugin)
+        assertTrue(plugin is com.thedesitadka.provider.plugins.LuluvdoResolverPlugin)
+
+        // 3. Playable media resolution must resolve to direct HLS stream (NOT raw EMBEDDED_WEB)
+        val mediaResult = adapter.parsePlayableMediaHtml(detailHtml, "https://chiggywiggy.int.in/horny-school-teacher-sex-student-bathroom-free/").getOrThrow()
+        assertTrue("Media must be resolved", mediaResult.isNotEmpty())
+        assertEquals(com.thedesitadka.core.model.MediaSourceType.HLS, mediaResult[0].type)
+        assertTrue("Media stream URL must contain master.m3u8: ${mediaResult[0].url}", mediaResult[0].url.contains("master.m3u8"))
+    }
 }
 
 

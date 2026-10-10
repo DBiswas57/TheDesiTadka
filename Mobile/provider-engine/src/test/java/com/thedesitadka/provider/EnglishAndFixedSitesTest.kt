@@ -100,6 +100,67 @@ class EnglishAndFixedSitesTest {
         assertEquals("Desi Bhabhi Romantic MMS", parsed.items[0].title)
         assertEquals("https://www.mykamababa.com/desi-bhabhi-romantic-clip/", parsed.items[0].detailUrl)
         assertEquals("https://www.mykamababa.com/thumbs/1.jpg", parsed.items[0].thumbnailUrl)
+
+        // 3. Test Categories parsing on /categories/ HTML
+        val sampleKamaCategoriesHtml = """
+            <div class="videos-list">
+                <article class="thumb-block post-37418">
+                    <a href="https://www.mykamababa.com/category/actress/" title="Actress">
+                        <div class="post-thumbnail">
+                            <img src="https://www.mykamababa.com/wp-content/uploads/2023/04/Indian-actress-Sunny-Leone-sex-video-320x180.jpg" alt="Indian actress Sunny Leone sex video" />
+                        </div>
+                        <header class="entry-header">
+                            <span class="cat-title">Actress</span>
+                        </header>
+                    </a>
+                </article>
+                <article class="thumb-block post-37419">
+                    <a href="https://www.mykamababa.com/category/anal/" title="Anal">
+                        <div class="post-thumbnail">
+                            <img src="https://www.mykamababa.com/wp-content/uploads/2020/07/Indian-anal-fuck-with-sexy-ass-desi-320x180.jpg" alt="Indian anal fuck" />
+                        </div>
+                        <header class="entry-header">
+                            <span class="cat-title">Anal</span>
+                        </header>
+                    </a>
+                </article>
+            </div>
+        """.trimIndent()
+
+        val parsedCats = adapter.parseCategoriesHtml(sampleKamaCategoriesHtml)
+        assertEquals(2, parsedCats.size)
+        assertEquals("Actress", parsedCats[0].name)
+        assertEquals("https://www.mykamababa.com/category/actress/", parsedCats[0].url)
+        assertEquals("Anal", parsedCats[1].name)
+        assertEquals("https://www.mykamababa.com/category/anal/", parsedCats[1].url)
+
+        // 4. Test Category pagination URL building
+        val catPage1 = "https://www.mykamababa.com/category/actress/"
+        val catPage2 = adapter.buildPagedUrl(catPage1, 2)
+        assertEquals("https://www.mykamababa.com/category/actress/page/2/", catPage2)
+
+        // 5. Test Media Source extraction from meta contentURL and player-x embed
+        val sampleKamaDetailHtml = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Guy fucks GF - KamaBaba</title>
+                <meta itemprop="contentURL" content="https://cdn.mykamababa.com/2026/09/Guy-fucks-GF.mp4" />
+            </head>
+            <body>
+                <iframe src="https://www.mykamababa.com/wp-content/plugins/clean-tube-player/public/player-x.php?q=cG9zdF9pZD05NTU4NyZ0eXBlPXZpZGVvJnRhZz0lM0N2aWRlbyUyMGlkJTNEJTIyd3BzdC12aWRlbyUyMiUyMGNsYXNzJTNEJTIydmlkZW8tanMlMjB2anMtYmlnLXBsYXktY2VudGVyZWQlMjIlMjBjb250cm9scyUyMHByZWxvYWQlM0QlMjJhdXRvJTIyJTIwd2lkdGglM0QlMjI2NDAlMjIlMjBoZWlnaHQlM0QlMjIyNjQlMjIlMjBwb3N0ZXIlM0QlMjJodHRwcyUzQSUyRiUyRnd3dy5teWthbWFiYWJhLmNvbSUyRndwLWNvbnRlbnQlMkZ1cGxvYWRzJTJGMjAyNiUyRjA5JTJGR3V5LWZ1Y2tzLUdGLWFuZC1tYWtlcy1oZXItZHJpbmstY3VtLWluLWFuLUluZGlhbi1zZXgtdmlkZW8uanBnJTIyJTNFJTNDc291cmNlJTIwc3JjJTNEJTIyaHR0cHMlM0ElMkYlMkZjZG4ubXlrYW1hYmFiYS5jb20lMkYyMDI2JTJGMDklMkZHdXktZnVja3MtR0YtYW5kLW1ha2VzLWhlci1kcmluay1jdW0taW4tYW4tSW5kaWFuLXNleC12aWRlby5tcDQlMjIlMjB0eXBlJTNEJTIydmlkZW8lMkZtcDQlMjIlM0UlM0MlMkZ2aWRlbyUzRQ=="></iframe>
+                <iframe src="https://a.videobaba.xyz/OX/KMB/d-kmb.php?spot=VDOB"></iframe>
+            </body>
+            </html>
+        """.trimIndent()
+
+        val mediaResult = adapter.parsePlayableMediaHtml(sampleKamaDetailHtml, "https://www.mykamababa.com/girl-fucks-and-drink-cum/")
+        assertTrue("Media parsing must succeed", mediaResult.isSuccess)
+        val sources = mediaResult.getOrThrow()
+        assertTrue("Media sources must not be empty", sources.isNotEmpty())
+        assertTrue("Stream must point to cdn.mykamababa.com MP4", sources.any { it.url.contains("cdn.mykamababa.com") && it.url.endsWith(".mp4") })
+        val kamaSource = sources.first { it.url.contains("cdn.mykamababa.com") }
+        assertEquals("https://www.mykamababa.com/", kamaSource.headersRequired["Referer"])
     }
 
     @Test
@@ -377,4 +438,90 @@ class EnglishAndFixedSitesTest {
             assertTrue("Must detect vixeo.io embed iframe in detail page", candidateEmbeds.any { it.contains("vixeo.io/e/") })
         }
     }
+
+    @Test
+    fun testXnxxXvideosAndFreeOnesMenuDetection() {
+        // 1. XVideos Category Detection (/c/ pattern)
+        val xvConfig = ProviderConfig(
+            id = "xvideos",
+            name = "XVideos",
+            baseUrl = "https://www.xvideos.com",
+            adapter = "html_selector"
+        )
+        val xvAdapter = HtmlSelectorAdapter(xvConfig)
+        val sampleXvideosMenuHtml = """
+            <nav>
+                <a href="/c/AI-239">AI</a>
+                <a href="/c/Amateur-65">Amateur</a>
+                <a href="/c/Anal-12">Anal</a>
+                <a href="/c/Big_Ass-24">Big Ass</a>
+            </nav>
+        """.trimIndent()
+        val xvCats = xvAdapter.parseCategoriesHtml(sampleXvideosMenuHtml)
+        assertEquals(4, xvCats.size)
+        assertEquals("AI", xvCats[0].name)
+        assertEquals("Amateur-65", xvCats[1].id)
+        assertEquals("Amateur", xvCats[1].name)
+        assertEquals("https://www.xvideos.com/c/Amateur-65", xvCats[1].url)
+
+        // 2. XNXX Menu Category Detection (#header /search/ and /tags)
+        val xnxxConfig = ProviderConfig(
+            id = "xnxx",
+            name = "XNXX",
+            baseUrl = "https://www.xnxx.com",
+            adapter = "html_selector"
+        )
+        val xnxxAdapter = HtmlSelectorAdapter(xnxxConfig)
+        val sampleXnxxMenuHtml = """
+            <div id="header">
+                <a href="/search/milf">Milf</a>
+                <a href="/search/anal">Anal Sex</a>
+                <a href="/search/indian">India / Indian girls</a>
+                <a href="/tags">Tags</a>
+            </div>
+        """.trimIndent()
+        val xnxxCats = xnxxAdapter.parseCategoriesHtml(sampleXnxxMenuHtml)
+        assertEquals(4, xnxxCats.size)
+        assertEquals("Milf", xnxxCats[0].name)
+        assertEquals("milf", xnxxCats[0].id)
+        assertEquals("https://www.xnxx.com/search/milf", xnxxCats[0].url)
+        assertEquals("India / Indian girls", xnxxCats[2].name)
+        assertEquals("indian", xnxxCats[2].id)
+
+        // 3. FreeOnesTube Category Name from title attribute and Pagination
+        val freeonesConfig = ProviderConfig(
+            id = "freeonestube",
+            name = "FreeOnes Tube",
+            baseUrl = "https://freeonestube.com",
+            adapter = "html_selector"
+        )
+        val freeonesAdapter = HtmlSelectorAdapter(freeonesConfig)
+        val sampleFreeonesCatHtml = """
+            <div class="categories-list">
+                <a class="thumb" href="https://freeonestube.com/category/hardcore/" title="Hardcore">
+                    <img class="video-img" src="https://thumbs.freeones.com/photo/123.jpg" />
+                </a>
+                <a class="infos" href="https://freeonestube.com/category/hardcore/" title="">
+                    <span class="title">Hardcore</span>
+                </a>
+                <a class="thumb" href="https://freeonestube.com/category/blowjobs/" title="Blowjobs">
+                    <img class="video-img" src="https://thumbs.freeones.com/photo/456.jpg" />
+                </a>
+            </div>
+        """.trimIndent()
+        val freeonesCats = freeonesAdapter.parseCategoriesHtml(sampleFreeonesCatHtml)
+        assertEquals(2, freeonesCats.size)
+        assertEquals("Hardcore", freeonesCats[0].name)
+        assertEquals("https://freeonestube.com/category/hardcore/", freeonesCats[0].url)
+        assertEquals("Blowjobs", freeonesCats[1].name)
+        assertEquals("https://freeonestube.com/category/blowjobs/", freeonesCats[1].url)
+
+        // 4. FreeOnesTube Category Pagination
+        val catPage1 = "https://freeonestube.com/category/hardcore/"
+        val catPage2 = freeonesAdapter.buildPagedUrl(catPage1, 2)
+        assertEquals("https://freeonestube.com/category/hardcore/page/2/", catPage2)
+        val catPage3 = freeonesAdapter.buildPagedUrl(catPage2, 3)
+        assertEquals("https://freeonestube.com/category/hardcore/page/3/", catPage3)
+    }
 }
+

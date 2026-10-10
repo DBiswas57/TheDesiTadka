@@ -12,6 +12,7 @@ data class ProviderManifest(
     val recommendedAppVersion: Int = 1,
     val forceUpdate: Boolean = false,
     val maintenanceMode: Boolean = false,
+    val adminNotice: AdminNotice? = null,
     val providers: List<ProviderConfig> = emptyList()
 )
 
@@ -31,7 +32,8 @@ data class ProviderConfig(
     val contentPolicy: ContentPolicy? = null,
     val domains: List<String> = emptyList(),
     val familyId: String? = null,
-    val validationMarker: String? = null
+    val validationMarker: String? = null,
+    val useProxy: Boolean = false
 )
 
 @Serializable

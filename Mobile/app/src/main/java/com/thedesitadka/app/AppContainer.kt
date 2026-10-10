@@ -1,12 +1,14 @@
 package com.thedesitadka.app
 
 import android.content.Context
+import com.thedesitadka.app.data.AdminNoticeRepository
 import com.thedesitadka.app.data.DashboardRepository
 import com.thedesitadka.app.download.DownloadRepository
 import com.thedesitadka.app.storage.AppDatabase
 import com.thedesitadka.app.storage.PreferenceStore
 import com.thedesitadka.core.config.ConfigCache
 import com.thedesitadka.core.config.ConfigRepository
+import com.thedesitadka.core.model.AdminNotice
 import com.thedesitadka.core.model.ContentPolicy
 import com.thedesitadka.core.model.NavigationConfig
 import com.thedesitadka.core.model.ProviderCapability
@@ -52,6 +54,10 @@ class AppContainer(val context: Context) {
         AdConfigRepository(context)
     }
 
+    val adminNoticeRepository: AdminNoticeRepository by lazy {
+        AdminNoticeRepository(context, preferenceStore, configRepository)
+    }
+
     val monetizationManager: MonetizationManager by lazy {
         MonetizationManager(context, adConfigRepository)
     }
@@ -85,9 +91,27 @@ class AppContainer(val context: Context) {
             return false
         }
 
-        // 2. Validate configuration against installed app version
+        // 2. Validate configuration against installed app version & release tracking
         val defaultManifest = getDefaultManifest()
-        val current = configCache.loadCurrent()
+        val releasePrefs = context.getSharedPreferences("app_release_state", android.content.Context.MODE_PRIVATE)
+        val lastSeenVersionCode = releasePrefs.getInt("last_seen_version_code", -1)
+        val lastSeenConfigVersion = releasePrefs.getInt("last_seen_config_version", -1)
+        val currentVersionCode = BuildConfig.VERSION_CODE
+        val isNewRelease = lastSeenVersionCode != currentVersionCode || lastSeenConfigVersion < defaultManifest.configVersion
+
+        if (isNewRelease) {
+            StreamHubLogger.i("AppContainer", "New release detected (app: $lastSeenVersionCode -> $currentVersionCode, config: $lastSeenConfigVersion -> ${defaultManifest.configVersion}). Purging all stale caches.")
+            configCache.clear()
+            com.thedesitadka.app.storage.NavigationStateStore.clearAll()
+            com.thedesitadka.core.network.CloudflareHtmlCache.clear()
+            try { dashboardRepository.clearCache() } catch (_: Exception) {}
+            releasePrefs.edit()
+                .putInt("last_seen_version_code", currentVersionCode)
+                .putInt("last_seen_config_version", defaultManifest.configVersion)
+                .apply()
+        }
+
+        val current = if (isNewRelease) null else configCache.loadCurrent()
         val candidate = if (current == null || current.configVersion < defaultManifest.configVersion || current.providers.size < defaultManifest.providers.size) {
             defaultManifest
         } else {
@@ -118,11 +142,20 @@ class AppContainer(val context: Context) {
         fun createDefaultManifest(): ProviderManifest {
         return ProviderManifest(
             schemaVersion = 1,
-            configVersion = 163,
+            configVersion = 174,
             minimumAppVersion = 4,
             forceUpdate = true,
             generatedAt = System.currentTimeMillis(),
             expiresAt = System.currentTimeMillis() + (365L * 24 * 3600 * 1000),
+            adminNotice = AdminNotice(
+                id = "notice_2026_10_08_swipe_downloads",
+                title = "Welcome to TheDesiTadka Update!",
+                message = "We have added exciting new features:\n\n• Swipe Gestures: Easily swipe left or right on the video page and player to jump to the next or previous video.\n• Easy Downloads: Tap the new Downloads icon or status bar on video details to monitor active downloads in real time and return seamlessly.\n• Admin Notice System: Stay informed on regular server updates and new features.",
+                date = "2026-10-08",
+                dismissible = true,
+                showOnce = true,
+                enabled = true
+            ),
             providers = listOf(
                 // 1. KamaBaba
                 ProviderConfig(
@@ -145,7 +178,8 @@ class AppContainer(val context: Context) {
                     navigation = NavigationConfig(
                         home = "/?filter=latest",
                         search = "/?s={query}",
-                        page = "/page/{page}/?filter=latest"
+                        page = "/page/{page}/?filter=latest",
+                        categories = "/categories/"
                     ),
                     selectors = SelectorConfig(
                         item = "article.thumb-block, article.video-preview-item, article",
@@ -158,7 +192,7 @@ class AppContainer(val context: Context) {
                         detailDescription = ".entry-content p, .video-details, p",
                         detailThumbnail = "meta[property='og:image'], img.video-main-thumb",
                         player = "iframe[src*='player']",
-                        videoSource = "meta[itemprop='contentURL'], video source[src], video[src], source[type='video/mp4']",
+                        videoSource = "meta[itemprop*='contentUrl'], meta[itemprop*='contentURL'], iframe[src*='player-x'], video source[src], video[src], source[type='video/mp4']",
                         videoSourceAttr = "src"
                     ),
                     contentPolicy = ContentPolicy(
@@ -291,15 +325,15 @@ class AppContainer(val context: Context) {
                         disclaimer = "Aggregated public media feed."
                     )
                 ),
-                // 5. AagMaal (AagMaal.Date / AagMaal.Run - WordPress Tube)
+                // 5. AagMaal (AagMaal.Webcam / AagMaal.Dates / AagMaal.Date / AagMaal.Run - WordPress Tube)
                 ProviderConfig(
                     id = "aagmaal",
                     familyId = "aagmaal_date_family",
-                    domains = listOf("https://aagmaal.date", "https://aagmaal.run"),
+                    domains = listOf("https://aagmaal.webcam", "https://aagmaal.dates", "https://aagmaal.date", "https://aagmaal.run"),
                     validationMarker = "aagmaal",
                     name = "AagMaal",
                     enabled = true,
-                    baseUrl = "https://aagmaal.date",
+                    baseUrl = "https://aagmaal.webcam",
                     adapter = "html_selector",
                     capabilities = listOf(
                         ProviderCapability.HOME,
@@ -318,8 +352,8 @@ class AppContainer(val context: Context) {
                     selectors = SelectorConfig(
                         item = "article.thumb-block, article.loop-video, article.post, article",
                         title = "header.entry-header a, h2.entry-title a, h2 a, a[title], .cat-title",
-                        thumbnail = "img",
-                        thumbnailAttr = "src",
+                        thumbnail = "img[data-src], img[data-lazy-src], img[data-original], img[data-webp], img[src], img",
+                        thumbnailAttr = "data-src, data-lazy-src, data-original, data-webp, src",
                         detailUrl = "header.entry-header a, a.thumb-pop, h2.entry-title a, a[title], a",
                         duration = ".duration, span.hd, .thumb-block span",
                         detailTitle = "h1.entry-title, h1",
@@ -684,11 +718,11 @@ class AppContainer(val context: Context) {
                 ProviderConfig(
                     id = "uncutmaza",
                     familyId = "clean_tube_family",
-                    domains = listOf("https://uncutmaza.cc"),
+                    domains = listOf("https://uncutmaza.movie", "https://uncutmaza.io", "https://uncutmaza.cc"),
                     validationMarker = "uncutmaza",
                     name = "UncutMaza",
                     enabled = true,
-                    baseUrl = "https://uncutmaza.cc",
+                    baseUrl = "https://uncutmaza.movie",
                     adapter = "html_selector",
                     capabilities = listOf(
                         ProviderCapability.HOME,
@@ -701,22 +735,22 @@ class AppContainer(val context: Context) {
                     navigation = NavigationConfig(
                         home = "/",
                         search = "/?s={query}",
-                        page = "/page/{page}"
+                        page = "/page/{page}/"
                     ),
                     selectors = SelectorConfig(
-                        item = "article.thumb-block",
-                        title = "h2.entry-title a, h2 a, a[title]",
-                        thumbnail = "img",
-                        thumbnailAttr = "src",
-                        detailUrl = "h2.entry-title a, h2 a, a",
-                        duration = ".duration",
-                        detailTitle = "h1",
-                        detailDescription = ".entry-content p, .video-details",
+                        item = "div.videos a, article.thumb-block, article, div.post, div.item",
+                        title = "h2.entry-title a, h2 a, a[title], div.title, .video-title",
+                        thumbnail = "img[data-src], img[src], img",
+                        thumbnailAttr = "data-src, src",
+                        detailUrl = "this",
+                        duration = "span.dur, .badge-duration, .duration",
+                        detailTitle = "h1.entry-title, h1",
+                        detailDescription = ".entry-content p, .video-details, p",
                         detailThumbnail = "meta[property='og:image'], img",
-                        player = "iframe[src*='player']",
-                        videoSource = "meta[itemprop='contentUrl'], meta[itemprop='contentURL'], video source[src], video[src], source[type='video/mp4']",
+                        player = "video, iframe, div.xplayer",
+                        videoSource = "video source[src], video[src], source[type='video/mp4'], meta[itemprop='contentUrl']",
                         videoSourceAttr = "src",
-                        relatedItems = ".under-video-block article, article.thumb-block"
+                        relatedItems = ".under-video-block article, article.thumb-block, article"
                     ),
                     contentPolicy = ContentPolicy(
                         rightsStatus = "Public Web Index",
@@ -1006,7 +1040,7 @@ class AppContainer(val context: Context) {
                         categories = "/tags"
                     ),
                     selectors = SelectorConfig(
-                        item = "div.thumb-block:not(.thumb-cat), div.thumb-block, div.mozaique > div",
+                        item = "div.thumb-block[id^='video_']",
                         title = ".thumb-under p a[title], .thumb-under a[title], p.title a, .title a, a[title]",
                         thumbnail = "img.thumb, img[data-src], img",
                         thumbnailAttr = "data-src, data-mzl, src",
@@ -1018,7 +1052,7 @@ class AppContainer(val context: Context) {
                         player = "div#html5video, video, iframe",
                         videoSource = "html5player.setVideoHLS, meta[property='og:video:url'], video source[src]",
                         videoSourceAttr = "content, src",
-                        relatedItems = "div.thumb-block:not(.thumb-cat), div.mozaique > div, div.thumb-block"
+                        relatedItems = "div.thumb-block[id^='video_']"
                     ),
                     contentPolicy = ContentPolicy(
                         rightsStatus = "Public Web Index",
@@ -1050,7 +1084,7 @@ class AppContainer(val context: Context) {
                         categories = "/tags"
                     ),
                     selectors = SelectorConfig(
-                        item = "div.thumb-block, div.mozaique > div",
+                        item = "div.thumb-block[id^='video_']",
                         title = ".thumb-under p a[title], .thumb-under a[title], p.title a, a[title]",
                         thumbnail = "img.thumb, img[data-src], img",
                         thumbnailAttr = "data-src, src",
@@ -1172,11 +1206,11 @@ class AppContainer(val context: Context) {
                 ProviderConfig(
                     id = "chiggywiggy",
                     familyId = "direct_cdn_family",
-                    domains = listOf("https://chiggywiggy.com", "https://www.chiggywiggy.com"),
+                    domains = listOf("https://chiggywiggy.int.in", "https://chiggywiggy.cc", "https://chiggywiggy.com"),
                     validationMarker = "chiggywiggy",
                     name = "ChiggyWiggy",
                     enabled = true,
-                    baseUrl = "https://chiggywiggy.com",
+                    baseUrl = "https://chiggywiggy.int.in",
                     adapter = "html_selector",
                     capabilities = listOf(
                         ProviderCapability.HOME,
@@ -1188,22 +1222,22 @@ class AppContainer(val context: Context) {
                     ),
                     navigation = NavigationConfig(
                         home = "/",
-                        search = "/search/video/?s={query}",
-                        page = "/?page={page}",
+                        search = "/?s={query}",
+                        page = "/page/{page}/",
                         categories = "/categories/"
                     ),
                     selectors = SelectorConfig(
-                        item = "div.video-thumb, div.video-preview, .thumb-block",
-                        title = "a[title], img[alt]",
-                        thumbnail = "img.thumb, img",
+                        item = "article.loop-video, article.thumb-block, article.video-preview-item, article, div.video-thumb, div.video-preview, .thumb-block",
+                        title = "header.entry-header h2 a, h2.entry-title a, h2 a, a[title], img[alt]",
+                        thumbnail = "img[src], img[data-src], img.thumb, img",
                         thumbnailAttr = "data-src, src",
                         detailUrl = "a",
-                        duration = ".video-duration, .duration, span.time",
-                        detailTitle = "h1",
-                        detailDescription = ".video-details, .description, p",
+                        duration = "span.duration, .badge-duration, span.time, .video-duration, .duration",
+                        detailTitle = "h1.entry-title, h1",
+                        detailDescription = ".entry-content p, .video-details, .description, p",
                         detailThumbnail = "meta[property='og:image'], img.thumb, img",
-                        player = "video#player, video",
-                        videoSource = "video source[src], video[src], source[type='video/mp4']"
+                        player = "iframe[src*='lulust'], iframe[src*='lulu'], video#player, video, iframe",
+                        videoSource = "video source[src], video[src], source[type='video/mp4'], div[data-url*='.mp4']"
                     ),
                     contentPolicy = ContentPolicy(
                         rightsStatus = "Public Web Index",
@@ -1555,7 +1589,7 @@ class AppContainer(val context: Context) {
                 ProviderConfig(
                     id = "max",
                     familyId = "clean_tube_family",
-                    domains = listOf("https://max.porn", "http://max.porn"),
+                    domains = listOf("https://max.porn", "https://www.max.porn"),
                     validationMarker = "max",
                     name = "MAX.porn",
                     enabled = true,
@@ -1985,7 +2019,7 @@ class AppContainer(val context: Context) {
                 ProviderConfig(
                     id = "pornstars_tube",
                     familyId = "clean_tube_family",
-                    domains = listOf("https://pornstars.tube", "http://pornstars.tube"),
+                    domains = listOf("https://pornstars.tube", "https://www.pornstars.tube"),
                     validationMarker = "pornstars.tube",
                     name = "Pornstars.tube",
                     enabled = true,
@@ -2239,15 +2273,15 @@ class AppContainer(val context: Context) {
                         disclaimer = "Aggregated public media feed."
                     )
                 ),
-                // 50. PRMovies Church
+                // 50. PRMovies Church / PrmoviesM
                 ProviderConfig(
                     id = "prmovies_church",
                     familyId = "cinema_movies_family",
-                    domains = listOf("https://prmovies.church", "https://prmovies.energy"),
+                    domains = listOf("https://prmovies.futbol", "https://prmovies.fotbal", "https://prmovies.football", "https://prmovies.church", "https://prmovies.energy"),
                     validationMarker = "prmovies",
-                    name = "PRMovies Church",
+                    name = "PrmoviesM",
                     enabled = true,
-                    baseUrl = "https://prmovies.church",
+                    baseUrl = "https://prmovies.futbol",
                     adapter = "html_selector",
                     capabilities = listOf(
                         ProviderCapability.HOME,
@@ -2286,11 +2320,11 @@ class AppContainer(val context: Context) {
                 ProviderConfig(
                     id = "pornhub",
                     familyId = "clean_tube_family",
-                    domains = listOf("https://www.pornhub.org", "https://www.pornhub.com", "https://www.pornhub.net"),
+                    domains = listOf("https://www.pornhub.com", "https://www.pornhub.org", "https://www.pornhub.net"),
                     validationMarker = "pornhub",
                     name = "PornHub",
                     enabled = true,
-                    baseUrl = "https://www.pornhub.org",
+                    baseUrl = "https://www.pornhub.com",
                     adapter = "html_selector",
                     capabilities = listOf(
                         ProviderCapability.HOME,
@@ -2307,12 +2341,12 @@ class AppContainer(val context: Context) {
                         categories = "/categories"
                     ),
                     selectors = SelectorConfig(
-                        item = "li.videoBox, .pcVideoListItem",
-                        title = "span.title a[title], .title a, a[title]",
-                        thumbnail = "img[data-src], img[src]",
-                        thumbnailAttr = "data-src, src",
-                        detailUrl = "a[href*='view_video.php'], a.linkVideoThumb",
-                        duration = "var.duration, .duration",
+                        item = "li.videoBox, .pcVideoListItem, .videoblock, ul#videoCategory li, .nf-videos li, div.phimage",
+                        title = "span.title a, .title a, a[title], img[alt]",
+                        thumbnail = "img[data-thumb_url], img[data-src], img[data-mediumthumb], img[src]",
+                        thumbnailAttr = "data-thumb_url, data-src, data-mediumthumb, src",
+                        detailUrl = "a[href*='view_video.php'], a.linkVideoThumb, a[href*='/view_video']",
+                        duration = "var.duration, .duration, span.duration",
                         detailTitle = "h1.title span, h1.title, h1",
                         detailDescription = ".video-description, .user-desc, p",
                         detailThumbnail = "meta[property='og:image'], img",
@@ -2350,10 +2384,10 @@ class AppContainer(val context: Context) {
                         categories = "/categories"
                     ),
                     selectors = SelectorConfig(
-                        item = "[data-video-id], .thumb-list__item.video-thumb",
-                        title = "a[data-video-title], a.video-thumb__image-container[aria-label], .video-thumb-info__name, a[title]",
-                        thumbnail = "img.thumb-image-container__image, img[src]",
-                        thumbnailAttr = "src, data-src",
+                        item = "[data-video-id], .thumb-list__item.video-thumb, .thumb-list__item, article.thumb-list__item, .video-thumb",
+                        title = "a[data-video-title], a.video-thumb__image-container[aria-label], .video-thumb-info__name, a[title], .thumb-image-container__image[alt]",
+                        thumbnail = "img.thumb-image-container__image, img[data-src], img[src]",
+                        thumbnailAttr = "data-src, src",
                         detailUrl = "a[href*='/videos/']",
                         duration = "[data-role='video-duration'], .duration",
                         detailTitle = "h1.page-title, h1",
@@ -2430,19 +2464,19 @@ class AppContainer(val context: Context) {
                         ProviderCapability.DOWNLOAD
                     ),
                     navigation = NavigationConfig(
-                        home = "/most_recent/",
+                        home = "/",
                         search = "/search/?query={query}",
-                        page = "/most_recent/?page={page}",
+                        page = "/?page={page}",
                         categories = "/categories/"
                     ),
                     selectors = SelectorConfig(
                         item = "div.video-box, .four-col-content-item, .video_thumb, [data-video-id]",
-                        title = "a[title], .video-title, span.title",
-                        thumbnail = "img[data-src], img[src]",
-                        thumbnailAttr = "data-src, src",
+                        title = "a[title], .video-title-text, .video-title, span.title, p.tm_category_title, .categoryTitle p",
+                        thumbnail = "img[data-src], img[data-thumbnail], img[src]",
+                        thumbnailAttr = "data-src, data-thumbnail, src",
                         detailUrl = "a[href*='/watch/']",
                         duration = ".video-duration, .duration",
-                        detailTitle = "h1.watch-video-title, h1",
+                        detailTitle = "h1.videoTitle, h1.watch-video-title, h1",
                         detailDescription = ".video-description, p",
                         detailThumbnail = "meta[property='og:image'], img",
                         player = "video, iframe",
@@ -2473,23 +2507,23 @@ class AppContainer(val context: Context) {
                         ProviderCapability.DOWNLOAD
                     ),
                     navigation = NavigationConfig(
-                        home = "/latest/",
+                        home = "/newest/page/1/",
                         search = "/searches?q={query}",
-                        page = "/latest/page/{page}/",
+                        page = "/newest/page/{page}/",
                         categories = "/categories.html"
                     ),
                     selectors = SelectorConfig(
-                        item = "div.video_box, .video-box, div.thumb, [data-video-id]",
-                        title = "a[title], .video_title, .title",
-                        thumbnail = "img[data-src], img[src]",
-                        thumbnailAttr = "data-src, src",
-                        detailUrl = "a[href*='/porn-video/'], a.video_link",
-                        duration = ".video_duration, .duration",
+                        item = "article.video-box, div.video-box, article[data-video-id]",
+                        title = "a.video-title-text, a.tm_video_title, img[alt], a[title]",
+                        thumbnail = "img.thumb-image, img[data-src], img[data-poster], img",
+                        thumbnailAttr = "data-src, data-poster, src",
+                        detailUrl = "a[href*='/porn-video/'], a.tm_video_link, a",
+                        duration = "div.video-duration, div.tm_video_duration, .video-properties",
                         detailTitle = "h1.video_title, h1",
                         detailDescription = ".video_description, p",
                         detailThumbnail = "meta[property='og:image'], img",
                         player = "video, iframe",
-                        videoSource = "meta[property='og:video:url']",
+                        videoSource = "meta[property*='og:video'], meta[property='og:video:url']",
                         videoSourceAttr = "content"
                     ),
                     contentPolicy = ContentPolicy(
@@ -2522,18 +2556,18 @@ class AppContainer(val context: Context) {
                         categories = "/categories"
                     ),
                     selectors = SelectorConfig(
-                        item = "a.thumb, div.thumb",
-                        title = "a[title], img[alt]",
+                        item = "div.video-block",
+                        title = "a.infos[title], span.title",
                         thumbnail = "img.video-img, img",
                         thumbnailAttr = "src, data-src",
-                        detailUrl = "a.thumb, a[href*='/video/']",
-                        duration = ".duration, span.badge",
+                        detailUrl = "a.thumb[href], a.infos[href]",
+                        duration = "span.duration",
                         detailTitle = "h1.page-title, h1",
                         detailDescription = ".video-description, .desc, p",
-                        detailThumbnail = "meta[property='og:image'], img",
+                        detailThumbnail = "meta[itemprop='thumbnailUrl'][content], meta[property='og:image']",
                         player = "video#fxgp-vod-scene-player, video, iframe",
-                        videoSource = "video source, meta[property='og:video:url']",
-                        videoSourceAttr = "src, content"
+                        videoSource = "meta[itemprop='contentURL'], video source",
+                        videoSourceAttr = "content, src"
                     ),
                     contentPolicy = ContentPolicy(
                         rightsStatus = "Public Web Index",
@@ -2559,9 +2593,9 @@ class AppContainer(val context: Context) {
                         ProviderCapability.DOWNLOAD
                     ),
                     navigation = NavigationConfig(
-                        home = "/trending_videos",
+                        home = "/",
                         search = "/s/{query}/",
-                        page = "/trending_videos/{page}/",
+                        page = "/?page={page}",
                         categories = "/categories"
                     ),
                     selectors = SelectorConfig(
@@ -2608,11 +2642,11 @@ class AppContainer(val context: Context) {
                         categories = "/categories"
                     ),
                     selectors = SelectorConfig(
-                        item = "div.video-list > div, div[data-vid], a.video-thumb",
-                        title = "a[title], img[alt], a.video-thumb",
+                        item = "div[data-vid], div.video-list > div, a.video-thumb",
+                        title = "a.video-title, a[title], img[alt], a.video-thumb",
                         thumbnail = "img[data-src], img",
                         thumbnailAttr = "data-src, src",
-                        detailUrl = "a.video-thumb, a[href*='/video']",
+                        detailUrl = "a.video-title, a.video-thumb, a[href*='/video']",
                         duration = "div.video-duration, .thumb-icon",
                         detailTitle = "h1, .video-title",
                         detailDescription = ".video-description, p",
@@ -2651,11 +2685,11 @@ class AppContainer(val context: Context) {
                         categories = "/categories"
                     ),
                     selectors = SelectorConfig(
-                        item = "div.video-list > div, div[data-vid], a.video-thumb",
-                        title = "a[title], img[alt], a.video-thumb",
+                        item = "div[data-vid]",
+                        title = "a.video-title, img[alt], a[title]",
                         thumbnail = "img[data-src], img",
                         thumbnailAttr = "data-src, src",
-                        detailUrl = "a.video-thumb, a[href*='/video']",
+                        detailUrl = "a.video-title, a.video-thumb",
                         duration = "div.video-duration, .thumb-icon",
                         detailTitle = "h1, .video-title",
                         detailDescription = ".video-description, p",
@@ -2673,11 +2707,11 @@ class AppContainer(val context: Context) {
                 ProviderConfig(
                     id = "beeg",
                     familyId = "clean_tube_family",
-                    domains = listOf("https://beeg.com", "https://www.beeg.com"),
-                    validationMarker = "beeg",
+                    domains = listOf("https://store.externulls.com", "https://beeg.com"),
+                    validationMarker = "",
                     name = "Beeg",
                     enabled = true,
-                    baseUrl = "https://beeg.com",
+                    baseUrl = "https://store.externulls.com",
                     adapter = "html_selector",
                     capabilities = listOf(
                         ProviderCapability.HOME,
@@ -2688,22 +2722,22 @@ class AppContainer(val context: Context) {
                         ProviderCapability.DOWNLOAD
                     ),
                     navigation = NavigationConfig(
-                        home = "/",
-                        search = "/search?q={query}",
-                        page = "/?p={page}",
-                        categories = "/tags"
+                        home = "https://store.externulls.com/tag/videos/index?limit=48&offset=0",
+                        search = "https://store.externulls.com/tag/videos/{query}?limit=48&offset=0",
+                        page = "https://store.externulls.com/tag/videos/{slug}?limit=48&offset={offset}",
+                        categories = "https://store.externulls.com/tag/recommends?type=other&slug=index"
                     ),
                     selectors = SelectorConfig(
                         item = "div.video, div.thumb, .item",
                         title = "a[title], .title, h3",
-                        thumbnail = "img[data-src], img",
-                        thumbnailAttr = "data-src, src",
-                        detailUrl = "a[href*='/video/'], a[href*='/v/'], a",
+                        thumbnail = "img",
+                        thumbnailAttr = "src",
+                        detailUrl = "a",
                         duration = ".duration",
                         detailTitle = "h1",
-                        player = "video, iframe",
-                        videoSource = "video source, meta[property='og:video:url']",
-                        videoSourceAttr = "src, content"
+                        player = "video",
+                        videoSource = "video source",
+                        videoSourceAttr = "src"
                     ),
                     contentPolicy = ContentPolicy(
                         rightsStatus = "Public Web Index",
@@ -2741,7 +2775,7 @@ class AppContainer(val context: Context) {
                         thumbnailAttr = "data-original, src",
                         detailUrl = "a[href*='/videos/'], a.thumb",
                         duration = "span.time, .duration",
-                        detailTitle = "h1.title, h1",
+                        detailTitle = "h3 span.agego-content-title, h3, h1.title, h1",
                         detailDescription = ".video-description, p",
                         detailThumbnail = "meta[property='og:image'], img",
                         player = "video, div#player",
@@ -2758,7 +2792,7 @@ class AppContainer(val context: Context) {
                     id = "eporner",
                     familyId = "clean_tube_family",
                     domains = listOf("https://www.eporner.com", "https://eporner.com"),
-                    validationMarker = "video-box",
+                    validationMarker = "videos",
                     name = "Eporner",
                     enabled = true,
                     baseUrl = "https://www.eporner.com",
@@ -2772,10 +2806,10 @@ class AppContainer(val context: Context) {
                         ProviderCapability.DOWNLOAD
                     ),
                     navigation = NavigationConfig(
-                        home = "/",
-                        search = "/search/{query}/{page}/",
-                        page = "/0/{page}/",
-                        categories = "/categories/"
+                        home = "/api/v2/video/search/?query=&per_page=30&page=1&thumbsize=big&order=top-weekly&format=json",
+                        search = "/api/v2/video/search/?query={query}&per_page=30&page=1&thumbsize=big&format=json",
+                        page = "/api/v2/video/search/?query=&per_page=30&page={page}&thumbsize=big&order=top-weekly&format=json",
+                        categories = "/cats/"
                     ),
                     selectors = SelectorConfig(
                         item = "div.mb, div.video-box, div[data-id]",
@@ -2800,11 +2834,11 @@ class AppContainer(val context: Context) {
                 ProviderConfig(
                     id = "drtuber",
                     familyId = "clean_tube_family",
-                    domains = listOf("https://www.drtuber.com", "https://www.drtuber.desi", "https://drtuber.com"),
-                    validationMarker = "thumbs_box",
+                    domains = listOf("https://www.drtuber.desi", "https://drtuber.desi", "https://m.drtuber.desi", "https://www.drtuber.com", "https://drtuber.com"),
+                    validationMarker = "drtuber",
                     name = "DrTuber",
                     enabled = true,
-                    baseUrl = "https://www.drtuber.com",
+                    baseUrl = "https://m.drtuber.desi",
                     adapter = "html_selector",
                     capabilities = listOf(
                         ProviderCapability.HOME,
@@ -2821,18 +2855,18 @@ class AppContainer(val context: Context) {
                         categories = "/categories"
                     ),
                     selectors = SelectorConfig(
-                        item = "div.thumbs_box > div, div.th, div.item",
-                        title = "a.title, a[title], .rate_thumb a",
-                        thumbnail = "img[data-src], img",
+                        item = "a.th, a[data-video_id], a.video-thumb, div.th",
+                        title = "a[title], img[alt], a.title",
+                        thumbnail = "img.b-lazy, img[data-src], img",
                         thumbnailAttr = "data-src, src",
                         detailUrl = "a[href*='/video/']",
-                        duration = "span.duration, .time",
+                        duration = "span.duration, strong.toolbar em, .time",
                         detailTitle = "h1, .page-title",
                         detailDescription = ".video-description, p",
                         detailThumbnail = "meta[property='og:image'], img",
                         player = "video, div#player",
-                        videoSource = "video source[src], meta[property='og:video:url']",
-                        videoSourceAttr = "src, content, poster"
+                        videoSource = "a[data-adv_play], video source[src], meta[property='og:video:url']",
+                        videoSourceAttr = "href, src, content, poster"
                     ),
                     contentPolicy = ContentPolicy(
                         rightsStatus = "Public Web Index",
@@ -2843,11 +2877,11 @@ class AppContainer(val context: Context) {
                 ProviderConfig(
                     id = "nuvid",
                     familyId = "clean_tube_family",
-                    domains = listOf("https://www.nuvid.com", "https://www.nuvid.org", "https://nuvid.com"),
+                    domains = listOf("https://m.nuvid.org", "https://www.nuvid.org", "https://www.nuvid.com", "https://nuvid.com", "https://www.nuvid.org/", "https://nuvid.org"),
                     validationMarker = "videos",
                     name = "NuVid",
                     enabled = true,
-                    baseUrl = "https://www.nuvid.com",
+                    baseUrl = "https://m.nuvid.org",
                     adapter = "html_selector",
                     capabilities = listOf(
                         ProviderCapability.HOME,
@@ -2859,23 +2893,23 @@ class AppContainer(val context: Context) {
                     ),
                     navigation = NavigationConfig(
                         home = "/",
-                        search = "/search/videos/{query}/{page}",
-                        page = "/videos/{page}",
+                        search = "/search/videos/{query}/{page}/",
+                        page = "/videos/{page}/",
                         categories = "/categories"
                     ),
                     selectors = SelectorConfig(
-                        item = "div.videos > div, div.th, div.video-thumb",
-                        title = "a.title, a[title], .ch-video a",
-                        thumbnail = "img[data-src], img",
+                        item = "div.vthumb, .box-tumb, div.th, div.video-thumb",
+                        title = "span.title, span.title_thumb, a[title], a.thumb_holder, a.title, img[alt]",
+                        thumbnail = "img.img_thumb, img[data-src], img",
                         thumbnailAttr = "data-src, src",
-                        detailUrl = "a[href*='/video/']",
-                        duration = "span.duration, .time",
+                        detailUrl = "a.thumb_holder, a.vid_link, a.video-thumb, a[href*='/video/']",
+                        duration = "span.view_time, span.time_thumb, i.time, span.time, span.duration",
                         detailTitle = "h1, .page-title",
                         detailDescription = ".video-description, p",
-                        detailThumbnail = "meta[property='og:image'], img",
+                        detailThumbnail = "meta[property='og:image'], img#video_preview_thumb, video[poster]",
                         player = "video, div#player",
-                        videoSource = "video source[src], meta[property='og:video:url']",
-                        videoSourceAttr = "src, content, poster"
+                        videoSource = "a.b_link, video source[src], meta[property='og:video:url']",
+                        videoSourceAttr = "href, src, content"
                     ),
                     contentPolicy = ContentPolicy(
                         rightsStatus = "Public Web Index",
@@ -2945,17 +2979,17 @@ class AppContainer(val context: Context) {
                     ),
                     navigation = NavigationConfig(
                         home = "/videos/",
-                        search = "/search/?s={query}",
+                        search = "/videos/?s={query}",
                         page = "/videos/?page={page}",
                         categories = "/categories/"
                     ),
                     selectors = SelectorConfig(
                         item = "div.models-videos__col, div.models-videos > div",
-                        title = "a.models-image, a[title], .title",
-                        thumbnail = "img.img-fluid, img",
+                        title = "a[title], .models-footer p, .title",
+                        thumbnail = "img.thumb, img.img-fluid, img",
                         thumbnailAttr = "data-src, src",
-                        detailUrl = "a.models-image, a[href*='/video/']",
-                        duration = ".duration, span.time",
+                        detailUrl = "a[href*='/video/'], a.models-image",
+                        duration = "span.video, .duration, span.time",
                         detailTitle = "h1",
                         detailDescription = "p",
                         detailThumbnail = "meta[property='og:image'], img",
@@ -2972,11 +3006,11 @@ class AppContainer(val context: Context) {
                 ProviderConfig(
                     id = "three_movs",
                     familyId = "clean_tube_family",
-                    domains = listOf("https://www.3movs.com", "https://3movs.com"),
+                    domains = listOf("https://www.3movs.xxx", "https://3movs.xxx", "https://www.3movs.com", "https://3movs.com"),
                     validationMarker = "3movs",
                     name = "3Movs",
                     enabled = true,
-                    baseUrl = "https://www.3movs.com",
+                    baseUrl = "https://www.3movs.xxx",
                     adapter = "html_selector",
                     capabilities = listOf(
                         ProviderCapability.HOME,
@@ -2987,23 +3021,23 @@ class AppContainer(val context: Context) {
                         ProviderCapability.DOWNLOAD
                     ),
                     navigation = NavigationConfig(
-                        home = "/latest-updates/",
+                        home = "/videos/",
                         search = "/search/{query}/",
-                        page = "/latest-updates/{page}/",
+                        page = "/videos/{page}/",
                         categories = "/categories/"
                     ),
                     selectors = SelectorConfig(
-                        item = "div.item.thumb:not(.slider *):not(.swiper-slide *), div.item:not(.slider *):not(.swiper-slide *):not(.pagination *):not(.navigation *)",
+                        item = "div.item.thumb",
                         title = "a[title], a.title, [title]",
                         thumbnail = "img",
-                        thumbnailAttr = "data-src, src",
+                        thumbnailAttr = "data-webp, data-src, src",
                         detailUrl = "a[href*='/videos/']",
-                        duration = ".duration",
+                        duration = ".time, .duration, span.time",
                         detailTitle = "h1",
                         detailDescription = "p",
                         detailThumbnail = "meta[property='og:image'], img",
                         player = "#kt_player, video",
-                        videoSource = "video source[src], video[src]",
+                        videoSource = "meta[itemprop*='contentUrl'], meta[itemprop*='contentURL'], video source[src], video[src], source[type='video/mp4']",
                         videoSourceAttr = "src"
                     ),
                     contentPolicy = ContentPolicy(
@@ -3220,6 +3254,94 @@ class AppContainer(val context: Context) {
                         player = "video",
                         videoSource = "video source[src], video[src]",
                         videoSourceAttr = "src"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Web Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 73. MasaHub
+                ProviderConfig(
+                    id = "masahub",
+                    familyId = "desi_family",
+                    domains = listOf("https://masahub.net.im"),
+                    validationMarker = "masahub",
+                    name = "MasaHub",
+                    enabled = true,
+                    baseUrl = "https://masahub.net.im",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/",
+                        search = "/?s={query}",
+                        page = "/page/{page}/",
+                        categories = "/categories/"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "main.site-main article.loop-video, article.loop-video",
+                        title = "header.entry-header span, a[title], header.entry-header h2 a",
+                        thumbnail = "img[data-src], img[src]",
+                        thumbnailAttr = "data-src, src",
+                        detailUrl = "a",
+                        duration = "span.duration, .duration",
+                        detailTitle = "h1.entry-title, h1, title",
+                        detailDescription = ".entry-content p, .description",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "iframe[src*='playmate'], iframe[src*='lulust'], iframe[src*='lulu'], video, iframe",
+                        videoSource = "iframe[src*='playmate'], iframe[src*='lulust'], iframe[src*='lulu'], video source[src], video[src], iframe",
+                        videoSourceAttr = "src",
+                        relatedItems = "article.loop-video"
+                    ),
+                    contentPolicy = ContentPolicy(
+                        rightsStatus = "Public Web Index",
+                        disclaimer = "Aggregated public media feed."
+                    )
+                ),
+                // 74. LiveCamRips
+                ProviderConfig(
+                    id = "livecamrips",
+                    familyId = "desi_family",
+                    domains = listOf("https://livecamrips.to", "https://www.livecamrips.to"),
+                    validationMarker = "livecamrips",
+                    name = "LiveCamRips",
+                    enabled = true,
+                    baseUrl = "https://livecamrips.to",
+                    adapter = "html_selector",
+                    capabilities = listOf(
+                        ProviderCapability.HOME,
+                        ProviderCapability.CATEGORY,
+                        ProviderCapability.SEARCH,
+                        ProviderCapability.DETAILS,
+                        ProviderCapability.STREAM,
+                        ProviderCapability.DOWNLOAD
+                    ),
+                    navigation = NavigationConfig(
+                        home = "/model/492550/V_Hot_Shila",
+                        search = "/search/{query}",
+                        page = "/model/492550/V_Hot_Shila/{page}",
+                        categories = "/models"
+                    ),
+                    selectors = SelectorConfig(
+                        item = "div.jc-caption",
+                        title = "div.tm-text-gray, figcaption, a[href*='/model/'], a[href*='/video/'], a",
+                        thumbnail = "img[data-src], img[src]",
+                        thumbnailAttr = "src",
+                        detailUrl = "figure a[href*='/video/'], figure a[href*='/model/'], a[href*='/video/'], a[href*='/model/'], a",
+                        duration = "figcaption span, span.tm-bg-dark, .tm-text-gray",
+                        detailTitle = "h1, h2, title",
+                        detailDescription = "div.tm-text-primary, p, .description",
+                        detailThumbnail = "meta[property='og:image'], img",
+                        player = "iframe[src*='uqload'], iframe[src*='abstream'], iframe[src*='mixdrop'], iframe[src*='mdzsmutpcvykb'], iframe[src*='videosh'], iframe[src*='upns'], iframe[src*='vidara'], iframe",
+                        videoSource = "iframe[src*='uqload'], iframe[src*='abstream'], iframe[src*='mixdrop'], iframe[src*='mdzsmutpcvykb'], iframe[src*='videosh'], iframe[src*='upns'], iframe[src*='vidara'], iframe",
+                        videoSourceAttr = "src",
+                        relatedItems = "div.jc-caption"
                     ),
                     contentPolicy = ContentPolicy(
                         rightsStatus = "Public Web Index",

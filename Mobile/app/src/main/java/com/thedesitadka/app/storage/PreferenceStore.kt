@@ -23,6 +23,7 @@ class PreferenceStore(private val context: Context) {
         val HOME_SELECTION_COMPLETED = booleanPreferencesKey("home_selection_completed")
         val SELECTED_HOME_PROVIDERS = stringSetPreferencesKey("selected_home_providers")
         val INITIAL_STORAGE_PROMPT_DONE = booleanPreferencesKey("initial_storage_prompt_done")
+        val LAST_DISMISSED_NOTICE_ID = stringPreferencesKey("last_dismissed_notice_id")
 
         const val DEFAULT_CONFIG_URL = "https://raw.githubusercontent.com/DBiswas57/TheDesiTadka/main/config-tools/signed-manifest.json"
     }
@@ -35,6 +36,7 @@ class PreferenceStore(private val context: Context) {
     val homeSelectionCompletedFlow: Flow<Boolean> = context.dataStore.data.map { it[HOME_SELECTION_COMPLETED] ?: false }
     val selectedHomeProvidersFlow: Flow<Set<String>> = context.dataStore.data.map { it[SELECTED_HOME_PROVIDERS] ?: emptySet() }
     val initialStoragePromptDoneFlow: Flow<Boolean> = context.dataStore.data.map { it[INITIAL_STORAGE_PROMPT_DONE] ?: false }
+    val lastDismissedNoticeIdFlow: Flow<String> = context.dataStore.data.map { it[LAST_DISMISSED_NOTICE_ID] ?: "" }
 
     suspend fun setThemeMode(mode: String) {
         context.dataStore.edit { it[THEME_MODE] = mode }
@@ -80,6 +82,14 @@ class PreferenceStore(private val context: Context) {
     suspend fun resetHomeSelection() {
         context.dataStore.edit {
             it[HOME_SELECTION_COMPLETED] = false
+        }
+    }
+
+    suspend fun getLastDismissedNoticeId(): String = lastDismissedNoticeIdFlow.first()
+
+    suspend fun setLastDismissedNoticeId(id: String) {
+        context.dataStore.edit {
+            it[LAST_DISMISSED_NOTICE_ID] = id
         }
     }
 }

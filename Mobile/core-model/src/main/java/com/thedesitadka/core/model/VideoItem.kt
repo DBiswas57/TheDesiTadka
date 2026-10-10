@@ -18,6 +18,26 @@ enum class DownloadAvailability {
 }
 
 @Serializable
+data class EpisodeItem(
+    val id: String,
+    val episodeNumber: Int,
+    val title: String,
+    val overview: String = "",
+    val thumbnailUrl: String = "",
+    val streamUrl: String = "",
+    val detailUrl: String = "",
+    val duration: String = "",
+    val durationSeconds: Long? = null
+)
+
+@Serializable
+data class SeriesSeason(
+    val seasonNumber: Int,
+    val name: String = "Season $seasonNumber",
+    val episodes: List<EpisodeItem> = emptyList()
+)
+
+@Serializable
 data class VideoItem(
     val id: String,
     val providerId: String,
@@ -32,7 +52,12 @@ data class VideoItem(
     val playbackAvailability: PlaybackAvailability = PlaybackAvailability.AVAILABLE,
     val downloadAvailability: DownloadAvailability = DownloadAvailability.NOT_SUPPORTED,
     val metadata: Map<String, String> = emptyMap(),
-    val isCategory: Boolean = false
+    val isCategory: Boolean = false,
+    val seasons: List<SeriesSeason> = emptyList(),
+    val isSeries: Boolean = false,
+    val languages: List<String> = emptyList(),
+    val qualities: List<String> = emptyList(),
+    val formats: List<String> = emptyList()
 )
 
 @Serializable
@@ -55,12 +80,14 @@ fun isCategoryUrl(url: String): Boolean {
     // Single video pages with ID or date path are playable items, never categories
     if (Regex("""/videos?/\d+""").containsMatchIn(lower) ||
         Regex("""/hdporn/\d+""").containsMatchIn(lower) ||
-        Regex("""/\d{4}/\d{2}/""").containsMatchIn(lower)) {
+        Regex("""/\d{4}/\d{2}/""").containsMatchIn(lower) ||
+        lower.contains("/video/")) {
         return false
     }
     return lower.contains("/category/") ||
             lower.contains("/categories/") ||
             lower.endsWith("/categories") ||
+            (lower.contains("/view/") && !lower.contains("view.php") && !Regex("""/view/\d+""").containsMatchIn(lower)) ||
             lower.contains("/channels/") ||
             lower.contains("/channel/") ||
             lower.contains("/models/") ||
@@ -80,6 +107,8 @@ fun isCategoryUrl(url: String): Boolean {
             lower.contains("/genres/") ||
             lower.contains("/sites/") ||
             lower.contains("/site/") ||
+            lower.contains("/website/") ||
+            lower.contains("/websites/") ||
             lower.contains("/paysite/") ||
             lower.contains("/paysitelist") ||
             lower.contains("search/?s=") ||

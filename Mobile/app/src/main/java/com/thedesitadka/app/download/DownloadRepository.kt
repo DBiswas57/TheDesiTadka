@@ -7,6 +7,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.thedesitadka.app.storage.AppDatabase
@@ -83,6 +84,7 @@ class DownloadRepository(
             downloadDao.insertDownload(record)
             val effectiveWifiOnly = wifiOnly ?: preferenceStore?.isWifiOnly() ?: false
             val isHls = mediaSource.type == MediaSourceType.HLS || mediaSource.mimeType.contains("mpegurl", ignoreCase = true)
+            val referer = mediaSource.headersRequired["Referer"] ?: ""
             startWorker(
                 downloadId = downloadId,
                 mediaUrl = rawDownloadUrl,
@@ -90,7 +92,8 @@ class DownloadRepository(
                 providerId = videoItem.providerId,
                 wifiOnly = effectiveWifiOnly,
                 mimeType = mediaSource.mimeType,
-                isHls = isHls
+                isHls = isHls,
+                referer = referer
             )
             StreamHubLogger.log(
                 StreamHubLogger.Category.DOWNLOAD,
@@ -112,7 +115,8 @@ class DownloadRepository(
         wifiOnly: Boolean = false,
         isPaused: Boolean = false,
         mimeType: String = "video/mp4",
-        isHls: Boolean = false
+        isHls: Boolean = false,
+        referer: String = ""
     ) {
         try {
             val constraints = Constraints.Builder()
@@ -130,7 +134,8 @@ class DownloadRepository(
                         DownloadWorker.KEY_WIFI_ONLY to wifiOnly,
                         DownloadWorker.KEY_IS_PAUSED to isPaused,
                         DownloadWorker.KEY_MIME_TYPE to mimeType,
-                        DownloadWorker.KEY_IS_HLS to isHls
+                        DownloadWorker.KEY_IS_HLS to isHls,
+                        DownloadWorker.KEY_REFERER to referer
                     )
                 )
                 .addTag("download_${downloadId}")
@@ -155,11 +160,11 @@ class DownloadRepository(
 
     suspend fun pauseDownload(downloadId: String) = withContext(Dispatchers.IO) {
         try {
-            workManager.cancelUniqueWork("download_${downloadId}")
             val existing = downloadDao.getDownload(downloadId)
             if (existing != null) {
                 downloadDao.updateDownload(existing.copy(status = DownloadStatus.PAUSED, speedBytesPerSec = 0L))
             }
+            workManager.cancelUniqueWork("download_${downloadId}")
         } catch (e: Exception) {
             StreamHubLogger.e("DownloadRepository", "Could not pause download $downloadId: ${e.message}")
         }
@@ -327,7 +332,6 @@ class DownloadRepository(
                     }
                 }
             }
-            recoverInterruptedDownloads()
             StreamHubLogger.i("DownloadRepository", "Filesystem reconciliation completed successfully")
         } catch (e: Exception) {
             StreamHubLogger.w("DownloadRepository", "Filesystem reconciliation warning: ${e.message}")
@@ -359,16 +363,31 @@ class DownloadRepository(
         try {
             val interrupted = downloadDao.getInterruptedDownloads()
             for (rec in interrupted) {
-                downloadDao.updateDownload(
-                    rec.copy(
-                        status = DownloadStatus.PAUSED,
-                        speedBytesPerSec = 0L,
-                        error = "Interrupted by app termination"
+                val workInfos = try {
+                    workManager.getWorkInfosForUniqueWork("download_${rec.id}").get()
+                } catch (e: Exception) {
+                    emptyList()
+                }
+                val isWorkActive = workInfos.any {
+                    it.state == WorkInfo.State.RUNNING ||
+                    it.state == WorkInfo.State.ENQUEUED ||
+                    it.state == WorkInfo.State.BLOCKED
+                }
+                if (!isWorkActive) {
+                    downloadDao.updateDownload(
+                        rec.copy(
+                            status = DownloadStatus.PAUSED,
+                            speedBytesPerSec = 0L,
+                            error = "Interrupted by app termination"
+                        )
                     )
-                )
+                    StreamHubLogger.i("DownloadRepository", "Recovered interrupted download ${rec.id} to PAUSED state (no active worker)")
+                } else {
+                    StreamHubLogger.i("DownloadRepository", "Skipping active download ${rec.id} - worker state is ${workInfos.firstOrNull()?.state}")
+                }
             }
             if (interrupted.isNotEmpty()) {
-                StreamHubLogger.i("DownloadRepository", "Recovered ${interrupted.size} interrupted downloads to PAUSED state")
+                StreamHubLogger.i("DownloadRepository", "Processed interrupted downloads check for ${interrupted.size} items")
             }
         } catch (e: Exception) {
             StreamHubLogger.w("DownloadRepository", "Failed to recover interrupted downloads: ${e.message}")

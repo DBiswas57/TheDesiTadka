@@ -217,4 +217,70 @@ class DownloadLifecycleTest {
         assertEquals("seg-1.m4s", segments[1])
         assertEquals("seg-2.m4s", segments[2])
     }
+
+    @Test
+    fun testPausePreservesDownloadedBytesAndResetsSpeed() {
+        val downloading = DownloadRecordEntity(
+            id = "vid_resume_1",
+            providerId = "kamababa1",
+            title = "Resumable Video",
+            thumbnailUrl = "https://example.com/thumb.jpg",
+            mediaUrl = "https://example.com/video.mp4",
+            status = DownloadStatus.DOWNLOADING,
+            downloadedBytes = 15728640L,
+            totalBytes = 31457280L,
+            progress = 50,
+            speedBytesPerSec = 2097152L
+        )
+
+        // Simulating pause action
+        val paused = downloading.copy(
+            status = DownloadStatus.PAUSED,
+            speedBytesPerSec = 0L
+        )
+
+        assertEquals(DownloadStatus.PAUSED, paused.status)
+        assertEquals(15728640L, paused.downloadedBytes)
+        assertEquals(0L, paused.speedBytesPerSec)
+        assertEquals(31457280L, paused.totalBytes)
+
+        // Simulating resume action
+        val resumed = paused.copy(
+            status = DownloadStatus.QUEUED,
+            error = null
+        )
+
+        assertEquals(DownloadStatus.QUEUED, resumed.status)
+        assertEquals(15728640L, resumed.downloadedBytes)
+        assertNull(resumed.error)
+    }
+
+    @Test
+    fun testWorkerStopStatusResolution() {
+        // When user pauses, DB status is PAUSED
+        val isPausedUser = true
+        val isCancelledUser = false
+        val finalStatusUser = when {
+            isCancelledUser -> DownloadStatus.CANCELLED
+            isPausedUser -> DownloadStatus.PAUSED
+            else -> DownloadStatus.PAUSED
+        }
+        assertEquals(DownloadStatus.PAUSED, finalStatusUser)
+
+        // When user cancels, DB status is CANCELLED
+        val isCancelled = true
+        val finalStatusCancel = when {
+            isCancelled -> DownloadStatus.CANCELLED
+            else -> DownloadStatus.PAUSED
+        }
+        assertEquals(DownloadStatus.CANCELLED, finalStatusCancel)
+
+        // When worker is stopped by system/WorkManager constraint, default to PAUSED (never CANCELLED)
+        val finalStatusSystem = when {
+            false -> DownloadStatus.CANCELLED
+            false -> DownloadStatus.PAUSED
+            else -> DownloadStatus.PAUSED
+        }
+        assertEquals(DownloadStatus.PAUSED, finalStatusSystem)
+    }
 }

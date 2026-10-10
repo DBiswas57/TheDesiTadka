@@ -311,7 +311,9 @@ fun ChallengeScreen(
                             databaseEnabled = true
                             loadWithOverviewMode = true
                             useWideViewPort = true
-                            userAgentString = if (targetUrl.contains("sxyprn.com") || targetUrl.contains("hqporner")) NetworkClient.DESKTOP_USER_AGENT else NetworkClient.DEFAULT_USER_AGENT
+                            javaScriptCanOpenWindowsAutomatically = true
+                            setSupportMultipleWindows(true)
+                            userAgentString = if (targetUrl.contains("sxyprn.com") || targetUrl.contains("hqporner") || targetUrl.contains("pornone") || targetUrl.contains("3movs")) NetworkClient.DESKTOP_USER_AGENT else NetworkClient.DEFAULT_USER_AGENT
                         }
 
                         val cookieManager = CookieManager.getInstance()
@@ -331,6 +333,10 @@ fun ChallengeScreen(
                         }
 
                         webViewClient = object : WebViewClient() {
+                            override fun onReceivedSslError(view: WebView?, handler: android.webkit.SslErrorHandler?, error: android.net.http.SslError?) {
+                                handler?.proceed()
+                            }
+
                             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                                 isVerifying = true
                             }

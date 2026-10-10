@@ -20,3 +20,9 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
 }
+
+tasks.withType<Test> {
+    maxParallelForks = 2
+    jvmArgs("-Xmx512m")
+}
+

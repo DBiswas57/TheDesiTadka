@@ -49,13 +49,39 @@ class AllProvidersManifestRegressionTest {
     fun testManifestIntegrityAndRegression() {
         val manifest = AppContainer.createDefaultManifest()
 
-        // 1. Total count must be 72 (70 existing + 2 new movie/series sites: movienerds, cineapse)
-        assertEquals("Total registered providers must be 72", 72, manifest.providers.size)
+        // 1. Total count must be 74 (73 existing + 1 new site: livecamrips)
+        assertEquals("Total registered providers must be 74", 74, manifest.providers.size)
 
         val providerMap = manifest.providers.associateBy { it.id }
 
         // 2. Zero duplicate IDs
         assertEquals("Provider IDs must be completely unique", manifest.providers.size, providerMap.size)
+
+        // 2.05 Verify masahub configuration
+        val masahub = providerMap["masahub"]
+        assertNotNull("MasaHub provider must be registered", masahub)
+        assertEquals("https://masahub.net.im", masahub!!.baseUrl)
+        assertEquals("MasaHub", masahub.name)
+        assertTrue(masahub.capabilities.contains(ProviderCapability.HOME))
+        assertTrue(masahub.capabilities.contains(ProviderCapability.CATEGORY))
+        assertTrue(masahub.capabilities.contains(ProviderCapability.SEARCH))
+        assertTrue(masahub.capabilities.contains(ProviderCapability.DETAILS))
+        assertTrue(masahub.capabilities.contains(ProviderCapability.STREAM))
+        assertTrue(masahub.capabilities.contains(ProviderCapability.DOWNLOAD))
+
+        // 2.06 Verify livecamrips configuration
+        val livecamrips = providerMap["livecamrips"]
+        assertNotNull("LiveCamRips provider must be registered", livecamrips)
+        assertEquals("https://livecamrips.to", livecamrips!!.baseUrl)
+        assertEquals("LiveCamRips", livecamrips.name)
+        assertEquals("/model/492550/V_Hot_Shila", livecamrips.navigation?.home)
+        assertEquals("desi_family", livecamrips.familyId)
+        assertTrue(livecamrips.capabilities.contains(ProviderCapability.HOME))
+        assertTrue(livecamrips.capabilities.contains(ProviderCapability.CATEGORY))
+        assertTrue(livecamrips.capabilities.contains(ProviderCapability.SEARCH))
+        assertTrue(livecamrips.capabilities.contains(ProviderCapability.DETAILS))
+        assertTrue(livecamrips.capabilities.contains(ProviderCapability.STREAM))
+        assertTrue(livecamrips.capabilities.contains(ProviderCapability.DOWNLOAD))
 
         // 2.1 Assert brazzers is completely removed
         assertFalse("brazzers must be completely removed from manifest", providerMap.containsKey("brazzers"))
@@ -157,7 +183,9 @@ class AllProvidersManifestRegressionTest {
 
         val prmoviesChurch = providerMap["prmovies_church"]
         assertNotNull(prmoviesChurch)
-        assertEquals("https://prmovies.church", prmoviesChurch!!.baseUrl)
+        assertEquals("https://prmovies.futbol", prmoviesChurch!!.baseUrl)
+        assertEquals("PrmoviesM", prmoviesChurch.name)
+        assertTrue(prmoviesChurch.domains.contains("https://prmovies.futbol"))
         assertTrue(prmoviesChurch.domains.contains("https://prmovies.church"))
         assertTrue(prmoviesChurch.domains.contains("https://prmovies.energy"))
         assertEquals("/bollywood-movies-on-prmovies/", prmoviesChurch.navigation?.home)
@@ -184,8 +212,8 @@ class AllProvidersManifestRegressionTest {
         val aagmaal = providerMap["aagmaal"]
         val aagmaalCom = providerMap["aagmaal_com"]
         assertNotNull(aagmaal)
-        assertNotNull(aagmaalCom)
-        assertTrue("aagmaal baseUrl must be aagmaal.date", aagmaal!!.baseUrl.contains("aagmaal.date"))
+        assertTrue("aagmaal baseUrl must be aagmaal.webcam", aagmaal!!.baseUrl.contains("aagmaal.webcam"))
+        assertTrue("aagmaal domains must contain aagmaal.webcam", aagmaal.domains.contains("https://aagmaal.webcam"))
         assertTrue("aagmaal_com baseUrl must be aagmaal.com", aagmaalCom!!.baseUrl.contains("aagmaal.com"))
         assertEquals("vp-card", aagmaalCom.validationMarker)
         assertTrue("aagmaal_com must contain xxviu mirrors", aagmaalCom.domains.contains("https://govmaal.com"))

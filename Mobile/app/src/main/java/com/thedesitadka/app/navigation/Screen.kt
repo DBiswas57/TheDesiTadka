@@ -6,19 +6,23 @@ sealed class Screen(val route: String) {
         fun createRoute(providerId: String) = "provider/$providerId"
     }
     object CategoryList : Screen("category_list/{providerId}") {
-        fun createRoute(providerId: String) = "category_list/$providerId"
+        fun createRoute(providerId: String): String {
+            val safeId = try { java.net.URLEncoder.encode(providerId.ifBlank { "unknown" }, "UTF-8") } catch (_: Exception) { providerId }
+            return "category_list/$safeId"
+        }
     }
     object CategoryContent : Screen("category_content/{providerId}/{title}?url={url}") {
         fun createRoute(providerId: String, title: String, url: String): String {
+            val safeId = try { java.net.URLEncoder.encode(providerId.ifBlank { "unknown" }, "UTF-8") } catch (_: Exception) { providerId }
             val safeTitle = title.ifBlank { "Category" }
                 .replace("/", " ")
                 .replace("?", " ")
                 .replace("#", " ")
                 .replace("&", " ")
                 .trim()
-            val encTitle = java.net.URLEncoder.encode(safeTitle.ifBlank { "Category" }, "UTF-8")
-            val encUrl = java.net.URLEncoder.encode(url, "UTF-8")
-            return "category_content/$providerId/$encTitle?url=$encUrl"
+            val encTitle = try { java.net.URLEncoder.encode(safeTitle.ifBlank { "Category" }, "UTF-8") } catch (_: Exception) { "Category" }
+            val encUrl = try { java.net.URLEncoder.encode(url, "UTF-8") } catch (_: Exception) { url }
+            return "category_content/$safeId/$encTitle?url=$encUrl"
         }
     }
     object Search : Screen("search")

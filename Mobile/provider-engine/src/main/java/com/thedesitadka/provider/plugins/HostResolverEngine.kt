@@ -22,6 +22,11 @@ object HostResolverEngine {
         registerPlugin(LuluvdoResolverPlugin())
         registerPlugin(MydaddyResolverPlugin())
         registerPlugin(StreamouploadResolverPlugin())
+        registerPlugin(PlaymateResolverPlugin())
+        registerPlugin(UqloadResolverPlugin())
+        registerPlugin(MixdropResolverPlugin())
+        registerPlugin(VidaraResolverPlugin())
+        registerPlugin(UpnsResolverPlugin())
     }
 
     fun registerPlugin(plugin: HostResolverPlugin) {
