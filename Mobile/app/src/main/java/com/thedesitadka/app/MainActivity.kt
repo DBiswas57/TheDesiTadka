@@ -19,8 +19,17 @@ import com.thedesitadka.core.security.StreamHubLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Image
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import com.thedesitadka.app.ui.theme.LocalAppPalette
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -125,7 +134,8 @@ class MainActivity : ComponentActivity() {
         lifecycle.addObserver(container.monetizationManager.lifecycleManager)
 
         setContent {
-            TheDesiTadkaTheme(darkTheme = true) {
+            val colorPalette by container.preferenceStore.colorPaletteFlow.collectAsState(initial = "sunset_amber")
+            TheDesiTadkaTheme(darkTheme = true, paletteId = colorPalette) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -992,35 +1002,54 @@ private fun AppNavigationContent(container: AppContainer) {
                     Triple(Screen.Downloads.route, "Downloads", Icons.Default.Download),
                     Triple(Screen.Settings.route, "Settings", Icons.Default.Settings)
                 )
-                // Custom floating-island bottom nav
+                val palette = LocalAppPalette.current
+                // Modern 3D Glassmorphic Floating Dock
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.background)
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .background(Color.Transparent)
+                        .padding(horizontal = 16.dp, vertical = 10.dp)
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(22.dp))
-                            .background(Color(0xFF1A1A2E))
-                            .padding(vertical = 6.dp, horizontal = 4.dp),
+                            .shadow(
+                                elevation = 16.dp,
+                                shape = RoundedCornerShape(26.dp),
+                                ambientColor = palette.glowColor,
+                                spotColor = palette.primary
+                            )
+                            .clip(RoundedCornerShape(26.dp))
+                            .background(palette.glassSurface)
+                            .border(
+                                border = BorderStroke(1.2.dp, palette.glassBorder),
+                                shape = RoundedCornerShape(26.dp)
+                            )
+                            .padding(vertical = 7.dp, horizontal = 6.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         navItems.forEach { (route, label, icon) ->
                             val selected = currentRoute == route
-                            val accentColor = MaterialTheme.colorScheme.primary
-                            val unselectedColor = Color(0xFF6B7280)
+                            val scale by animateFloatAsState(
+                                targetValue = if (selected) 1.06f else 1.0f,
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                    stiffness = Spring.StiffnessLow
+                                ),
+                                label = "nav_scale_$route"
+                            )
+                            val iconAlpha by animateFloatAsState(
+                                targetValue = if (selected) 1.0f else 0.70f,
+                                label = "nav_alpha_$route"
+                            )
+
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier
                                     .weight(1f)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(
-                                        if (selected) accentColor.copy(alpha = 0.12f)
-                                        else Color.Transparent
-                                    )
+                                    .scale(scale)
+                                    .clip(RoundedCornerShape(18.dp))
                                     .clickable {
                                         navController.navigate(route) {
                                             popUpTo(navController.graph.findStartDestination().id) {
@@ -1030,14 +1059,14 @@ private fun AppNavigationContent(container: AppContainer) {
                                             restoreState = true
                                         }
                                     }
-                                    .padding(vertical = 8.dp)
+                                    .padding(vertical = 4.dp)
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(10.dp))
+                                        .clip(RoundedCornerShape(14.dp))
                                         .background(
-                                            if (selected) accentColor
-                                            else Color.Transparent
+                                            if (selected) palette.gradientBrush
+                                            else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
                                         )
                                         .padding(horizontal = 16.dp, vertical = 5.dp),
                                     contentAlignment = Alignment.Center
@@ -1045,7 +1074,7 @@ private fun AppNavigationContent(container: AppContainer) {
                                     Icon(
                                         imageVector = icon,
                                         contentDescription = label,
-                                        tint = if (selected) Color.Black else unselectedColor,
+                                        tint = if (selected) palette.onPrimary else Color(0xFF94A3B8).copy(alpha = iconAlpha),
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
@@ -1053,8 +1082,8 @@ private fun AppNavigationContent(container: AppContainer) {
                                 Text(
                                     text = label,
                                     fontSize = 10.sp,
-                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (selected) accentColor else unselectedColor
+                                    fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium,
+                                    color = if (selected) palette.primary else Color(0xFF94A3B8).copy(alpha = iconAlpha)
                                 )
                             }
                         }

@@ -63,6 +63,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -80,6 +81,8 @@ import com.thedesitadka.app.ui.components.ErrorStateView
 import com.thedesitadka.app.ui.components.HeroCarousel
 import com.thedesitadka.app.ui.components.VideoCard
 import com.thedesitadka.app.ui.components.VideoCardSkeleton
+import com.thedesitadka.app.ui.theme.LocalAppPalette
+import androidx.compose.foundation.border
 import com.thedesitadka.core.model.ContentCategoryDefinition
 import com.thedesitadka.core.model.ProviderInfo
 import com.thedesitadka.core.model.VideoItem
@@ -106,6 +109,7 @@ fun HomeScreen(
     onCustomizeSourcesClick: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
+    val palette = LocalAppPalette.current
     val allProviders = remember { providerEngine.getActiveProviders() }
     val selectedHomeProviders by preferenceStore?.selectedHomeProvidersFlow?.collectAsState(
         initial = emptySet()
@@ -195,20 +199,20 @@ fun HomeScreen(
                             painter = painterResource(id = R.drawable.app_logo),
                             contentDescription = "TheDesiTadka Logo",
                             modifier = Modifier
-                                .size(32.dp)
-                                .clip(RoundedCornerShape(8.dp))
+                                .size(34.dp)
+                                .clip(RoundedCornerShape(9.dp))
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = "TheDesi",
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.Black,
                             color = Color.White,
                             fontSize = 22.sp
                         )
                         Text(
                             text = "Tadka",
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Black,
+                            color = palette.primary,
                             fontSize = 22.sp
                         )
                     }
@@ -216,11 +220,11 @@ fun HomeScreen(
                 actions = {
                     if (isRefreshing) {
                         CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary,
+                            color = palette.primary,
                             modifier = Modifier
-                                .size(20.dp)
+                                .size(22.dp)
                                 .padding(end = 6.dp),
-                            strokeWidth = 2.dp
+                            strokeWidth = 2.5.dp
                         )
                     } else {
                         IconButton(onClick = { dashboardRepository.refresh(selectedCategoryId) }) {
@@ -239,7 +243,7 @@ fun HomeScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = palette.glassSurface.copy(alpha = 0.95f))
             )
         },
         containerColor = MaterialTheme.colorScheme.background
@@ -254,28 +258,43 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 1. Categories Row Filter
+            // 1. Categories Row Filter with 3D Glassmorphic Glow
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .horizontalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                        .padding(horizontal = 14.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     categories.forEach { cat ->
                         val isSelected = selectedCategoryId == cat.id
-                        FilterChip(
-                            selected = isSelected,
-                            onClick = { selectedCategoryId = cat.id },
-                            label = { Text(cat.name, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                selectedLabelColor = Color.Black,
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                labelColor = Color.White
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(
+                                    if (isSelected) palette.gradientBrush
+                                    else Brush.linearGradient(listOf(palette.surfaceVariant, palette.surfaceVariant))
+                                )
+                                .border(
+                                    border = BorderStroke(
+                                        width = 1.dp,
+                                        brush = if (isSelected) palette.glassBorder
+                                        else Brush.linearGradient(listOf(Color.White.copy(alpha = 0.12f), Color.White.copy(alpha = 0.04f)))
+                                    ),
+                                    shape = RoundedCornerShape(20.dp)
+                                )
+                                .clickable { selectedCategoryId = cat.id }
+                                .padding(horizontal = 14.dp, vertical = 7.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = cat.name,
+                                fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
+                                fontSize = 12.sp,
+                                color = if (isSelected) palette.onPrimary else Color.White.copy(alpha = 0.9f)
                             )
-                        )
+                        }
                     }
                 }
             }
@@ -432,9 +451,23 @@ fun HomeScreen(
                             items(displayedProviders) { provider ->
                                 Card(
                                     modifier = Modifier
+                                        .border(
+                                            border = BorderStroke(
+                                                width = 1.dp,
+                                                brush = Brush.linearGradient(
+                                                    listOf(
+                                                        Color.White.copy(alpha = 0.15f),
+                                                        palette.primary.copy(alpha = 0.25f),
+                                                        Color.White.copy(alpha = 0.05f)
+                                                    )
+                                                )
+                                            ),
+                                            shape = RoundedCornerShape(10.dp)
+                                        )
+                                        .clip(RoundedCornerShape(10.dp))
                                         .clickable { onProviderClick(provider.id) },
-                                    shape = RoundedCornerShape(8.dp),
-                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                    shape = RoundedCornerShape(10.dp),
+                                    colors = CardDefaults.cardColors(containerColor = palette.cardSurface)
                                 ) {
                                     Box(
                                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
@@ -442,7 +475,7 @@ fun HomeScreen(
                                     ) {
                                         Text(
                                             text = provider.name,
-                                            fontWeight = FontWeight.SemiBold,
+                                            fontWeight = FontWeight.Bold,
                                             fontSize = 12.sp,
                                             color = Color.White,
                                             maxLines = 1

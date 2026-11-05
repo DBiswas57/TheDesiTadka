@@ -142,16 +142,16 @@ class AppContainer(val context: Context) {
         fun createDefaultManifest(): ProviderManifest {
         return ProviderManifest(
             schemaVersion = 1,
-            configVersion = 174,
+            configVersion = 175,
             minimumAppVersion = 4,
             forceUpdate = true,
             generatedAt = System.currentTimeMillis(),
             expiresAt = System.currentTimeMillis() + (365L * 24 * 3600 * 1000),
             adminNotice = AdminNotice(
-                id = "notice_2026_10_08_swipe_downloads",
-                title = "Welcome to TheDesiTadka Update!",
-                message = "We have added exciting new features:\n\n• Swipe Gestures: Easily swipe left or right on the video page and player to jump to the next or previous video.\n• Easy Downloads: Tap the new Downloads icon or status bar on video details to monitor active downloads in real time and return seamlessly.\n• Admin Notice System: Stay informed on regular server updates and new features.",
-                date = "2026-10-08",
+                id = "notice_2026_11_05_v1_3_0_major_update",
+                title = "Welcome to TheDesiTadka v1.3.0!",
+                message = "Experience our biggest visual & performance upgrade yet:\n\n• Modern Glassmorphism & 3D UI: Translucent frosted glass bottom dock, 3D card elevation, and smooth spring animations.\n• Vibrant Color Palettes: Choose between Sunset Amber, Cyber Neon, Oceanic Aurora, Emerald Matrix, and Crimson Royale in Settings.\n• Instant Multi-Threaded Search: Real-time progressive search streaming displays results concurrently without waiting minutes.\n• 74 Verified Providers: Enhanced feed grab, embed resolution, and streaming performance across all 74 sources.",
+                date = "2026-11-05",
                 dismissible = true,
                 showOnce = true,
                 enabled = true

@@ -30,6 +30,10 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.ui.graphics.Brush
+import com.thedesitadka.app.ui.theme.AvailablePalettes
+import com.thedesitadka.app.ui.theme.LocalAppPalette
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.Clear
@@ -107,6 +111,7 @@ fun SettingsScreen(
     val lastSyncError by configRepository.lastSyncError.collectAsState()
 
     val wifiOnly by preferenceStore.wifiOnlyFlow.collectAsState(initial = true)
+    val currentPaletteId by preferenceStore.colorPaletteFlow.collectAsState(initial = "sunset_amber")
     var showPrivacyDialog by remember { mutableStateOf(false) }
     var showTermsDialog by remember { mutableStateOf(false) }
 
@@ -217,6 +222,119 @@ fun SettingsScreen(
                             fontSize = 11.sp
                         )
                     )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Section: Visual Style & Color Palettes
+            Text(
+                text = "VISUAL STYLE & COLOR PALETTES",
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    letterSpacing = 1.sp
+                )
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Cinematic Theme Palettes",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Customize your visual experience with modern glassmorphism, 3D ambient glows, and rich color accents.",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 11.sp
+                        )
+                    )
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    AvailablePalettes.forEach { item ->
+                        val isSelected = currentPaletteId.equals(item.id, ignoreCase = true)
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 5.dp)
+                                .border(
+                                    border = BorderStroke(
+                                        width = if (isSelected) 1.5.dp else 1.dp,
+                                        brush = if (isSelected) item.gradientBrush
+                                        else Brush.linearGradient(
+                                            listOf(
+                                                Color.White.copy(alpha = 0.12f),
+                                                Color.White.copy(alpha = 0.04f)
+                                            )
+                                        )
+                                    ),
+                                    shape = RoundedCornerShape(10.dp)
+                                )
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable {
+                                    coroutineScope.launch {
+                                        preferenceStore.setColorPalette(item.id)
+                                    }
+                                },
+                            shape = RoundedCornerShape(10.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (isSelected) item.surface.copy(alpha = 0.85f) else Color(0xFF131622)
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = item.name,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 13.sp,
+                                        color = if (isSelected) item.primary else Color.White
+                                    )
+                                    Text(
+                                        text = item.description,
+                                        fontSize = 10.5.sp,
+                                        color = Color(0xFF94A3B8)
+                                    )
+                                }
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                                ) {
+                                    item.previewColors.forEach { color ->
+                                        Box(
+                                            modifier = Modifier
+                                                .size(15.dp)
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(color)
+                                        )
+                                    }
+                                    if (isSelected) {
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Icon(
+                                            imageVector = Icons.Default.DoneAll,
+                                            contentDescription = "Selected",
+                                            tint = item.primary,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 

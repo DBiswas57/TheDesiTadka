@@ -20,7 +20,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,6 +29,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -52,14 +53,17 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.thedesitadka.app.navigation.PlaylistNavigationContext
+import com.thedesitadka.app.navigation.PlaylistSourceType
+import com.thedesitadka.app.navigation.VideoPlaylistHelper
 import com.thedesitadka.app.ui.components.EmptyStateView
 import com.thedesitadka.app.ui.components.ErrorStateView
 import com.thedesitadka.app.ui.components.VideoCard
 import com.thedesitadka.app.ui.components.VideoCardSkeleton
 import com.thedesitadka.core.model.VideoItem
 import com.thedesitadka.provider.ProviderEngine
-import com.thedesitadka.app.navigation.PlaylistNavigationContext
-import com.thedesitadka.app.navigation.PlaylistSourceType
+import com.thedesitadka.provider.SearchEvent
+import java.util.Collections
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -69,17 +73,21 @@ class SearchViewModel : ViewModel() {
     var selectedProviderId by mutableStateOf<String?>(null)
     val searchResults = mutableStateListOf<VideoItem>()
     var isLoading by mutableStateOf(false)
+    var completedSources by mutableStateOf(0)
+    var totalSources by mutableStateOf(0)
     var errorMessage by mutableStateOf<String?>(null)
+
     private var searchJob: Job? = null
+    private val seenKeys = Collections.synchronizedSet(mutableSetOf<String>())
 
     fun onQueryChanged(query: String, providerEngine: ProviderEngine) {
         searchQuery = query
-        triggerSearch(query, selectedProviderId, providerEngine)
+        triggerSearch(query, selectedProviderId, providerEngine, debounceMs = 300L)
     }
 
     fun onProviderSelected(providerId: String?, providerEngine: ProviderEngine) {
         selectedProviderId = providerId
-        triggerSearch(searchQuery, providerId, providerEngine)
+        triggerSearch(searchQuery, providerId, providerEngine, debounceMs = 0L)
     }
 
     fun retrySearch(providerEngine: ProviderEngine) {
@@ -88,9 +96,14 @@ class SearchViewModel : ViewModel() {
 
     private fun triggerSearch(query: String, providerId: String?, providerEngine: ProviderEngine, debounceMs: Long = 300L) {
         searchJob?.cancel()
-        if (query.trim().length < 2) {
+        val trimmed = query.trim()
+        if (trimmed.length < 2) {
             searchResults.clear()
+            seenKeys.clear()
             isLoading = false
+            completedSources = 0
+            totalSources = 0
+            errorMessage = null
             return
         }
 
@@ -100,15 +113,44 @@ class SearchViewModel : ViewModel() {
             }
             isLoading = true
             errorMessage = null
-            val result = providerEngine.search(query.trim(), providerId, 1)
-            result.onSuccess { feedPage ->
-                searchResults.clear()
-                searchResults.addAll(feedPage.items)
-                isLoading = false
-            }.onFailure { err ->
-                errorMessage = err.message ?: "Search failed"
-                isLoading = false
+            searchResults.clear()
+            seenKeys.clear()
+            completedSources = 0
+            totalSources = 0
+
+            var foundAny = false
+
+            providerEngine.searchFlow(trimmed, providerId, 1).collect { event ->
+                when (event) {
+                    is SearchEvent.Progress -> {
+                        completedSources = event.completedProviders
+                        totalSources = event.totalProviders
+                    }
+                    is SearchEvent.ProviderResult -> {
+                        val newItems = mutableListOf<VideoItem>()
+                        for (item in event.items) {
+                            val normUrl = VideoPlaylistHelper.normalizeUrl(item.detailUrl)
+                            val key = if (normUrl.isNotBlank()) normUrl else "${item.providerId}_${item.id}"
+                            if (key.isNotBlank() && seenKeys.add(key)) {
+                                newItems.add(item)
+                            }
+                        }
+                        if (newItems.isNotEmpty()) {
+                            foundAny = true
+                            searchResults.addAll(newItems)
+                        }
+                    }
+                    is SearchEvent.ProviderError -> {
+                        if (!foundAny && searchResults.isEmpty() && providerId != null) {
+                            errorMessage = event.error?.message ?: "Search failed for ${event.providerName}"
+                        }
+                    }
+                    is SearchEvent.Completed -> {
+                        isLoading = false
+                    }
+                }
             }
+            isLoading = false
         }
     }
 }
@@ -127,6 +169,8 @@ fun SearchScreen(
     val selectedProviderId = viewModel.selectedProviderId
     val searchResults = viewModel.searchResults
     val isLoading = viewModel.isLoading
+    val completedSources = viewModel.completedSources
+    val totalSources = viewModel.totalSources
     val errorMessage = viewModel.errorMessage
 
     Scaffold(
@@ -136,7 +180,7 @@ fun SearchScreen(
                 title = { Text("Search Media", fontWeight = FontWeight.Bold, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
@@ -215,7 +259,60 @@ fun SearchScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            // Live Search Progress Indicator while search is underway
+            if (isLoading) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                ) {
+                    val progressFraction = if (totalSources > 0) completedSources.toFloat() / totalSources.toFloat() else null
+                    if (progressFraction != null) {
+                        LinearProgressIndicator(
+                            progress = { progressFraction },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(4.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    } else {
+                        LinearProgressIndicator(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(4.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (totalSources > 1) {
+                                "Searching ($completedSources/$totalSources sources)..."
+                            } else {
+                                "Searching source..."
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        if (searchResults.isNotEmpty()) {
+                            Text(
+                                text = "${searchResults.size} loaded",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
 
             // Results Grid
             LazyVerticalGrid(
@@ -225,18 +322,19 @@ fun SearchScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                if (isLoading) {
-                    items(4) {
+                // Initial loading skeleton while waiting for the first site to respond
+                if (isLoading && searchResults.isEmpty()) {
+                    items(6) {
                         VideoCardSkeleton()
                     }
-                } else if (errorMessage != null) {
+                } else if (!isLoading && errorMessage != null && searchResults.isEmpty()) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         ErrorStateView(
                             message = errorMessage!!,
                             onRetry = { viewModel.retrySearch(providerEngine) }
                         )
                     }
-                } else if (searchQuery.length >= 2 && searchResults.isEmpty()) {
+                } else if (!isLoading && searchQuery.trim().length >= 2 && searchResults.isEmpty()) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         EmptyStateView(
                             title = "No Results Found",
@@ -244,7 +342,10 @@ fun SearchScreen(
                         )
                     }
                 } else {
-                    items(searchResults) { item ->
+                    items(
+                        items = searchResults,
+                        key = { item -> item.providerId + "_" + (item.detailUrl.ifBlank { item.id }) }
+                    ) { item ->
                         VideoCard(
                             videoItem = item,
                             onClick = {
@@ -265,6 +366,13 @@ fun SearchScreen(
                                 }
                             }
                         )
+                    }
+
+                    // Background loading indicator at bottom of grid while more sites stream in
+                    if (isLoading && searchResults.isNotEmpty()) {
+                        items(2) {
+                            VideoCardSkeleton()
+                        }
                     }
                 }
             }

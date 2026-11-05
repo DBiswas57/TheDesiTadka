@@ -16,6 +16,7 @@ class PreferenceStore(private val context: Context) {
 
     companion object {
         val THEME_MODE = stringPreferencesKey("theme_mode") // "system", "dark", "light"
+        val COLOR_PALETTE = stringPreferencesKey("color_palette") // "sunset_amber", "cyber_neon", "oceanic_aurora", "emerald_matrix", "crimson_royale"
         val WIFI_ONLY_DOWNLOADS = booleanPreferencesKey("wifi_only_downloads")
         val TELEMETRY_ENABLED = booleanPreferencesKey("telemetry_enabled")
         val DEFAULT_QUALITY = stringPreferencesKey("default_quality")
@@ -29,6 +30,7 @@ class PreferenceStore(private val context: Context) {
     }
 
     val themeModeFlow: Flow<String> = context.dataStore.data.map { it[THEME_MODE] ?: "dark" }
+    val colorPaletteFlow: Flow<String> = context.dataStore.data.map { it[COLOR_PALETTE] ?: "sunset_amber" }
     val wifiOnlyFlow: Flow<Boolean> = context.dataStore.data.map { it[WIFI_ONLY_DOWNLOADS] ?: false }
     val telemetryFlow: Flow<Boolean> = context.dataStore.data.map { it[TELEMETRY_ENABLED] ?: false }
     val qualityFlow: Flow<String> = context.dataStore.data.map { it[DEFAULT_QUALITY] ?: "auto" }
@@ -40,6 +42,10 @@ class PreferenceStore(private val context: Context) {
 
     suspend fun setThemeMode(mode: String) {
         context.dataStore.edit { it[THEME_MODE] = mode }
+    }
+
+    suspend fun setColorPalette(palette: String) {
+        context.dataStore.edit { it[COLOR_PALETTE] = palette }
     }
 
     suspend fun setWifiOnly(enabled: Boolean) {

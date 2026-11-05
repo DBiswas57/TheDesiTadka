@@ -1,5 +1,6 @@
 package com.thedesitadka.core.network
 
+import okhttp3.Dispatcher
 import okhttp3.FormBody
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -38,7 +39,12 @@ object NetworkClient {
     val smartDns: SmartBypassDns by lazy { SmartBypassDns() }
 
     val okHttpClient: OkHttpClient by lazy {
+        val dispatcher = Dispatcher().apply {
+            maxRequests = 128
+            maxRequestsPerHost = 10
+        }
         OkHttpClient.Builder()
+            .dispatcher(dispatcher)
             .dns(smartDns)
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)

@@ -1,12 +1,23 @@
 {
     "schemaVersion": 1,
-    "configVersion": 163,
-    "generatedAt": 1790064863824,
-    "expiresAt": 1821600863824,
+    "configVersion": 175,
+    "generatedAt": 1793885747838,
+    "expiresAt": 1825421747838,
     "minimumAppVersion": 4,
     "recommendedAppVersion": 1,
     "forceUpdate": true,
     "maintenanceMode": false,
+    "adminNotice": {
+        "id": "notice_2026_11_05_v1_3_0_major_update",
+        "title": "Welcome to TheDesiTadka v1.3.0!",
+        "message": "Experience our biggest visual & performance upgrade yet:\n\n• Modern Glassmorphism & 3D UI: Translucent frosted glass bottom dock, 3D card elevation, and smooth spring animations.\n• Vibrant Color Palettes: Choose between Sunset Amber, Cyber Neon, Oceanic Aurora, Emerald Matrix, and Crimson Royale in Settings.\n• Instant Multi-Threaded Search: Real-time progressive search streaming displays results concurrently without waiting minutes.\n• 74 Verified Providers: Enhanced feed grab, embed resolution, and streaming performance across all 74 sources.",
+        "date": "2026-11-05",
+        "dismissible": true,
+        "showOnce": true,
+        "enabled": true,
+        "minAppVersion": 0,
+        "maxAppVersion": 2147483647
+    },
     "providers": [
         {
             "id": "kamababa1",
@@ -26,7 +37,8 @@
             "navigation": {
                 "home": "/?filter=latest",
                 "search": "/?s={query}",
-                "page": "/page/{page}/?filter=latest"
+                "page": "/page/{page}/?filter=latest",
+                "categories": "/categories/"
             },
             "selectors": {
                 "item": "article.thumb-block, article.video-preview-item, article",
@@ -39,7 +51,7 @@
                 "detailDescription": ".entry-content p, .video-details, p",
                 "detailThumbnail": "meta[property='og:image'], img.video-main-thumb",
                 "player": "iframe[src*='player']",
-                "videoSource": "meta[itemprop='contentURL'], video source[src], video[src], source[type='video/mp4']",
+                "videoSource": "meta[itemprop*='contentUrl'], meta[itemprop*='contentURL'], iframe[src*='player-x'], video source[src], video[src], source[type='video/mp4']",
                 "videoSourceAttr": "src",
                 "relatedItems": ".related-videos article, .related article"
             },
@@ -54,7 +66,8 @@
                 "https://kamababa1.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "kamababa"
+            "validationMarker": "kamababa",
+            "useProxy": false
         },
         {
             "id": "masa49",
@@ -100,7 +113,8 @@
                 "https://masa49.nl"
             ],
             "familyId": "masa_network_family",
-            "validationMarker": "masa"
+            "validationMarker": "masa",
+            "useProxy": false
         },
         {
             "id": "fsiblogxx",
@@ -145,7 +159,8 @@
                 "https://fsiblogxx.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "fsiblog"
+            "validationMarker": "fsiblog",
+            "useProxy": false
         },
         {
             "id": "masahub2",
@@ -189,13 +204,14 @@
                 "https://masahub2.com"
             ],
             "familyId": "masa_network_family",
-            "validationMarker": "masahub"
+            "validationMarker": "masahub",
+            "useProxy": false
         },
         {
             "id": "aagmaal",
             "name": "AagMaal",
             "enabled": true,
-            "baseUrl": "https://aagmaal.date",
+            "baseUrl": "https://aagmaal.webcam",
             "adapter": "html_selector",
             "capabilities": [
                 "HOME",
@@ -215,8 +231,8 @@
             "selectors": {
                 "item": "article.thumb-block, article.loop-video, article.post, article",
                 "title": "header.entry-header a, h2.entry-title a, h2 a, a[title], .cat-title",
-                "thumbnail": "img",
-                "thumbnailAttr": "src",
+                "thumbnail": "img[data-src], img[data-lazy-src], img[data-original], img[data-webp], img[src], img",
+                "thumbnailAttr": "data-src, data-lazy-src, data-original, data-webp, src",
                 "detailUrl": "header.entry-header a, a.thumb-pop, h2.entry-title a, a[title], a",
                 "duration": ".duration, span.hd, .thumb-block span",
                 "detailTitle": "h1.entry-title, h1",
@@ -232,11 +248,14 @@
                 "disclaimer": "Aggregated public media feed."
             },
             "domains": [
+                "https://aagmaal.webcam",
+                "https://aagmaal.dates",
                 "https://aagmaal.date",
                 "https://aagmaal.run"
             ],
             "familyId": "aagmaal_date_family",
-            "validationMarker": "aagmaal"
+            "validationMarker": "aagmaal",
+            "useProxy": false
         },
         {
             "id": "fry99",
@@ -281,7 +300,8 @@
                 "https://fry99.cc"
             ],
             "familyId": "fry99_family",
-            "validationMarker": "fry99"
+            "validationMarker": "fry99",
+            "useProxy": false
         },
         {
             "id": "hitmaal",
@@ -326,7 +346,8 @@
                 "https://hitmaal.io"
             ],
             "familyId": "hitmaal_family",
-            "validationMarker": "hitmaal"
+            "validationMarker": "hitmaal",
+            "useProxy": false
         },
         {
             "id": "webxseries",
@@ -372,7 +393,8 @@
                 "https://webxseries.hot"
             ],
             "familyId": "webxseries_family",
-            "validationMarker": "webxseries"
+            "validationMarker": "webxseries",
+            "useProxy": false
         },
         {
             "id": "desibf",
@@ -417,7 +439,8 @@
                 "https://desibf.com"
             ],
             "familyId": "direct_cdn_family",
-            "validationMarker": "desibf"
+            "validationMarker": "desibf",
+            "useProxy": false
         },
         {
             "id": "antarvasnabf",
@@ -462,7 +485,8 @@
                 "https://antarvasnabf.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "antarvasnabf"
+            "validationMarker": "antarvasnabf",
+            "useProxy": false
         },
         {
             "id": "desisex",
@@ -508,7 +532,8 @@
                 "https://www.desisex.site"
             ],
             "familyId": "direct_cdn_family",
-            "validationMarker": "desisex"
+            "validationMarker": "desisex",
+            "useProxy": false
         },
         {
             "id": "ixiporn",
@@ -553,7 +578,8 @@
                 "https://ixiporn.live"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "ixiporn"
+            "validationMarker": "ixiporn",
+            "useProxy": false
         },
         {
             "id": "masafun",
@@ -598,13 +624,14 @@
                 "https://masafun.art"
             ],
             "familyId": "masa_network_family",
-            "validationMarker": "masafun"
+            "validationMarker": "masafun",
+            "useProxy": false
         },
         {
             "id": "uncutmaza",
             "name": "UncutMaza",
             "enabled": true,
-            "baseUrl": "https://uncutmaza.cc",
+            "baseUrl": "https://uncutmaza.movie",
             "adapter": "html_selector",
             "capabilities": [
                 "HOME",
@@ -618,32 +645,35 @@
             "navigation": {
                 "home": "/",
                 "search": "/?s={query}",
-                "page": "/page/{page}"
+                "page": "/page/{page}/"
             },
             "selectors": {
-                "item": "article.thumb-block",
-                "title": "h2.entry-title a, h2 a, a[title]",
-                "thumbnail": "img",
-                "thumbnailAttr": "src",
-                "detailUrl": "h2.entry-title a, h2 a, a",
-                "duration": ".duration",
-                "detailTitle": "h1",
-                "detailDescription": ".entry-content p, .video-details",
+                "item": "div.videos a, article.thumb-block, article, div.post, div.item",
+                "title": "h2.entry-title a, h2 a, a[title], div.title, .video-title",
+                "thumbnail": "img[data-src], img[src], img",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "this",
+                "duration": "span.dur, .badge-duration, .duration",
+                "detailTitle": "h1.entry-title, h1",
+                "detailDescription": ".entry-content p, .video-details, p",
                 "detailThumbnail": "meta[property='og:image'], img",
-                "player": "iframe[src*='player']",
-                "videoSource": "meta[itemprop='contentUrl'], meta[itemprop='contentURL'], video source[src], video[src], source[type='video/mp4']",
+                "player": "video, iframe, div.xplayer",
+                "videoSource": "video source[src], video[src], source[type='video/mp4'], meta[itemprop='contentUrl']",
                 "videoSourceAttr": "src",
-                "relatedItems": ".under-video-block article, article.thumb-block"
+                "relatedItems": ".under-video-block article, article.thumb-block, article"
             },
             "contentPolicy": {
                 "rightsStatus": "Public Web Index",
                 "disclaimer": "Aggregated public media feed."
             },
             "domains": [
+                "https://uncutmaza.movie",
+                "https://uncutmaza.io",
                 "https://uncutmaza.cc"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "uncutmaza"
+            "validationMarker": "uncutmaza",
+            "useProxy": false
         },
         {
             "id": "wowuncut",
@@ -688,7 +718,8 @@
                 "https://wowuncut.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "wowuncut"
+            "validationMarker": "wowuncut",
+            "useProxy": false
         },
         {
             "id": "desikahani2",
@@ -733,7 +764,8 @@
                 "https://desikahani2.net"
             ],
             "familyId": "kvs_tube_family",
-            "validationMarker": "desikahani"
+            "validationMarker": "desikahani",
+            "useProxy": false
         },
         {
             "id": "desitales2",
@@ -778,7 +810,8 @@
                 "https://desitales2.com"
             ],
             "familyId": "kvs_tube_family",
-            "validationMarker": "desitales"
+            "validationMarker": "desitales",
+            "useProxy": false
         },
         {
             "id": "indiansexstories3",
@@ -825,7 +858,8 @@
                 "https://indiansexstories3.com"
             ],
             "familyId": "kvs_tube_family",
-            "validationMarker": "indiansexstories"
+            "validationMarker": "indiansexstories",
+            "useProxy": false
         },
         {
             "id": "xxxindianstories",
@@ -870,7 +904,8 @@
                 "https://xxxindianstories.com"
             ],
             "familyId": "kvs_tube_family",
-            "validationMarker": "xxxindianstories"
+            "validationMarker": "xxxindianstories",
+            "useProxy": false
         },
         {
             "id": "xmaza",
@@ -915,7 +950,8 @@
                 "https://xmaza.xxx"
             ],
             "familyId": "direct_cdn_family",
-            "validationMarker": "xmaza"
+            "validationMarker": "xmaza",
+            "useProxy": false
         },
         {
             "id": "xnxx",
@@ -939,7 +975,7 @@
                 "categories": "/tags"
             },
             "selectors": {
-                "item": "div.thumb-block:not(.thumb-cat), div.thumb-block, div.mozaique > div",
+                "item": "div.thumb-block[id^='video_']",
                 "title": ".thumb-under p a[title], .thumb-under a[title], p.title a, .title a, a[title]",
                 "thumbnail": "img.thumb, img[data-src], img",
                 "thumbnailAttr": "data-src, data-mzl, src",
@@ -951,7 +987,7 @@
                 "player": "div#html5video, video, iframe",
                 "videoSource": "html5player.setVideoHLS, meta[property='og:video:url'], video source[src]",
                 "videoSourceAttr": "content, src",
-                "relatedItems": "div.thumb-block:not(.thumb-cat), div.mozaique > div, div.thumb-block"
+                "relatedItems": "div.thumb-block[id^='video_']"
             },
             "contentPolicy": {
                 "rightsStatus": "Public Web Index",
@@ -964,7 +1000,8 @@
                 "https://www.xnxx2.com"
             ],
             "familyId": "xvideos_network_family",
-            "validationMarker": "xnxx"
+            "validationMarker": "xnxx",
+            "useProxy": false
         },
         {
             "id": "xvideos",
@@ -988,7 +1025,7 @@
                 "categories": "/tags"
             },
             "selectors": {
-                "item": "div.thumb-block, div.mozaique > div",
+                "item": "div.thumb-block[id^='video_']",
                 "title": ".thumb-under p a[title], .thumb-under a[title], p.title a, a[title]",
                 "thumbnail": "img.thumb, img[data-src], img",
                 "thumbnailAttr": "data-src, src",
@@ -1013,7 +1050,8 @@
                 "https://www.xvideos.red"
             ],
             "familyId": "xvideos_network_family",
-            "validationMarker": "xvideos"
+            "validationMarker": "xvideos",
+            "useProxy": false
         },
         {
             "id": "aagmaal_com",
@@ -1069,7 +1107,8 @@
                 "https://webmaal.bz"
             ],
             "familyId": "aagmaal_com_family",
-            "validationMarker": "vp-card"
+            "validationMarker": "vp-card",
+            "useProxy": false
         },
         {
             "id": "bmaal",
@@ -1116,13 +1155,14 @@
                 "https://bmaal.com"
             ],
             "familyId": "web_series_family",
-            "validationMarker": "bmaal"
+            "validationMarker": "bmaal",
+            "useProxy": false
         },
         {
             "id": "chiggywiggy",
             "name": "ChiggyWiggy",
             "enabled": true,
-            "baseUrl": "https://chiggywiggy.com",
+            "baseUrl": "https://chiggywiggy.int.in",
             "adapter": "html_selector",
             "capabilities": [
                 "HOME",
@@ -1135,22 +1175,22 @@
             "description": "",
             "navigation": {
                 "home": "/",
-                "search": "/search/video/?s={query}",
-                "page": "/?page={page}",
+                "search": "/?s={query}",
+                "page": "/page/{page}/",
                 "categories": "/categories/"
             },
             "selectors": {
-                "item": "div.video-thumb, div.video-preview, .thumb-block",
-                "title": "a[title], img[alt]",
-                "thumbnail": "img.thumb, img",
+                "item": "article.loop-video, article.thumb-block, article.video-preview-item, article, div.video-thumb, div.video-preview, .thumb-block",
+                "title": "header.entry-header h2 a, h2.entry-title a, h2 a, a[title], img[alt]",
+                "thumbnail": "img[src], img[data-src], img.thumb, img",
                 "thumbnailAttr": "data-src, src",
                 "detailUrl": "a",
-                "duration": ".video-duration, .duration, span.time",
-                "detailTitle": "h1",
-                "detailDescription": ".video-details, .description, p",
+                "duration": "span.duration, .badge-duration, span.time, .video-duration, .duration",
+                "detailTitle": "h1.entry-title, h1",
+                "detailDescription": ".entry-content p, .video-details, .description, p",
                 "detailThumbnail": "meta[property='og:image'], img.thumb, img",
-                "player": "video#player, video",
-                "videoSource": "video source[src], video[src], source[type='video/mp4']",
+                "player": "iframe[src*='lulust'], iframe[src*='lulu'], video#player, video, iframe",
+                "videoSource": "video source[src], video[src], source[type='video/mp4'], div[data-url*='.mp4']",
                 "videoSourceAttr": "src",
                 "relatedItems": ".related-videos article, .related article"
             },
@@ -1159,11 +1199,13 @@
                 "disclaimer": "Aggregated public reference media feed."
             },
             "domains": [
-                "https://chiggywiggy.com",
-                "https://www.chiggywiggy.com"
+                "https://chiggywiggy.int.in",
+                "https://chiggywiggy.cc",
+                "https://chiggywiggy.com"
             ],
             "familyId": "direct_cdn_family",
-            "validationMarker": "chiggywiggy"
+            "validationMarker": "chiggywiggy",
+            "useProxy": false
         },
         {
             "id": "desibabe",
@@ -1212,7 +1254,8 @@
                 "https://www.desibabe.net"
             ],
             "familyId": "direct_cdn_family",
-            "validationMarker": "desibabe"
+            "validationMarker": "desibabe",
+            "useProxy": false
         },
         {
             "id": "desigirlxx",
@@ -1259,7 +1302,8 @@
                 "https://www.desigirlxx.beer"
             ],
             "familyId": "direct_cdn_family",
-            "validationMarker": "desigirlxx"
+            "validationMarker": "desigirlxx",
+            "useProxy": false
         },
         {
             "id": "desimaals",
@@ -1308,7 +1352,8 @@
                 "https://www.desimaals.com"
             ],
             "familyId": "direct_cdn_family",
-            "validationMarker": "desimaals"
+            "validationMarker": "desimaals",
+            "useProxy": false
         },
         {
             "id": "desivideo",
@@ -1357,7 +1402,8 @@
                 "https://www.desivideo.us"
             ],
             "familyId": "direct_cdn_family",
-            "validationMarker": "desivideo"
+            "validationMarker": "desivideo",
+            "useProxy": false
         },
         {
             "id": "brazzpw",
@@ -1404,7 +1450,8 @@
                 "https://brazzpw.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "brazzpw"
+            "validationMarker": "brazzpw",
+            "useProxy": false
         },
         {
             "id": "fpo",
@@ -1451,7 +1498,8 @@
                 "https://fpo.xxx"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "fpo"
+            "validationMarker": "fpo",
+            "useProxy": false
         },
         {
             "id": "hello",
@@ -1497,7 +1545,8 @@
                 "https://hello.porn"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "hello"
+            "validationMarker": "hello",
+            "useProxy": false
         },
         {
             "id": "hqporner",
@@ -1543,7 +1592,8 @@
                 "https://hqporner.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "hqporner"
+            "validationMarker": "hqporner",
+            "useProxy": false
         },
         {
             "id": "max",
@@ -1587,10 +1637,11 @@
             },
             "domains": [
                 "https://max.porn",
-                "http://max.porn"
+                "https://www.max.porn"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "max"
+            "validationMarker": "max",
+            "useProxy": false
         },
         {
             "id": "netfapx",
@@ -1636,7 +1687,8 @@
                 "https://netfapx.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "netfapx"
+            "validationMarker": "netfapx",
+            "useProxy": false
         },
         {
             "id": "ok_porn",
@@ -1682,7 +1734,8 @@
                 "https://ok.porn"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "ok.porn"
+            "validationMarker": "ok.porn",
+            "useProxy": false
         },
         {
             "id": "ok_xxx",
@@ -1728,7 +1781,8 @@
                 "https://ok.xxx"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "ok.xxx"
+            "validationMarker": "ok.xxx",
+            "useProxy": false
         },
         {
             "id": "perfectgirls",
@@ -1775,7 +1829,8 @@
                 "https://perfectgirls.xxx"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "perfectgirls"
+            "validationMarker": "perfectgirls",
+            "useProxy": false
         },
         {
             "id": "porn4days",
@@ -1821,7 +1876,8 @@
                 "https://porn4days.pw"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "porn4days"
+            "validationMarker": "porn4days",
+            "useProxy": false
         },
         {
             "id": "pornhat",
@@ -1868,7 +1924,8 @@
                 "https://pornhat.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "pornhat"
+            "validationMarker": "pornhat",
+            "useProxy": false
         },
         {
             "id": "pornhd4k",
@@ -1914,7 +1971,8 @@
                 "https://pornhd4k.net"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "pornhd4k"
+            "validationMarker": "pornhd4k",
+            "useProxy": false
         },
         {
             "id": "pornhouse",
@@ -1960,7 +2018,8 @@
                 "https://pornhouse.me"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "pornhouse"
+            "validationMarker": "pornhouse",
+            "useProxy": false
         },
         {
             "id": "pornmz",
@@ -2006,7 +2065,8 @@
                 "https://pornmz.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "pornmz"
+            "validationMarker": "pornmz",
+            "useProxy": false
         },
         {
             "id": "pornstars_tube",
@@ -2050,10 +2110,11 @@
             },
             "domains": [
                 "https://pornstars.tube",
-                "http://pornstars.tube"
+                "https://www.pornstars.tube"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "pornstars.tube"
+            "validationMarker": "pornstars.tube",
+            "useProxy": false
         },
         {
             "id": "sxyprn",
@@ -2099,7 +2160,8 @@
                 "https://sxyprn.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "sxyprn"
+            "validationMarker": "sxyprn",
+            "useProxy": false
         },
         {
             "id": "watchxxxfree",
@@ -2146,7 +2208,8 @@
                 "https://justfullporn.net"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "watchxxxfree"
+            "validationMarker": "watchxxxfree",
+            "useProxy": false
         },
         {
             "id": "lalamasa",
@@ -2192,7 +2255,8 @@
                 "https://lalamasa.mobi"
             ],
             "familyId": "masa_network_family",
-            "validationMarker": "lalamasa"
+            "validationMarker": "lalamasa",
+            "useProxy": false
         },
         {
             "id": "watchoerotic",
@@ -2238,7 +2302,8 @@
                 "https://watchoerotic.com"
             ],
             "familyId": "erotic_movies_family",
-            "validationMarker": "watchoerotic"
+            "validationMarker": "watchoerotic",
+            "useProxy": false
         },
         {
             "id": "prmovies",
@@ -2284,13 +2349,14 @@
                 "https://prmovies.com"
             ],
             "familyId": "erotic_movies_family",
-            "validationMarker": "prmovies"
+            "validationMarker": "prmovies",
+            "useProxy": false
         },
         {
             "id": "prmovies_church",
-            "name": "PRMovies Church",
+            "name": "PrmoviesM",
             "enabled": true,
-            "baseUrl": "https://prmovies.church",
+            "baseUrl": "https://prmovies.futbol",
             "adapter": "html_selector",
             "capabilities": [
                 "HOME",
@@ -2327,17 +2393,21 @@
                 "disclaimer": "Aggregated public media feed."
             },
             "domains": [
+                "https://prmovies.futbol",
+                "https://prmovies.fotbal",
+                "https://prmovies.football",
                 "https://prmovies.church",
                 "https://prmovies.energy"
             ],
             "familyId": "cinema_movies_family",
-            "validationMarker": "prmovies"
+            "validationMarker": "prmovies",
+            "useProxy": false
         },
         {
             "id": "pornhub",
             "name": "PornHub",
             "enabled": true,
-            "baseUrl": "https://www.pornhub.org",
+            "baseUrl": "https://www.pornhub.com",
             "adapter": "html_selector",
             "capabilities": [
                 "HOME",
@@ -2355,12 +2425,12 @@
                 "categories": "/categories"
             },
             "selectors": {
-                "item": "li.videoBox, .pcVideoListItem",
-                "title": "span.title a[title], .title a, a[title]",
-                "thumbnail": "img[data-src], img[src]",
-                "thumbnailAttr": "data-src, src",
-                "detailUrl": "a[href*='view_video.php'], a.linkVideoThumb",
-                "duration": "var.duration, .duration",
+                "item": "li.videoBox, .pcVideoListItem, .videoblock, ul#videoCategory li, .nf-videos li, div.phimage",
+                "title": "span.title a, .title a, a[title], img[alt]",
+                "thumbnail": "img[data-thumb_url], img[data-src], img[data-mediumthumb], img[src]",
+                "thumbnailAttr": "data-thumb_url, data-src, data-mediumthumb, src",
+                "detailUrl": "a[href*='view_video.php'], a.linkVideoThumb, a[href*='/view_video']",
+                "duration": "var.duration, .duration, span.duration",
                 "detailTitle": "h1.title span, h1.title, h1",
                 "detailDescription": ".video-description, .user-desc, p",
                 "detailThumbnail": "meta[property='og:image'], img",
@@ -2374,12 +2444,13 @@
                 "disclaimer": "Aggregated public media feed."
             },
             "domains": [
-                "https://www.pornhub.org",
                 "https://www.pornhub.com",
+                "https://www.pornhub.org",
                 "https://www.pornhub.net"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "pornhub"
+            "validationMarker": "pornhub",
+            "useProxy": false
         },
         {
             "id": "xhamster",
@@ -2403,10 +2474,10 @@
                 "categories": "/categories"
             },
             "selectors": {
-                "item": "[data-video-id], .thumb-list__item.video-thumb",
-                "title": "a[data-video-title], a.video-thumb__image-container[aria-label], .video-thumb-info__name, a[title]",
-                "thumbnail": "img.thumb-image-container__image, img[src]",
-                "thumbnailAttr": "src, data-src",
+                "item": "[data-video-id], .thumb-list__item.video-thumb, .thumb-list__item, article.thumb-list__item, .video-thumb",
+                "title": "a[data-video-title], a.video-thumb__image-container[aria-label], .video-thumb-info__name, a[title], .thumb-image-container__image[alt]",
+                "thumbnail": "img.thumb-image-container__image, img[data-src], img[src]",
+                "thumbnailAttr": "data-src, src",
                 "detailUrl": "a[href*='/videos/']",
                 "duration": "[data-role='video-duration'], .duration",
                 "detailTitle": "h1.page-title, h1",
@@ -2427,7 +2498,8 @@
                 "https://xhamster.desi"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "xhamster"
+            "validationMarker": "xhamster",
+            "useProxy": false
         },
         {
             "id": "redtube",
@@ -2475,7 +2547,8 @@
                 "https://www.redtube.xxx"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "redtube"
+            "validationMarker": "redtube",
+            "useProxy": false
         },
         {
             "id": "youporn",
@@ -2493,19 +2566,19 @@
             ],
             "description": "",
             "navigation": {
-                "home": "/most_recent/",
+                "home": "/",
                 "search": "/search/?query={query}",
-                "page": "/most_recent/?page={page}",
+                "page": "/?page={page}",
                 "categories": "/categories/"
             },
             "selectors": {
                 "item": "div.video-box, .four-col-content-item, .video_thumb, [data-video-id]",
-                "title": "a[title], .video-title, span.title",
-                "thumbnail": "img[data-src], img[src]",
-                "thumbnailAttr": "data-src, src",
+                "title": "a[title], .video-title-text, .video-title, span.title, p.tm_category_title, .categoryTitle p",
+                "thumbnail": "img[data-src], img[data-thumbnail], img[src]",
+                "thumbnailAttr": "data-src, data-thumbnail, src",
                 "detailUrl": "a[href*='/watch/']",
                 "duration": ".video-duration, .duration",
-                "detailTitle": "h1.watch-video-title, h1",
+                "detailTitle": "h1.videoTitle, h1.watch-video-title, h1",
                 "detailDescription": ".video-description, p",
                 "detailThumbnail": "meta[property='og:image'], img",
                 "player": "video, iframe",
@@ -2523,7 +2596,8 @@
                 "https://www.youporn.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "youporn"
+            "validationMarker": "youporn",
+            "useProxy": false
         },
         {
             "id": "tube8",
@@ -2541,23 +2615,23 @@
             ],
             "description": "",
             "navigation": {
-                "home": "/latest/",
+                "home": "/newest/page/1/",
                 "search": "/searches?q={query}",
-                "page": "/latest/page/{page}/",
+                "page": "/newest/page/{page}/",
                 "categories": "/categories.html"
             },
             "selectors": {
-                "item": "div.video_box, .video-box, div.thumb, [data-video-id]",
-                "title": "a[title], .video_title, .title",
-                "thumbnail": "img[data-src], img[src]",
-                "thumbnailAttr": "data-src, src",
-                "detailUrl": "a[href*='/porn-video/'], a.video_link",
-                "duration": ".video_duration, .duration",
+                "item": "article.video-box, div.video-box, article[data-video-id]",
+                "title": "a.video-title-text, a.tm_video_title, img[alt], a[title]",
+                "thumbnail": "img.thumb-image, img[data-src], img[data-poster], img",
+                "thumbnailAttr": "data-src, data-poster, src",
+                "detailUrl": "a[href*='/porn-video/'], a.tm_video_link, a",
+                "duration": "div.video-duration, div.tm_video_duration, .video-properties",
                 "detailTitle": "h1.video_title, h1",
                 "detailDescription": ".video_description, p",
                 "detailThumbnail": "meta[property='og:image'], img",
                 "player": "video, iframe",
-                "videoSource": "meta[property='og:video:url']",
+                "videoSource": "meta[property*='og:video'], meta[property='og:video:url']",
                 "videoSourceAttr": "content",
                 "relatedItems": ".related-videos article, .related article"
             },
@@ -2570,7 +2644,8 @@
                 "https://www.tube8.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "tube8"
+            "validationMarker": "tube8",
+            "useProxy": false
         },
         {
             "id": "freeonestube",
@@ -2594,18 +2669,18 @@
                 "categories": "/categories"
             },
             "selectors": {
-                "item": "a.thumb, div.thumb",
-                "title": "a[title], img[alt]",
+                "item": "div.video-block",
+                "title": "a.infos[title], span.title",
                 "thumbnail": "img.video-img, img",
                 "thumbnailAttr": "src, data-src",
-                "detailUrl": "a.thumb, a[href*='/video/']",
-                "duration": ".duration, span.badge",
+                "detailUrl": "a.thumb[href], a.infos[href]",
+                "duration": "span.duration",
                 "detailTitle": "h1.page-title, h1",
                 "detailDescription": ".video-description, .desc, p",
-                "detailThumbnail": "meta[property='og:image'], img",
+                "detailThumbnail": "meta[itemprop='thumbnailUrl'][content], meta[property='og:image']",
                 "player": "video#fxgp-vod-scene-player, video, iframe",
-                "videoSource": "video source, meta[property='og:video:url']",
-                "videoSourceAttr": "src, content",
+                "videoSource": "meta[itemprop='contentURL'], video source",
+                "videoSourceAttr": "content, src",
                 "relatedItems": ".related-videos article, .related article"
             },
             "contentPolicy": {
@@ -2616,7 +2691,8 @@
                 "https://freeonestube.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "freeones"
+            "validationMarker": "freeones",
+            "useProxy": false
         },
         {
             "id": "spankbang",
@@ -2634,9 +2710,9 @@
             ],
             "description": "",
             "navigation": {
-                "home": "/trending_videos",
+                "home": "/",
                 "search": "/s/{query}/",
-                "page": "/trending_videos/{page}/",
+                "page": "/?page={page}",
                 "categories": "/categories"
             },
             "selectors": {
@@ -2665,7 +2741,8 @@
                 "https://spankbang.net"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "video-item"
+            "validationMarker": "video-item",
+            "useProxy": false
         },
         {
             "id": "tnaflix",
@@ -2689,11 +2766,11 @@
                 "categories": "/categories"
             },
             "selectors": {
-                "item": "div.video-list > div, div[data-vid], a.video-thumb",
-                "title": "a[title], img[alt], a.video-thumb",
+                "item": "div[data-vid], div.video-list > div, a.video-thumb",
+                "title": "a.video-title, a[title], img[alt], a.video-thumb",
                 "thumbnail": "img[data-src], img",
                 "thumbnailAttr": "data-src, src",
-                "detailUrl": "a.video-thumb, a[href*='/video']",
+                "detailUrl": "a.video-title, a.video-thumb, a[href*='/video']",
                 "duration": "div.video-duration, .thumb-icon",
                 "detailTitle": "h1, .video-title",
                 "detailDescription": ".video-description, p",
@@ -2712,7 +2789,8 @@
                 "https://tnaflix.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "video-list"
+            "validationMarker": "video-list",
+            "useProxy": false
         },
         {
             "id": "empflix",
@@ -2736,11 +2814,11 @@
                 "categories": "/categories"
             },
             "selectors": {
-                "item": "div.video-list > div, div[data-vid], a.video-thumb",
-                "title": "a[title], img[alt], a.video-thumb",
+                "item": "div[data-vid]",
+                "title": "a.video-title, img[alt], a[title]",
                 "thumbnail": "img[data-src], img",
                 "thumbnailAttr": "data-src, src",
-                "detailUrl": "a.video-thumb, a[href*='/video']",
+                "detailUrl": "a.video-title, a.video-thumb",
                 "duration": "div.video-duration, .thumb-icon",
                 "detailTitle": "h1, .video-title",
                 "detailDescription": ".video-description, p",
@@ -2759,13 +2837,14 @@
                 "https://empflix.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "video-list"
+            "validationMarker": "video-list",
+            "useProxy": false
         },
         {
             "id": "beeg",
             "name": "Beeg",
             "enabled": true,
-            "baseUrl": "https://beeg.com",
+            "baseUrl": "https://store.externulls.com",
             "adapter": "html_selector",
             "capabilities": [
                 "HOME",
@@ -2777,24 +2856,24 @@
             ],
             "description": "",
             "navigation": {
-                "home": "/",
-                "search": "/search?q={query}",
-                "page": "/?p={page}",
-                "categories": "/tags"
+                "home": "https://store.externulls.com/tag/videos/index?limit=48&offset=0",
+                "search": "https://store.externulls.com/tag/videos/{query}?limit=48&offset=0",
+                "page": "https://store.externulls.com/tag/videos/{slug}?limit=48&offset={offset}",
+                "categories": "https://store.externulls.com/tag/recommends?type=other&slug=index"
             },
             "selectors": {
                 "item": "div.video, div.thumb, .item",
                 "title": "a[title], .title, h3",
-                "thumbnail": "img[data-src], img",
-                "thumbnailAttr": "data-src, src",
-                "detailUrl": "a[href*='/video/'], a[href*='/v/'], a",
+                "thumbnail": "img",
+                "thumbnailAttr": "src",
+                "detailUrl": "a",
                 "duration": ".duration",
                 "detailTitle": "h1",
                 "detailDescription": ".description, .content, article p",
                 "detailThumbnail": ".featured img, meta[property='og:image']",
-                "player": "video, iframe",
-                "videoSource": "video source, meta[property='og:video:url']",
-                "videoSourceAttr": "src, content",
+                "player": "video",
+                "videoSource": "video source",
+                "videoSourceAttr": "src",
                 "relatedItems": ".related-videos article, .related article"
             },
             "contentPolicy": {
@@ -2802,11 +2881,12 @@
                 "disclaimer": "Aggregated public media feed."
             },
             "domains": [
-                "https://beeg.com",
-                "https://www.beeg.com"
+                "https://store.externulls.com",
+                "https://beeg.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "beeg"
+            "validationMarker": "",
+            "useProxy": false
         },
         {
             "id": "youjizz",
@@ -2836,7 +2916,7 @@
                 "thumbnailAttr": "data-original, src",
                 "detailUrl": "a[href*='/videos/'], a.thumb",
                 "duration": "span.time, .duration",
-                "detailTitle": "h1.title, h1",
+                "detailTitle": "h3 span.agego-content-title, h3, h1.title, h1",
                 "detailDescription": ".video-description, p",
                 "detailThumbnail": "meta[property='og:image'], img",
                 "player": "video, div#player",
@@ -2853,7 +2933,8 @@
                 "https://youjizz.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "video-thumb"
+            "validationMarker": "video-thumb",
+            "useProxy": false
         },
         {
             "id": "eporner",
@@ -2871,10 +2952,10 @@
             ],
             "description": "",
             "navigation": {
-                "home": "/",
-                "search": "/search/{query}/{page}/",
-                "page": "/0/{page}/",
-                "categories": "/categories/"
+                "home": "/api/v2/video/search/?query=&per_page=30&page=1&thumbsize=big&order=top-weekly&format=json",
+                "search": "/api/v2/video/search/?query={query}&per_page=30&page=1&thumbsize=big&format=json",
+                "page": "/api/v2/video/search/?query=&per_page=30&page={page}&thumbsize=big&order=top-weekly&format=json",
+                "categories": "/cats/"
             },
             "selectors": {
                 "item": "div.mb, div.video-box, div[data-id]",
@@ -2900,13 +2981,14 @@
                 "https://eporner.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "video-box"
+            "validationMarker": "videos",
+            "useProxy": false
         },
         {
             "id": "drtuber",
             "name": "DrTuber",
             "enabled": true,
-            "baseUrl": "https://www.drtuber.com",
+            "baseUrl": "https://m.drtuber.desi",
             "adapter": "html_selector",
             "capabilities": [
                 "HOME",
@@ -2924,18 +3006,18 @@
                 "categories": "/categories"
             },
             "selectors": {
-                "item": "div.thumbs_box > div, div.th, div.item",
-                "title": "a.title, a[title], .rate_thumb a",
-                "thumbnail": "img[data-src], img",
+                "item": "a.th, a[data-video_id], a.video-thumb, div.th",
+                "title": "a[title], img[alt], a.title",
+                "thumbnail": "img.b-lazy, img[data-src], img",
                 "thumbnailAttr": "data-src, src",
                 "detailUrl": "a[href*='/video/']",
-                "duration": "span.duration, .time",
+                "duration": "span.duration, strong.toolbar em, .time",
                 "detailTitle": "h1, .page-title",
                 "detailDescription": ".video-description, p",
                 "detailThumbnail": "meta[property='og:image'], img",
                 "player": "video, div#player",
-                "videoSource": "video source[src], meta[property='og:video:url']",
-                "videoSourceAttr": "src, content, poster",
+                "videoSource": "a[data-adv_play], video source[src], meta[property='og:video:url']",
+                "videoSourceAttr": "href, src, content, poster",
                 "relatedItems": ".related-videos article, .related article"
             },
             "contentPolicy": {
@@ -2943,18 +3025,21 @@
                 "disclaimer": "Aggregated public media feed."
             },
             "domains": [
-                "https://www.drtuber.com",
                 "https://www.drtuber.desi",
+                "https://drtuber.desi",
+                "https://m.drtuber.desi",
+                "https://www.drtuber.com",
                 "https://drtuber.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "thumbs_box"
+            "validationMarker": "drtuber",
+            "useProxy": false
         },
         {
             "id": "nuvid",
             "name": "NuVid",
             "enabled": true,
-            "baseUrl": "https://www.nuvid.com",
+            "baseUrl": "https://m.nuvid.org",
             "adapter": "html_selector",
             "capabilities": [
                 "HOME",
@@ -2967,23 +3052,23 @@
             "description": "",
             "navigation": {
                 "home": "/",
-                "search": "/search/videos/{query}/{page}",
-                "page": "/videos/{page}",
+                "search": "/search/videos/{query}/{page}/",
+                "page": "/videos/{page}/",
                 "categories": "/categories"
             },
             "selectors": {
-                "item": "div.videos > div, div.th, div.video-thumb",
-                "title": "a.title, a[title], .ch-video a",
-                "thumbnail": "img[data-src], img",
+                "item": "div.vthumb, .box-tumb, div.th, div.video-thumb",
+                "title": "span.title, span.title_thumb, a[title], a.thumb_holder, a.title, img[alt]",
+                "thumbnail": "img.img_thumb, img[data-src], img",
                 "thumbnailAttr": "data-src, src",
-                "detailUrl": "a[href*='/video/']",
-                "duration": "span.duration, .time",
+                "detailUrl": "a.thumb_holder, a.vid_link, a.video-thumb, a[href*='/video/']",
+                "duration": "span.view_time, span.time_thumb, i.time, span.time, span.duration",
                 "detailTitle": "h1, .page-title",
                 "detailDescription": ".video-description, p",
-                "detailThumbnail": "meta[property='og:image'], img",
+                "detailThumbnail": "meta[property='og:image'], img#video_preview_thumb, video[poster]",
                 "player": "video, div#player",
-                "videoSource": "video source[src], meta[property='og:video:url']",
-                "videoSourceAttr": "src, content, poster",
+                "videoSource": "a.b_link, video source[src], meta[property='og:video:url']",
+                "videoSourceAttr": "href, src, content",
                 "relatedItems": ".related-videos article, .related article"
             },
             "contentPolicy": {
@@ -2991,12 +3076,16 @@
                 "disclaimer": "Aggregated public media feed."
             },
             "domains": [
-                "https://www.nuvid.com",
+                "https://m.nuvid.org",
                 "https://www.nuvid.org",
-                "https://nuvid.com"
+                "https://www.nuvid.com",
+                "https://nuvid.com",
+                "https://www.nuvid.org/",
+                "https://nuvid.org"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "videos"
+            "validationMarker": "videos",
+            "useProxy": false
         },
         {
             "id": "pornone",
@@ -3044,7 +3133,8 @@
                 "https://www.vporn.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "thumb-block"
+            "validationMarker": "thumb-block",
+            "useProxy": false
         },
         {
             "id": "definebabe",
@@ -3063,17 +3153,17 @@
             "description": "",
             "navigation": {
                 "home": "/videos/",
-                "search": "/search/?s={query}",
+                "search": "/videos/?s={query}",
                 "page": "/videos/?page={page}",
                 "categories": "/categories/"
             },
             "selectors": {
                 "item": "div.models-videos__col, div.models-videos > div",
-                "title": "a.models-image, a[title], .title",
-                "thumbnail": "img.img-fluid, img",
+                "title": "a[title], .models-footer p, .title",
+                "thumbnail": "img.thumb, img.img-fluid, img",
                 "thumbnailAttr": "data-src, src",
-                "detailUrl": "a.models-image, a[href*='/video/']",
-                "duration": ".duration, span.time",
+                "detailUrl": "a[href*='/video/'], a.models-image",
+                "duration": "span.video, .duration, span.time",
                 "detailTitle": "h1",
                 "detailDescription": "p",
                 "detailThumbnail": "meta[property='og:image'], img",
@@ -3091,13 +3181,14 @@
                 "https://definebabe.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "definebabe"
+            "validationMarker": "definebabe",
+            "useProxy": false
         },
         {
             "id": "three_movs",
             "name": "3Movs",
             "enabled": true,
-            "baseUrl": "https://www.3movs.com",
+            "baseUrl": "https://www.3movs.xxx",
             "adapter": "html_selector",
             "capabilities": [
                 "HOME",
@@ -3109,23 +3200,23 @@
             ],
             "description": "",
             "navigation": {
-                "home": "/latest-updates/",
+                "home": "/videos/",
                 "search": "/search/{query}/",
-                "page": "/latest-updates/{page}/",
+                "page": "/videos/{page}/",
                 "categories": "/categories/"
             },
             "selectors": {
-                "item": "div.item.thumb:not(.slider *):not(.swiper-slide *), div.item:not(.slider *):not(.swiper-slide *):not(.pagination *):not(.navigation *)",
+                "item": "div.item.thumb",
                 "title": "a[title], a.title, [title]",
                 "thumbnail": "img",
-                "thumbnailAttr": "data-src, src",
+                "thumbnailAttr": "data-webp, data-src, src",
                 "detailUrl": "a[href*='/videos/']",
-                "duration": ".duration",
+                "duration": ".time, .duration, span.time",
                 "detailTitle": "h1",
                 "detailDescription": "p",
                 "detailThumbnail": "meta[property='og:image'], img",
                 "player": "#kt_player, video",
-                "videoSource": "video source[src], video[src]",
+                "videoSource": "meta[itemprop*='contentUrl'], meta[itemprop*='contentURL'], video source[src], video[src], source[type='video/mp4']",
                 "videoSourceAttr": "src",
                 "relatedItems": ".related-videos article, .related article"
             },
@@ -3134,11 +3225,14 @@
                 "disclaimer": "Aggregated public media feed."
             },
             "domains": [
+                "https://www.3movs.xxx",
+                "https://3movs.xxx",
                 "https://www.3movs.com",
                 "https://3movs.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "3movs"
+            "validationMarker": "3movs",
+            "useProxy": false
         },
         {
             "id": "txxx",
@@ -3185,7 +3279,8 @@
                 "https://www.txxx.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "txxx"
+            "validationMarker": "txxx",
+            "useProxy": false
         },
         {
             "id": "upornia",
@@ -3232,7 +3327,8 @@
                 "https://www.upornia.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "upornia"
+            "validationMarker": "upornia",
+            "useProxy": false
         },
         {
             "id": "hdzog",
@@ -3279,7 +3375,8 @@
                 "https://www.hdzog.com"
             ],
             "familyId": "clean_tube_family",
-            "validationMarker": "hdzog"
+            "validationMarker": "hdzog",
+            "useProxy": false
         },
         {
             "id": "movienerds",
@@ -3327,7 +3424,8 @@
                 "https://api.themoviedb.org"
             ],
             "familyId": "movie_series_family",
-            "validationMarker": "movienerds"
+            "validationMarker": "movienerds",
+            "useProxy": false
         },
         {
             "id": "cineapse",
@@ -3373,7 +3471,103 @@
                 "https://cineapse.net"
             ],
             "familyId": "movie_series_family",
-            "validationMarker": "cineapse"
+            "validationMarker": "cineapse",
+            "useProxy": false
+        },
+        {
+            "id": "masahub",
+            "name": "MasaHub",
+            "enabled": true,
+            "baseUrl": "https://masahub.net.im",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/",
+                "search": "/?s={query}",
+                "page": "/page/{page}/",
+                "categories": "/categories/"
+            },
+            "selectors": {
+                "item": "main.site-main article.loop-video, article.loop-video",
+                "title": "header.entry-header span, a[title], header.entry-header h2 a",
+                "thumbnail": "img[data-src], img[src]",
+                "thumbnailAttr": "data-src, src",
+                "detailUrl": "a",
+                "duration": "span.duration, .duration",
+                "detailTitle": "h1.entry-title, h1, title",
+                "detailDescription": ".entry-content p, .description",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "iframe[src*='playmate'], iframe[src*='lulust'], iframe[src*='lulu'], video, iframe",
+                "videoSource": "iframe[src*='playmate'], iframe[src*='lulust'], iframe[src*='lulu'], video source[src], video[src], iframe",
+                "videoSourceAttr": "src",
+                "relatedItems": "article.loop-video"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://masahub.net.im"
+            ],
+            "familyId": "desi_family",
+            "validationMarker": "masahub",
+            "useProxy": false
+        },
+        {
+            "id": "livecamrips",
+            "name": "LiveCamRips",
+            "enabled": true,
+            "baseUrl": "https://livecamrips.to",
+            "adapter": "html_selector",
+            "capabilities": [
+                "HOME",
+                "CATEGORY",
+                "SEARCH",
+                "DETAILS",
+                "STREAM",
+                "DOWNLOAD"
+            ],
+            "description": "",
+            "navigation": {
+                "home": "/model/492550/V_Hot_Shila",
+                "search": "/search/{query}",
+                "page": "/model/492550/V_Hot_Shila/{page}",
+                "categories": "/models"
+            },
+            "selectors": {
+                "item": "div.jc-caption",
+                "title": "div.tm-text-gray, figcaption, a[href*='/model/'], a[href*='/video/'], a",
+                "thumbnail": "img[data-src], img[src]",
+                "thumbnailAttr": "src",
+                "detailUrl": "figure a[href*='/video/'], figure a[href*='/model/'], a[href*='/video/'], a[href*='/model/'], a",
+                "duration": "figcaption span, span.tm-bg-dark, .tm-text-gray",
+                "detailTitle": "h1, h2, title",
+                "detailDescription": "div.tm-text-primary, p, .description",
+                "detailThumbnail": "meta[property='og:image'], img",
+                "player": "iframe[src*='uqload'], iframe[src*='abstream'], iframe[src*='mixdrop'], iframe[src*='mdzsmutpcvykb'], iframe[src*='videosh'], iframe[src*='upns'], iframe[src*='vidara'], iframe",
+                "videoSource": "iframe[src*='uqload'], iframe[src*='abstream'], iframe[src*='mixdrop'], iframe[src*='mdzsmutpcvykb'], iframe[src*='videosh'], iframe[src*='upns'], iframe[src*='vidara'], iframe",
+                "videoSourceAttr": "src",
+                "relatedItems": "div.jc-caption"
+            },
+            "contentPolicy": {
+                "rightsStatus": "Public Web Index",
+                "disclaimer": "Aggregated public media feed."
+            },
+            "domains": [
+                "https://livecamrips.to",
+                "https://www.livecamrips.to"
+            ],
+            "familyId": "desi_family",
+            "validationMarker": "livecamrips",
+            "useProxy": false
         }
     ]
 }
